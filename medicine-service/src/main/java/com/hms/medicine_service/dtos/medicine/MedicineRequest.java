@@ -1,0 +1,37 @@
+package com.hms.medicine_service.dtos.medicine;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+public class MedicineRequest {
+    @NotBlank(message = "Medicine name is required")
+    private String name;
+
+    @NotBlank(message = "Active ingredient is required")
+    private String activeIngredient;
+
+
+    @NotBlank(message = "Unit is required")
+    private String unit;
+
+    private String description;
+
+    @NotNull(message = "Quantity is required")
+    private Long quantity;
+
+    private String concentration;
+
+    private String packaging;
+
+    @NotNull(message = "Purchase price is required")
+    private BigDecimal purchasePrice;
+
+    @NotNull(message = "Selling price is required")
+    private BigDecimal sellingPrice;
+
+    @NotNull(message = "Expiration date is required")
+    private Instant expiresAt;
+}
