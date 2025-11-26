@@ -3,8 +3,10 @@ plugins {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter")
     implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation ("org.springframework.boot:spring-boot-starter-web")
+    implementation ("org.springframework.boot:spring-boot-starter-validation")
+    implementation ("io.github.perplexhub:rsql-jpa-spring-boot-starter:6.0.32")
     implementation ("org.mapstruct:mapstruct:1.6.3")
     annotationProcessor ("org.mapstruct:mapstruct-processor:1.6.3")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

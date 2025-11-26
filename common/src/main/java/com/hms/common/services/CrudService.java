@@ -1,5 +1,17 @@
 package com.hms.common.services;
 
+import com.hms.common.dtos.PageResponse;
+import com.hms.common.exceptions.errors.ApiException;
+import com.hms.common.exceptions.errors.ErrorCode;
+import com.hms.common.hooks.GenericHook;
+import com.hms.common.mappers.GenericMapper;
+import com.hms.common.repositories.SimpleRepository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public interface CrudService<E, ID, I, O> {
 
     PageResponse<O> findAll(Pageable pageable, Specification<E> specification);
