@@ -1,8 +1,14 @@
 spring:
   application:
     name: config-server
+  profiles:
+    active: native
   cloud:
-   config:
-     server:
-       git:
-         uri:
+    config:
+      server:
+        native:
+          search-locations: classpath:/configuration
+      override-system-properties: false
+server:
+  port: ${CONFIG_SERVER_PORT:8888}
+
