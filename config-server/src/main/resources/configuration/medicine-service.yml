@@ -1,0 +1,26 @@
+spring:
+  docker:
+    compose:
+      enabled: true
+      file: ${DOCKER_COMPOSE_FILE_MEDICINE_SERVICE:file:infrastructure/dev/medicine-service/compose.yaml}
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MEDICINE_DB_HOST:localhost}:${MEDICINE_DB_PORT:3306}/${MEDICINE_DB_NAME:mydatabase}
+    username: ${MEDICINE_DB_USERNAME:myuser}
+    password: ${MEDICINE_DB_PASSWORD:secret}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: ${MEDICINE_SERVICE_PORT:8082}
+  servlet:
+    context-path: /medicine-service
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://${DISCOVERY_SERVICE_HOST:localhost}:${DISCOVERY_SERVICE_PORT:8761}/eureka/
