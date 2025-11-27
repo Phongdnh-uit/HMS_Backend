@@ -8,12 +8,24 @@ spring:
               uri: lb://medicine-service
               predicates:
                 - Path=/medicine-service/**
+              filters:
+                - StripPrefix=1
+            - id: auth-service
+              uri: lb://auth-service
+              predicates:
+                - Path=/auth-service/**
+              filters:
+                - StripPrefix=1
+
+jwt:
+  public-key: ${JWT_PUBLIC_KEY}
 
 server:
   port: ${API_GATEWAY_PORT:8080}
+
 eureka:
   instance:
     prefer-ip-address: true
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://${DISCOVERY_SERVICE_HOST:localhost}:${DISCOVERY_SERVICE_PORT:8761}/eureka/

@@ -27,8 +27,8 @@ subprojects {
     }
 
     dependencies {
-        implementation("io.github.cdimascio:dotenv-java:3.2.0")
         implementation(platform("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"))
+        implementation("org.springframework.boot:spring-boot-starter-actuator")
         compileOnly("org.projectlombok:lombok")
         annotationProcessor("org.projectlombok:lombok")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
