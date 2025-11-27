@@ -1,0 +1,32 @@
+spring:
+  docker:
+    compose:
+      enabled: true
+      file: ${DOCKER_COMPOSE_FILE_AUTH_SERVICE:file:infrastructure/dev/auth-service/compose.yaml}
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${AUTH_DB_HOST:localhost}:${AUTH_DB_PORT:3306}/${AUTH_DB_NAME:mydatabase}
+    username: ${AUTH_DB_USERNAME:myuser}
+    password: ${AUTH_DB_PASSWORD:secret}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  private-key: ${JWT_PRIVATE_KEY}
+  public-key: ${JWT_PUBLIC_KEY}
+  refresh-token:
+    expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800}
+  access-token:
+    expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600}
+
+server:
+  port: ${AUTH_SERVICE_PORT:8082}
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://${DISCOVERY_SERVICE_HOST:localhost}:${DISCOVERY_SERVICE_PORT:8761}/eureka/

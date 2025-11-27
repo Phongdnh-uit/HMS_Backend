@@ -8,6 +8,17 @@ spring:
               uri: lb://medicine-service
               predicates:
                 - Path=/medicine-service/**
+              filters:
+                - StripPrefix=1
+            - id: auth-service
+              uri: lb://auth-service
+              predicates:
+                - Path=/auth-service/**
+              filters:
+                - StripPrefix=1
+
+jwt:
+  public-key: ${JWT_PUBLIC_KEY}
 
 server:
   port: ${API_GATEWAY_PORT:8080}

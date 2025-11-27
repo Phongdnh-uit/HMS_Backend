@@ -15,8 +15,6 @@ spring:
 
 server:
   port: ${MEDICINE_SERVICE_PORT:8082}
-  servlet:
-    context-path: /medicine-service
 
 eureka:
   instance:
