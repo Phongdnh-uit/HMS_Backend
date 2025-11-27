@@ -28,6 +28,7 @@ subprojects {
 
     dependencies {
         implementation(platform("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"))
+        implementation("org.springframework.boot:spring-boot-starter-actuator")
         compileOnly("org.projectlombok:lombok")
         annotationProcessor("org.projectlombok:lombok")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
