@@ -1,0 +1,133 @@
+services:
+  # Database Services
+  mysql-auth-service:
+    image: mysql:8.0
+    container_name: mysql-auth-service
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${AUTH_DB_PASSWORD}
+      MYSQL_DATABASE: ${AUTH_DB_NAME}
+      MYSQL_USER: ${AUTH_DB_USERNAME}
+      MYSQL_PASSWORD: ${AUTH_DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: always
+  mysql-medicine-service:
+    image: mysql:8.0
+    container_name: mysql-medicine-service
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MEDICINE_DB_PASSWORD}
+      MYSQL_DATABASE: ${MEDICINE_DB_NAME}
+      MYSQL_USER: ${MEDICINE_DB_USERNAME}
+      MYSQL_PASSWORD: ${MEDICINE_DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: always
+
+  # Application Services
+  config-server-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+    container_name: config-server-pro
+    environment:
+      - 'SERVICE=config-server'
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${CONFIG_SERVER_PORT}/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+  discovery-service-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+    container_name: discovery-service-pro
+    environment:
+      - 'SERVICE=discovery-service'
+    env_file:
+      - .env
+    ports:
+      - "${DISCOVERY_SERVICE_PORT}:${DISCOVERY_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: always
+  api-gateway-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+    container_name: api-gateway-pro
+    environment:
+      - 'SERVICE=api-gateway'
+    ports:
+      - "${API_GATEWAY_PORT}:${API_GATEWAY_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+  auth-service-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+    container_name: auth-service-pro
+    environment:
+      - 'SERVICE=auth-service'
+    ports:
+      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-auth-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+  medicine-service-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+    container_name: medicine-service-pro
+    environment:
+      - 'SERVICE=medicine-service'
+    ports:
+      - "${MEDICINE_SERVICE_PORT}:${MEDICINE_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-medicine-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge

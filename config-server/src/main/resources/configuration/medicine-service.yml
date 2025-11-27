@@ -1,7 +1,7 @@
 spring:
   docker:
     compose:
-      enabled: true
+      enabled: ${DOCKER_COMPOSE_ENABLED:false}
       file: ${DOCKER_COMPOSE_FILE_MEDICINE_SERVICE:file:infrastructure/dev/medicine-service/compose.yaml}
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
