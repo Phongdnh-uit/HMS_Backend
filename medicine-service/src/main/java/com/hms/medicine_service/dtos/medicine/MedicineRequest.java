@@ -2,10 +2,14 @@ package com.hms.medicine_service.dtos.medicine;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
+@Getter
+@Setter
 public class MedicineRequest {
     @NotBlank(message = "Medicine name is required")
     private String name;
@@ -34,4 +38,7 @@ public class MedicineRequest {
 
     @NotNull(message = "Expiration date is required")
     private Instant expiresAt;
+
+    @NotNull(message = "Category is required")
+    private String categoryId;
 }

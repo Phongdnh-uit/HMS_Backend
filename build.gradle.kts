@@ -27,7 +27,6 @@ subprojects {
     }
 
     dependencies {
-        implementation("io.github.cdimascio:dotenv-java:3.2.0")
         implementation(platform("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"))
         compileOnly("org.projectlombok:lombok")
         annotationProcessor("org.projectlombok:lombok")

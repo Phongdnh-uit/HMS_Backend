@@ -1,8 +1,13 @@
 package com.hms.medicine_service.dtos.medicine;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 
+@Getter
+@Setter
 public class MedicineResponse {
     private String id;
     private String name;
