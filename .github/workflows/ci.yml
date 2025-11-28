@@ -1,0 +1,46 @@
+name: CI Build and Package
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        java-version: [ '23' ]
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+          cache: gradle
+
+#      Optional: Validate Gradle wrapper to ensure security and integrity
+#      - name: Validate Gradle wrapper
+#        uses: gradle/wrapper-validation-action@v2
+
+      - name: Build all modules
+        run: ./gradlew clean build -x test
+
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Package JARs (all services)
+        run: ./gradlew :config-server:bootJar :discovery-service:bootJar :medicine-service:bootJar :auth-service:bootJar :api-gateway:bootJar
+
+#      - name: Archive built JARs
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: microservice-packages
+#          path: |
+#            **/build/libs/*.jar

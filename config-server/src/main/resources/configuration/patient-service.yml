@@ -1,0 +1,26 @@
+spring:
+  docker:
+    compose:
+      enabled: ${DOCKER_COMPOSE_ENABLED:false}
+      file: ${DOCKER_COMPOSE_FILE_PATIENT_SERVICE:file:infrastructure/dev/patient-service/compose.yaml}
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${PATIENT_DB_HOST:localhost}:${PATIENT_DB_PORT:3308}/${PATIENT_DB_NAME:mydatabase}
+    username: ${PATIENT_DB_USERNAME:myuser}
+    password: ${PATIENT_DB_PASSWORD:secret}
+  jpa:
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: ${PATIENT_SERVICE_PORT:8083}
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://${DISCOVERY_SERVICE_HOST:localhost}:${DISCOVERY_SERVICE_PORT:8761}/eureka/

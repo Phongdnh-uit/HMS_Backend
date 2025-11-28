@@ -1,4 +1,4 @@
-package com.hms.medicine_service;
+package com.hms.patient_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,10 +12,10 @@ import org.springframework.boot.test.context.SpringBootTest;
         "spring.jpa.show-sql=true",
         "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect"
 })
-class MedicineServiceApplicationTests {
+class PatientServiceApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }

@@ -36,6 +36,24 @@ services:
     networks:
       - app-network
     restart: always
+  mysql-patient-service:
+    image: mysql:8.0
+    container_name: mysql-patient-service
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PATIENT_DB_PASSWORD}
+      MYSQL_DATABASE: ${PATIENT_DB_NAME}
+      MYSQL_USER: ${PATIENT_DB_USERNAME}
+      MYSQL_PASSWORD: ${PATIENT_DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: always
 
   # Application Services
   config-server-pro:
@@ -96,8 +114,6 @@ services:
     container_name: auth-service-pro
     environment:
       - 'SERVICE=auth-service'
-    ports:
-      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
     depends_on:
       config-server-pro:
         condition: service_healthy
@@ -115,8 +131,6 @@ services:
     container_name: medicine-service-pro
     environment:
       - 'SERVICE=medicine-service'
-    ports:
-      - "${MEDICINE_SERVICE_PORT}:${MEDICINE_SERVICE_PORT}"
     depends_on:
       config-server-pro:
         condition: service_healthy
@@ -127,7 +141,23 @@ services:
     networks:
       - app-network
     restart: always
-
+  patient-service-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+    container_name: patient-service-pro
+    environment:
+      - 'SERVICE=patient-service'
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-patient-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
 networks:
   app-network:
     driver: bridge
