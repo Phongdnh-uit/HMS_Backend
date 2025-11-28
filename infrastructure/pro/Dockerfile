@@ -14,6 +14,7 @@ COPY discovery-service ./discovery-service
 COPY api-gateway ./api-gateway
 COPY auth-service ./auth-service
 COPY medicine-service ./medicine-service
+COPY patient-service ./patient-service
 
 # Build tất cả modules
 RUN ./gradlew clean bootJar --no-daemon
@@ -31,5 +32,6 @@ COPY --from=builder /build/auth-service/build/libs/auth-service-*.jar ./auth-ser
 COPY --from=builder /build/config-server/build/libs/config-server-*.jar ./config-server.jar
 COPY --from=builder /build/discovery-service/build/libs/discovery-service-*.jar ./discovery-service.jar
 COPY --from=builder /build/medicine-service/build/libs/medicine-service-*.jar ./medicine-service.jar
+COPY --from=builder /build/patient-service/build/libs/patient-service-*.jar ./patient-service.jar
 
 ENTRYPOINT ["sh","-c","java -jar /app/${SERVICE}.jar"]

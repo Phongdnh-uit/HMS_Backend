@@ -1,16 +1,18 @@
-
 # HMS BACKEND
 
-HMS_BACKEND — Hệ thống quản lý bệnh viện (Hospital Management System) là dự án môn học CNPMCS được tổ chức theo kiến trúc microservices. Dự án sử dụng Spring Boot / Spring Cloud, chia thành nhiều module (config server, discovery, API gateway, dịch vụ nghiệp vụ như medicine và auth), có cấu hình để chạy bằng Docker Compose.
+HMS_BACKEND — Hệ thống quản lý bệnh viện (Hospital Management System) là dự án môn học CNPMCS được tổ chức theo kiến
+trúc microservices. Dự án sử dụng Spring Boot / Spring Cloud, chia thành nhiều module (config server, discovery, API
+gateway, dịch vụ nghiệp vụ như medicine và auth), có cấu hình để chạy bằng Docker Compose.
 
 ## Installation
 
 Yêu cầu trước khi cài:
+
 - Java 23 (Có thể không cần nếu chạy bằng Docker)
 - Docker & Docker Compose
 
-
 #### Local:
+
 - Dựa vào .env.example bổ sung đầy đủ các trường cần thiết
 - Cần bổ sung tối thiểu các field sau đây vào .env
 
@@ -52,16 +54,27 @@ JWT_ACCESS_TOKEN_EXPIRATION=
 JWT_REFRESH_TOKEN_EXPIRATION=
 # docker compose file for auth service, if not using: default ../../infrastructure/dev/auth-service/compose.yml, only used if DOCKER_COMPOSE_ENABLED=true
 # DOCKER_COMPOSE_FILE_AUTH_SERVICE=
+
+PATIENT_DB_HOST=localhost
+PATIENT_DB_PORT=3306
+PATIENT_DB_NAME=mydatabase
+PATIENT_DB_USERNAME=myuser
+PATIENT_DB_PASSWORD=secret
+PATIENT_SERVICE_PORT=8083
 ```
+
 - DOCKER_COMPOSE_ENABLED giúp tự khởi chạy compose có sẵn ở infrastructure/dev/{service}
-- Nếu cần cấu hình lại Docker-Compose cho các ứng dụng chỉ cần tạo mới file Docker-Compose và thêm lại vào đường dẫn trên .env
+- Nếu cần cấu hình lại Docker-Compose cho các ứng dụng chỉ cần tạo mới file Docker-Compose và thêm lại vào đường dẫn
+  trên .env
 
 Build toàn bộ project từ thư mục gốc:
+
 ```
 ./gradlew clean build
 ```
 
 Nếu cần build và chạy module cụ thể thì bạn có thể sử dụng như sau
+
 ```
 ./gradlew clean :config-server:build
 ```
@@ -72,7 +85,8 @@ Thứ tự khuyến nghị khi chạy local:
 2. discovery-service
 3. auth-service
 4. medicine-service
-5. api-gateway (nên chạy api-gateway sau cùng để giảm tình trạng tất cả service đều chạy nhưng 30s sau mới hoạt động được)
+5. api-gateway (nên chạy api-gateway sau cùng để giảm tình trạng tất cả service đều chạy nhưng 30s sau mới hoạt động
+   được)
 
 ```bash
 # chạy Config Server
@@ -94,10 +108,13 @@ Thứ tự khuyến nghị khi chạy local:
 #### Docker Compose:
 
 Từ .env.example bổ sung .env vào vị trí
+
 ```
 /infrastructure/pro/.env
 ```
+
 với cấu hình .env khuyến nghị như sau
+
 ```
 # Khi chạy bằng docker compose nên tắt tính năng này
 # Trong compose đã đầy đủ database nên không cần thêm
@@ -125,7 +142,7 @@ API_GATEWAY_PORT=8080
 # Biến này dùng để khai báo trong config
 MEDICINE_DB_HOST=mysql-medicine-service
 
-# Không nên thay biến này, tương ứng với tên service trong compose
+# Không nên thay biến này
 # Biến này dùng để khai báo trong config
 MEDICINE_DB_PORT=3306
 
@@ -139,7 +156,10 @@ MEDICINE_SERVICE_PORT=8081
 # Biến này dùng để khai báo trong config
 AUTH_DB_HOST=mysql-auth-service
 
+# Không nên thay biến này
+# Biến này dùng để khai báo trong config
 AUTH_DB_PORT=3306
+
 AUTH_DB_NAME=mydatabase
 AUTH_DB_USERNAME=myuser
 AUTH_DB_PASSWORD=secret
@@ -147,9 +167,24 @@ AUTH_SERVICE_PORT=8082
 
 JWT_PRIVATE_KEY=---private key---
 JWT_PUBLIC_KEY=---public key--
+
+# Không nên thay biến này, tương ứng với tên service trong compose
+# Biến này dùng để khai báo trong config
+AUTH_DB_HOST=mysql-auth-service
+PATIENT_DB_HOST=mysql-medicine-service
+
+# Không nên thay biến này
+# Biến này dùng để khai báo trong config
+PATIENT_DB_PORT=3306
+
+PATIENT_DB_NAME=mydatabase
+PATIENT_DB_USERNAME=myuser
+PATIENT_DB_PASSWORD=secret
+PATIENT_SERVICE_PORT=8083
 ```
 
 Chạy Docker Compose
+
 ```
 cd /infrastructure/pro
 docker compose up -d
@@ -158,14 +193,12 @@ docker compose up -d
 ## Usage
 
 Ví dụ endpoint (một số endpoint cơ bản, tùy cấu hình thực tế của từng module):
+
 - Health check (Spring Actuator): http://localhost:<PORT>/{service-name}/actuator/health
 - Eureka dashboard: http://localhost:<EUREKA_PORT>/ (thường là discovery-service)
 - API Gateway entrypoint: http://localhost:<GATEWAY_PORT>/
 
 Chi tiết các endpoint cụ thể đã được lưu tạm trong `postman/api.json`. Có thể dùng postman để import collection.
-
-
-
 
 ## Tech Stack
 
