@@ -7,4 +7,5 @@ include(
     "api-gateway",
     "medicine-service",
     "auth-service",
+    "patient-service"
 )
