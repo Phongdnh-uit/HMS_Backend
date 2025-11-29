@@ -1,5 +1,6 @@
 package com.hms.medicine_service.dtos.medicine;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -24,6 +25,7 @@ public class MedicineRequest {
     private String description;
 
     @NotNull(message = "Quantity is required")
+    @Min(value = 0, message = "Quantity cannot be negative")
     private Long quantity;
 
     private String concentration;
@@ -31,9 +33,11 @@ public class MedicineRequest {
     private String packaging;
 
     @NotNull(message = "Purchase price is required")
+    @Min(value = 0, message = "Purchase price cannot be negative")
     private BigDecimal purchasePrice;
 
     @NotNull(message = "Selling price is required")
+    @Min(value = 0, message = "Selling price cannot be negative")
     private BigDecimal sellingPrice;
 
     @NotNull(message = "Expiration date is required")
