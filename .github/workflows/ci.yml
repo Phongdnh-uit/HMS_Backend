@@ -72,7 +72,7 @@ jobs:
         run: ./gradlew clean build -x test --no-daemon
 
       # 3️⃣ Test all modules
-      - name: Build all modules
+      - name: Test all modules
         run: ./gradlew test --no-daemon
 
       # 4️⃣ Login Docker Hub

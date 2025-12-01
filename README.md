@@ -187,7 +187,7 @@ Chạy Docker Compose
 
 ```
 cd /infrastructure/pro
-docker compose up -d
+docker compose  -f compose.pro.yaml up -d
 ```
 
 ## Usage
