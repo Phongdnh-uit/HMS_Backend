@@ -67,9 +67,13 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      # 3️⃣ Build all modules (chỉ cần build bootJar)
+      # 3️⃣ Build all modules
       - name: Build all modules
-        run: ./gradlew clean bootJar -x test
+        run: ./gradlew clean build -x test --no-daemon
+
+      # 3️⃣ Test all modules
+      - name: Build all modules
+        run: ./gradlew test --no-daemon
 
       # 4️⃣ Login Docker Hub
       - name: Login to Docker Hub
