@@ -46,6 +46,12 @@ public class Medicine {
     @Column(nullable = false)
     private BigDecimal sellingPrice;
 
+    private String manufacturer;
+
+    private String sideEffects;
+
+    private String storageConditions;
+
     @Column(nullable = false)
     private Instant expiresAt;
 

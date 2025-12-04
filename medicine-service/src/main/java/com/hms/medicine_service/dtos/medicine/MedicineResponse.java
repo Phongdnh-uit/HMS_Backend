@@ -20,6 +20,9 @@ public class MedicineResponse {
     private BigDecimal purchasePrice;
     private BigDecimal sellingPrice;
     private Instant expiresAt;
+    private String manufacturer;
+    private String sideEffects;
+    private String storageConditions;
     private Instant createdAt;
     private Instant updatedAt;
     private String createdBy;
