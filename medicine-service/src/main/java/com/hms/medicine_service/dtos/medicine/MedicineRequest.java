@@ -43,6 +43,12 @@ public class MedicineRequest {
     @NotNull(message = "Expiration date is required")
     private Instant expiresAt;
 
+    private String manufacturer;
+
+    private String sideEffects;
+
+    private String storageConditions;
+
     @NotNull(message = "Category is required")
     private String categoryId;
 }
