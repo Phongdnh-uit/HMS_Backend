@@ -1,0 +1,4 @@
+include:
+  - ./auth-service/compose.yaml
+  - ./medicine-service/compose.yaml
+  - ./patient-service/compose.yaml

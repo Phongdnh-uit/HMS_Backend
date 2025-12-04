@@ -1,10 +1,10 @@
 package com.hms.auth_service.hooks;
 
-import com.hms.auth_service.dtos.account.AccountRequest;
-import com.hms.auth_service.dtos.account.AccountResponse;
 import com.hms.auth_service.entities.Account;
 import com.hms.auth_service.repositories.AccountRepository;
 import com.hms.common.dtos.PageResponse;
+import com.hms.common.dtos.account.AccountRequest;
+import com.hms.common.dtos.account.AccountResponse;
 import com.hms.common.enums.RoleEnum;
 import com.hms.common.exceptions.errors.ApiException;
 import com.hms.common.exceptions.errors.ErrorCode;

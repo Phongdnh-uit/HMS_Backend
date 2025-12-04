@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "5857a0f9-98bf-4552-88c4-76adf3b9ebc8",
+		"_postman_id": "9b07f5ea-b400-4884-a642-c30f647e0ac7",
 		"name": "CNPMCS",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
-		"_exporter_id": "36912475"
+		"_exporter_id": "43862897"
 	},
 	"item": [
 		{
@@ -557,6 +557,158 @@
 			]
 		},
 		{
+			"name": "patient",
+			"item": [
+				{
+					"name": "all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credential\": \"0867907500\",\n  \"password\": \"password\"\n}"
+						},
+						"url": "{{baseUrl}}/patient-service/patients/all"
+					},
+					"response": []
+				},
+				{
+					"name": "find one",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credential\": \"0867907500\",\n  \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/patient-service/patients/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patient-service",
+								"patients",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "f9183c99-334e-493c-ba75-b7e255e8f817"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"email\": \"patiendst11x@gmail.com\",\n  \"dateOfBirth\": \"1990-01-15\",\n  \"gender\": \"MALE\",\n  \"phoneNumber\": \"0901234567\",\n  \"address\": \"123 Main St, Ho Chi Minh City\",\n  \"identificationNumber\": \"071212210934\",\n  \"healthInsuranceNumber\": \"VN154453099\",\n  \"bloodType\": \"O+\",\n  \"allergies\": \"Penicillin, Peanuts\",\n  \"relativeFullName\": \"Nguyen Thi B\",\n  \"relativePhoneNumber\": \"0907654321\",\n  \"relativeRelationship\": \"Spouse\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/patient-service/patients"
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"email\": \"1xdcas@gmail.com\",\n  \"dateOfBirth\": \"1990-01-15\",\n  \"gender\": \"MALE\",\n  \"phoneNumber\": \"0901234567\",\n  \"address\": \"123 Main St, Ho Chi Mcinh City\",\n  \"identificationNumber\": \"071211210934\",\n  \"healthInsuranceNumber\": \"VN151356099\",\n  \"bloodType\": \"O+\",\n  \"allergies\": \"Penicillin, Peanuts\",\n  \"relativeFullName\": \"Nguyen Thi B\",\n  \"relativePhoneNumber\": \"0907654321\",\n  \"relativeRelationship\": \"Spouse\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/patient-service/patients/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patient-service",
+								"patients",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "f9183c99-334e-493c-ba75-b7e255e8f817"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/patient-service/patients/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patient-service",
+								"patients",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "f9183c99-334e-493c-ba75-b7e255e8f817"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "auth",
 			"item": [
 				{
@@ -625,7 +777,7 @@
 	"auth": {
 		"type": "bearer",
 		"bearer": {
-			"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJzZWxmIiwic3ViIjoiOTM1OTYwODEtOGMyNy00OTg3LWJhMTktMDkwYTkwYzI1YTQ1Iiwicm9sZSI6IlBBVElFTlQiLCJleHAiOjE3NjQyMjIxMzAsImlhdCI6MTc2NDIxODUzMCwiZW1haWwiOiJhZG1pbkBobXMuY29tIn0.MLatEEDiq1DronNbxFU0JRAwH4fOvVuuI38qpxpeZJ7SYazqCzcW7gpRw40fAp_LgtpDwt6SZdKvDrZ10a-3cWWxeD3Wj45OQhwOO4bh27aEoXHsFL1yNsWLMYfVMSo2qew_mmQmqRCg6xbkKt2reFB-X6tR6-nWCy_f8QoXUQX9b9SrGdfR1diwm3lA0YSgT3eIRYfGxsjKAPf_--zi1jVEoJ2RtWvyB3TbVIZoeQgMXU-Rh5oqWPKndJxDgXPun6-PUXaAaMLkBcENcqBdvNkI-FLlTm3RTvOT6FodgC4a8yxOUgdWiBBwNZvi6DaOHV9WWyzAPnSH8lxhfMmp2g"
+			"token": "{{accessToken}}"
 		}
 	},
 	"event": [

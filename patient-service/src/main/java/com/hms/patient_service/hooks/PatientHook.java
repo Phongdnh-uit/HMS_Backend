@@ -1,5 +1,6 @@
 package com.hms.patient_service.hooks;
 
+import com.hms.common.clients.AccountClient;
 import com.hms.common.dtos.PageResponse;
 import com.hms.common.hooks.GenericHook;
 import com.hms.patient_service.dtos.patient.PatientRequest;
@@ -16,6 +17,7 @@ import java.util.Map;
 @Component
 public class PatientHook implements GenericHook<Patient, String, PatientRequest, PatientResponse> {
     private final PatientRepository patientRepository;
+    private final AccountClient authClient;
 
     @Override
     public void enrichFindAll(PageResponse<PatientResponse> response) {
@@ -29,11 +31,20 @@ public class PatientHook implements GenericHook<Patient, String, PatientRequest,
 
     @Override
     public void validateCreate(PatientRequest input, Map<String, Object> context) {
+
         //CHECK IF FIELDS ALREADY EXIST IN ANOTHER ACCOUNT
         // EMAIL, IDENTIFICATION NUMBER, HEALTH INSURANCE NUMBER
         if (PatientHelper.isAccountExists(input, patientRepository))
             throw new RuntimeException("Patient already exists");
 
+//        //CREATE ACCOUNT BEFORE CREATE PATIENT RECORD
+//        AccountResponse newAccount = Objects.requireNonNull(authClient.create(AccountRequest.builder()
+//                .email(input.getEmail())
+//                .password(input.getPassword())
+//                .role(RoleEnum.PATIENT)
+//                .build()).getBody()).getData();
+
+//        input.setAccountId(newAccount.getId());
     }
 
     @Override
@@ -47,11 +58,15 @@ public class PatientHook implements GenericHook<Patient, String, PatientRequest,
     }
 
     @Override
-    public void validateUpdate(String s, PatientRequest input, Patient existingEntity, Map<String, Object> context) {
+    public void validateUpdate(String id, PatientRequest input, Patient existingEntity, Map<String, Object> context) {
         //CHECK IF FIELDS ALREADY EXIST IN ANOTHER ACCOUNT
         // EMAIL, IDENTIFICATION NUMBER, HEALTH INSURANCE NUMBER
-        if (PatientHelper.isAccountExists(input, patientRepository))
+        if (PatientHelper.isAccountExists(input, patientRepository, id))
             throw new RuntimeException("Patient already exists");
+
+        //IGNORE SOME FIELD THAT DON ALLOW TO UPDATE
+        this.ignoreFieldBeforeUpdate(input);
+
     }
 
     @Override
@@ -82,5 +97,10 @@ public class PatientHook implements GenericHook<Patient, String, PatientRequest,
     @Override
     public void afterBulkDelete(Iterable<String> strings) {
 
+    }
+
+    void ignoreFieldBeforeUpdate(PatientRequest request) {
+        //EMAIL
+        request.setEmail(null);
     }
 }
