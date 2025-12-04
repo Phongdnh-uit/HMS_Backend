@@ -1,0 +1,24 @@
+spring:
+  docker:
+    compose:
+      enabled: ${DOCKER_COMPOSE_ENABLED:false}
+      file: ${DOCKER_COMPOSE_FILE_HR_SERVICE:file:infrastructure/dev/hr-service/compose.yaml}
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${HR_DB_HOST:localhost}:${HR_DB_PORT:3306}/${HR_DB_NAME:mydatabase}
+    username: ${HR_DB_USERNAME:myuser}
+    password: ${HR_DB_PASSWORD:secret}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: ${HR_SERVICE_PORT:8082}
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://${DISCOVERY_SERVICE_HOST:localhost}:${DISCOVERY_SERVICE_PORT:8761}/eureka/

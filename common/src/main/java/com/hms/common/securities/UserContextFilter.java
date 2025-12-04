@@ -1,4 +1,4 @@
-package com.hms.medicine_service.securities;
+package com.hms.common.securities;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

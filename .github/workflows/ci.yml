@@ -1,69 +1,83 @@
-# name: CI Build and Package
+#name: CI Build and Push Docker Images
 #
-# on:
-#   push:
-#     branches: ["main", "develop"]
-#   pull_request:
-#     branches: ["main", "develop"]
+#on:
+#  push:
+#    branches: ["main", "develop"]
+#  pull_request:
+#    branches: ["main", "develop"]
 #
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
+#jobs:
+#  build-and-push:
+#    runs-on: ubuntu-latest
+#    strategy:
+#      matrix:
+#        service: [config-server, discovery-service, api-gateway, auth-service, medicine-service, patient-service]
+#        java-version: ["23"]
 #
-#     strategy:
-#       matrix:
-#         java-version: ["23"]
+#    steps:
+#      # 1️⃣ Checkout source
+#      - name: Checkout code
+#        uses: actions/checkout@v4
 #
-#     steps:
-#       - name: Checkout source code
-#         uses: actions/checkout@v4
+#      # 2️⃣ Setup JDK
+#      - name: Set up JDK ${{ matrix.java-version }}
+#        uses: actions/setup-java@v4
+#        with:
+#          java-version: ${{ matrix.java-version }}
+#          distribution: temurin
+#          cache: gradle
 #
-#       - name: Set up JDK ${{ matrix.java-version }}
-#         uses: actions/setup-java@v4
-#         with:
-#           java-version: ${{ matrix.java-version }}
-#           distribution: "temurin"
-#           cache: gradle
+#      # 3️⃣ Build all modules
+#      - name: Build all modules
+#        run: ./gradlew clean build -x test --no-daemon
 #
-#       #      Optional: Validate Gradle wrapper to ensure security and integrity
-#       #      - name: Validate Gradle wrapper
-#       #        uses: gradle/wrapper-validation-action@v2
+#      # 3️⃣ Test all modules
+#      - name: Test all modules
+#        run: ./gradlew test --no-daemon
 #
-#       - name: Build all modules
-#         run: ./gradlew clean build -x test
+#      # 4️⃣ Login Docker Hub
+#      - name: Login to Docker Hub
+#        uses: docker/login-action@v2
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 #
-#       - name: Run tests
-#         run: ./gradlew test
+#      # 5️⃣ Setup Docker Buildx
+#      - name: Set up Docker Buildx
+#        uses: docker/setup-buildx-action@v3
 #
-#       - name: Package JARs (all services)
-#         run: ./gradlew :config-server:bootJar :discovery-service:bootJar :medicine-service:bootJar :auth-service:bootJar :api-gateway:bootJar
+#      # 6️⃣ Build & Push Docker Image cho từng service
+#      - name: Build & Push ${{ matrix.service }} Image
+#        uses: docker/build-push-action@v5
+#        with:
+#          context: .
+#          file: infrastructure/pro/Dockerfile
+#          push: true
+#          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
+#          build-args: |
+#            SERVICE=${{ matrix.service }}
 
 name: CI Build and Push Docker Images
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: ["main", "develop"]
+    branches: [ "main", "develop" ]
 
 jobs:
-  build-and-push:
+  test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [config-server, discovery-service, api-gateway, auth-service, medicine-service, patient-service]
-        java-version: ["23"]
-
     steps:
       # 1️⃣ Checkout source
       - name: Checkout code
         uses: actions/checkout@v4
 
       # 2️⃣ Setup JDK
-      - name: Set up JDK ${{ matrix.java-version }}
+      - name: Set up JDK 23
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.java-version }}
+          java-version: "23"
           distribution: temurin
           cache: gradle
 
@@ -71,28 +85,41 @@ jobs:
       - name: Build all modules
         run: ./gradlew clean build -x test --no-daemon
 
-      # 3️⃣ Test all modules
+      # 4️⃣ Test all modules
       - name: Test all modules
         run: ./gradlew test --no-daemon
 
-      # 4️⃣ Login Docker Hub
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [ config-server, discovery-service, api-gateway, auth-service, medicine-service, patient-service, hr-service ]
+        java-version: [ "23" ]
+
+    steps:
+      # 1️⃣ Checkout source
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Login Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # 5️⃣ Setup Docker Buildx
-      - name: Set up Docker Buildx
+      # 3️⃣ Setup Buildx
+      - name: Set up Docker Build
         uses: docker/setup-buildx-action@v3
 
-      # 6️⃣ Build & Push Docker Image cho từng service
+      # 4️⃣ Build & Push Image (each service builds only itself)
       - name: Build & Push ${{ matrix.service }} Image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: .                     # build toàn project nhưng Dockerfile chỉ dùng đúng service
           file: infrastructure/pro/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
           build-args: |
             SERVICE=${{ matrix.service }}
+            JAVA_VERSION=${{ matrix.java-version }}

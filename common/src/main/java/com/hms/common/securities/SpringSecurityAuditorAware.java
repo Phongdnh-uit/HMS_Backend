@@ -1,4 +1,4 @@
-package com.hms.patient_service.securities;
+package com.hms.common.securities;
 
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;

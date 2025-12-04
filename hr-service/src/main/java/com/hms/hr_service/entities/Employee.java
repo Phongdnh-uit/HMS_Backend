@@ -1,73 +1,66 @@
-package com.hms.medicine_service.entities;
+package com.hms.hr_service.entities;
 
+import com.hms.hr_service.enums.EmployeeRole;
+import com.hms.hr_service.enums.EmployeeStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SoftDelete;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-@Table
 @Entity
-public class Medicine {
+@Table(name = "employees")
+@SoftDelete
+public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(nullable = false)
-    private String name;
+    private String accountId;
 
     @Column(nullable = false)
-    private String activeIngredient;
+    @NotBlank(message = "Full name is required")
+    private String fullName;
 
     @Column(nullable = false)
-    private String unit;
+    @Enumerated(EnumType.STRING)
+    private EmployeeRole role;
 
-    private String description;
+    private String departmentId;
 
-    @Column(nullable = false)
-    private Long quantity;
+    private String specialization;
 
-    private String concentration;
+    private String licenseNumber;
 
-    private String packaging;
+    private String phoneNumber;
 
-    @Column(nullable = false)
-    private BigDecimal purchasePrice;
-
-    @Column(nullable = false)
-    private BigDecimal sellingPrice;
-
-    private String manufacturer;
-
-    private String sideEffects;
-
-    private String storageConditions;
+    private String address;
 
     @Column(nullable = false)
-    private Instant expiresAt;
+    @Enumerated(EnumType.STRING)
+    private EmployeeStatus status;
+
+    private Instant hiredAt;
+
+    private Instant deletedAt;
+    private String deletedBy;
 
     @CreatedDate
     private Instant createdAt;
-
     @LastModifiedDate
     private Instant updatedAt;
-
     @CreatedBy
     private String createdBy;
-
     @LastModifiedBy
     private String updatedBy;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
 }

@@ -1,0 +1,1118 @@
+{
+	"info": {
+		"_postman_id": "5857a0f9-98bf-4552-88c4-76adf3b9ebc8",
+		"name": "CNPMCS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "36912475"
+	},
+	"item": [
+		{
+			"name": "medicine-category",
+			"item": [
+				{
+					"name": "all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credential\": \"0867907500\",\n  \"password\": \"password\"\n}"
+						},
+						"url": "{{baseUrl}}/medicine-service/categories/all"
+					},
+					"response": []
+				},
+				{
+					"name": "find one",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credential\": \"0867907500\",\n  \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/medicine-service/categories/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"medicine-service",
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "86759c40-85c5-4377-a963-244e987b9f55"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Antibiotics\",\n  \"description\": \"Nhóm thuốc dùng để điều trị các bệnh nhiễm khuẩn do vi khuẩn gây ra như viêm phổi, viêm họng, nhiễm trùng da. Bao gồm Penicillin, Amoxicillin, Ciprofloxacin.\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/medicine-service/categories"
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Analgesics\",\n  \"description\": \"Nhóm thuốc giúp giảm các loại đau từ nhẹ đến trung bình như đau đầu, đau cơ, đau răng và đau bụng kinh. Phổ biến gồm Paracetamol, Ibuprofen, Diclofenac.\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/medicine-service/categories/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"medicine-service",
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "86759c40-85c5-4377-a963-244e987b9f55"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/medicine-service/categories/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"medicine-service",
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "86759c40-85c5-4377-a963-244e987b9f55"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete all",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/medicine-service/categories?ids=1&ids=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"medicine-service",
+								"categories"
+							],
+							"query": [
+								{
+									"key": "ids",
+									"value": "1"
+								},
+								{
+									"key": "ids",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "account",
+			"item": [
+				{
+					"name": "all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credential\": \"0867907500\",\n  \"password\": \"password\"\n}"
+						},
+						"url": "{{baseUrl}}/auth-service/accounts/all"
+					},
+					"response": []
+				},
+				{
+					"name": "find one",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credential\": \"0867907500\",\n  \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth-service/accounts/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth-service",
+								"accounts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "86759c40-85c5-4377-a963-244e987b9f55"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@hms.com\",\n    \"password\": \"password\",\n    \"role\": \"ADMIN\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/auth-service/accounts"
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@hms.com\",\n    \"password\": \"password\",\n    \"role\": \"ADMIN\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth-service/accounts/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth-service",
+								"accounts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "86759c40-85c5-4377-a963-244e987b9f55"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth-service/accounts/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth-service",
+								"accounts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "86759c40-85c5-4377-a963-244e987b9f55"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete all",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth-service/accounts?ids=1&ids=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth-service",
+								"accounts"
+							],
+							"query": [
+								{
+									"key": "ids",
+									"value": "1"
+								},
+								{
+									"key": "ids",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "medicine",
+			"item": [
+				{
+					"name": "all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credential\": \"0867907500\",\n  \"password\": \"password\"\n}"
+						},
+						"url": "{{baseUrl}}/medicine-service/medicines/all"
+					},
+					"response": []
+				},
+				{
+					"name": "find one",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credential\": \"0867907500\",\n  \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/medicine-service/medicines/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"medicine-service",
+								"medicines",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Amoxicillin 500mg\",\n  \"activeIngredient\": \"Amoxicillin\",\n  \"unit\": \"Hộp\",\n  \"description\": \"Kháng sinh nhóm Beta-lactam điều trị viêm phổi, viêm họng, nhiễm trùng da.\",\n  \"quantity\": 200,\n  \"concentration\": \"500mg\",\n  \"packaging\": \"Hộp 10 vỉ x 10 viên\",\n  \"purchasePrice\": 45000,\n  \"sellingPrice\": 68000,\n  \"expiresAt\": \"2026-05-30T00:00:00Z\",\n  \"categoryId\": \"724e2334-2e43-4408-bb2a-2bc39fd93d37\",\n  \"manufacturer\":\"\",\n  \"sideEffects\":\"\",\n  \"storageConditions\": \"\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/medicine-service/medicines"
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Amoxicillin 500mg\",\n  \"activeIngredient\": \"Amoxicillin\",\n  \"unit\": \"Hộp\",\n  \"description\": \"Kháng sinh nhóm Beta-lactam điều trị viêm phổi, viêm họng, nhiễm trùng da.\",\n  \"quantity\": 200,\n  \"concentration\": \"500mg\",\n  \"packaging\": \"Hộp 10 vỉ x 10 viên\",\n  \"purchasePrice\": 45000,\n  \"sellingPrice\": 68000,\n  \"expiresAt\": \"2026-05-30T00:00:00Z\",\n  \"categoryId\": \"724e2334-2e43-4408-bb2a-2bc39fd93d37\",\n  \"manufacturer\":\"\",\n  \"sideEffects\":\"\",\n  \"storageConditions\": \"\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/medicine-service/medicines/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"medicine-service",
+								"medicines",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ace89914-f26b-4525-8a5c-1ccc30baa376"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/medicine-service/medicines/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"medicine-service",
+								"medicines",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete all",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\"\n}"
+						},
+						"url": "{{baseUrl}}/medicine-service/medicines/bulk"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "department",
+			"item": [
+				{
+					"name": "all",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": "{{baseUrl}}/hr-service/hr/departments/all"
+					},
+					"response": []
+				},
+				{
+					"name": "find one",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credential\": \"0867907500\",\n  \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/hr-service/hr/departments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"hr-service",
+								"hr",
+								"departments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Cardiology\",\n  \"description\": \"Responsible for diagnosing and treating heart-related conditions.\",\n  \"headDoctorId\": \"DOC-10293\",\n  \"location\": \"Building A - Floor 3\",\n  \"phoneExtension\": \"3201\",\n  \"status\": \"ACTIVE\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/hr-service/hr/departments"
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Cardiology\",\n  \"description\": \"Responsible for diagnosing and treating heart-related conditions.\",\n  \"headDoctorId\": \"DOC-10293\",\n  \"location\": \"Building A - Floor 3\",\n  \"phoneExtension\": \"3201\",\n  \"status\": \"ACTIVE\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/hr-service/hr/departments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"hr-service",
+								"hr",
+								"departments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "d5d5d495-2ea6-4032-bdff-a3d6f2c4d8a5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/hr-service/hr/departments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"hr-service",
+								"hr",
+								"departments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "d5d5d495-2ea6-4032-bdff-a3d6f2c4d8a5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete all",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\"\n}"
+						},
+						"url": "{{baseUrl}}/hr-service/hr/departments/bulk"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "employee",
+			"item": [
+				{
+					"name": "all",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": "{{baseUrl}}/hr-service/hr/employees/all"
+					},
+					"response": []
+				},
+				{
+					"name": "find one",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credential\": \"0867907500\",\n  \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/hr-service/hr/employees/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"hr-service",
+								"hr",
+								"employees",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountId\": \"9721bdf9-2e63-4296-b6b8-719b6035092c\",\n  \"fullName\": \"Dr. Nguyen Minh Khoa\",\n  \"role\": \"DOCTOR\",\n  \"departmentId\": \"7b06941b-c04f-45c8-96b9-b4d8956fa774\",\n  \"specialization\": \"Cardiology\",\n  \"licenseNumber\": \"MD-12345\",\n  \"phoneNumber\": \"0987654321\",\n  \"address\": \"Ho Chi Minh City, District 3\",\n  \"status\": \"ACTIVE\",\n  \"hiredAt\": \"2024-01-10T08:30:00Z\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/hr-service/hr/employees"
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountId\": \"ACC-10001\",\n  \"fullName\": \"Dr. Nguyen Minh Khoa\",\n  \"role\": \"DOCTOR\",\n  \"departmentId\": \"DEP-00123\",\n  \"specialization\": \"Cardiology\",\n  \"licenseNumber\": \"MD-12345\",\n  \"phoneNumber\": \"0987654321\",\n  \"address\": \"Ho Chi Minh City, District 3\",\n  \"status\": \"ACTIVE\",\n  \"hiredAt\": \"2024-01-10T08:30:00Z\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/hr-service/hr/employees/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"hr-service",
+								"hr",
+								"employees",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "8a3c9962-7dc1-4322-aae7-a9e3c39b605d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/hr-service/hr/employees/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"hr-service",
+								"hr",
+								"employees",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "8a3c9962-7dc1-4322-aae7-a9e3c39b605d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete all",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\"\n}"
+						},
+						"url": "{{baseUrl}}/hr-service/hr/employees/bulk"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@hms.com\",\n    \"password\": \"password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/auth-service/auth/register"
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@hms.com\",\n    \"password\": \"password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/auth-service/auth/login"
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"85fa22ea-20de-44ca-b435-c1348c8ec855\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/auth-service/auth/logout"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "patient",
+			"item": [
+				{
+					"name": "all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credential\": \"0867907500\",\n  \"password\": \"password\"\n}"
+						},
+						"url": "{{baseUrl}}/patient-service/patients/all"
+					},
+					"response": []
+				},
+				{
+					"name": "find one",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credential\": \"0867907500\",\n  \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/patient-service/patients/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patient-service",
+								"patients",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "f9183c99-334e-493c-ba75-b7e255e8f817"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"email\": \"patiendst11x@gmail.com\",\n  \"dateOfBirth\": \"1990-01-15\",\n  \"gender\": \"MALE\",\n  \"phoneNumber\": \"0901234567\",\n  \"address\": \"123 Main St, Ho Chi Minh City\",\n  \"identificationNumber\": \"071212210934\",\n  \"healthInsuranceNumber\": \"VN154453099\",\n  \"bloodType\": \"O+\",\n  \"allergies\": \"Penicillin, Peanuts\",\n  \"relativeFullName\": \"Nguyen Thi B\",\n  \"relativePhoneNumber\": \"0907654321\",\n  \"relativeRelationship\": \"Spouse\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/patient-service/patients"
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"email\": \"1xdcas@gmail.com\",\n  \"dateOfBirth\": \"1990-01-15\",\n  \"gender\": \"MALE\",\n  \"phoneNumber\": \"0901234567\",\n  \"address\": \"123 Main St, Ho Chi Mcinh City\",\n  \"identificationNumber\": \"071211210934\",\n  \"healthInsuranceNumber\": \"VN151356099\",\n  \"bloodType\": \"O+\",\n  \"allergies\": \"Penicillin, Peanuts\",\n  \"relativeFullName\": \"Nguyen Thi B\",\n  \"relativePhoneNumber\": \"0907654321\",\n  \"relativeRelationship\": \"Spouse\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/patient-service/patients/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patient-service",
+								"patients",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "f9183c99-334e-493c-ba75-b7e255e8f817"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/patient-service/patients/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patient-service",
+								"patients",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "f9183c99-334e-493c-ba75-b7e255e8f817"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": {
+			"token": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJzZWxmIiwic3ViIjoiYWZkMjkyYWYtMjQ1My00MDZiLTgwMWQtOWNmNDU1MThjNjU4Iiwicm9sZSI6IlBBVElFTlQiLCJleHAiOjE3NjQ4NDA4ODQsImlhdCI6MTc2NDgzNzI4NCwiZW1haWwiOiJhZG1pbkBobXMuY29tIn0.R1AYiqW-TNL17bDVpH5TRSOCAYBsZQYsUbbQrtixewOMXZxuRmvONK6BG8JHGsL8CxUy3X2XBGMP556WnoD5tckbx6BsIUAuFaU4RbwKU_npuGvCfdfj_BM6XFH0WhOa58uSCI5atvzzQpf6FqTRm80OwKNyroj94OUB_jLLBoDZEWfvI4omnwBYkAHt9rNYLPCjUl7ExS01DnSRQ9R2y0fytCbU24z-gfLXzV7SfaNLMW_hsAf2JvLcEd2eUwkH_QTOxMyR0WGcRX2qNQ2PoNWqhKQ48YPfRi9lBQwUjrysboFjNceaVmxfwfOss6c13s217S9W2aphpG9gw64hXQ"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": ""
+		}
+	]
+}

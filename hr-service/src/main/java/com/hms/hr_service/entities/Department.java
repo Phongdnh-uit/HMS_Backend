@@ -1,5 +1,6 @@
-package com.hms.medicine_service.entities;
+package com.hms.hr_service.entities;
 
+import com.hms.hr_service.enums.DepartmentStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,51 +10,33 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-@Table
 @Entity
-public class Medicine {
+@Table(name = "departments")
+public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(nullable = false)
-    private String activeIngredient;
-
-    @Column(nullable = false)
-    private String unit;
-
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private Long quantity;
+    private String headDoctorId;
 
-    private String concentration;
+    private String location;
 
-    private String packaging;
-
-    @Column(nullable = false)
-    private BigDecimal purchasePrice;
+    private String phoneExtension;
 
     @Column(nullable = false)
-    private BigDecimal sellingPrice;
-
-    private String manufacturer;
-
-    private String sideEffects;
-
-    private String storageConditions;
-
-    @Column(nullable = false)
-    private Instant expiresAt;
+    @Enumerated(EnumType.STRING)
+    private DepartmentStatus status;
 
     @CreatedDate
     private Instant createdAt;
@@ -66,8 +49,4 @@ public class Medicine {
 
     @LastModifiedBy
     private String updatedBy;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
 }
