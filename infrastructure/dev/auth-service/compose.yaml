@@ -1,5 +1,5 @@
 services:
-  mysql:
+  auth-mysql:
     image: 'mysql:latest'
     container_name: mysql-auth-service-dev
     environment:

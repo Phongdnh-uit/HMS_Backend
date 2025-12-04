@@ -54,6 +54,7 @@ public class PatientHelper {
             patient.setRelativePhoneNumber("N/A");
         }
 
+
         return patient;
 
     }
@@ -82,10 +83,21 @@ public class PatientHelper {
         //CHECK IF FIELDS ALREADY EXIST IN ANOTHER ACCOUNT
         // EMAIL, IDENTIFICATION NUMBER, HEALTH INSURANCE NUMBER
 
-        Specification<Patient> existsPatientSpec = PatientHelper.emailLike(patientRequest.email())
-                .or(PatientHelper.healthInsuranceNumberLike(patientRequest.healthInsuranceNumber()))
-                .or(PatientHelper.identificationNumberLike(patientRequest.identificationNumber()));
+        Specification<Patient> existsPatientSpec = PatientHelper.emailLike(patientRequest.getEmail())
+                .or(PatientHelper.healthInsuranceNumberLike(patientRequest.getHealthInsuranceNumber()))
+                .or(PatientHelper.identificationNumberLike(patientRequest.getIdentificationNumber()));
 
         return patientRepository.exists(existsPatientSpec);
+    }
+
+    public static boolean isAccountExists(PatientRequest patientRequest, PatientRepository patientRepository, String ownId) {
+        //CHECK IF FIELDS ALREADY EXIST IN ANOTHER ACCOUNT
+        // EMAIL, IDENTIFICATION NUMBER, HEALTH INSURANCE NUMBER
+
+        Specification<Patient> existsPatientSpec = PatientHelper.emailLike(patientRequest.getEmail())
+                .or(PatientHelper.healthInsuranceNumberLike(patientRequest.getHealthInsuranceNumber()))
+                .or(PatientHelper.identificationNumberLike(patientRequest.getIdentificationNumber()));
+
+        return patientRepository.findAll(existsPatientSpec).stream().anyMatch(p -> !p.getId().equals(ownId));
     }
 }

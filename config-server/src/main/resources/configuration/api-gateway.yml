@@ -16,9 +16,21 @@ spring:
                 - Path=/auth-service/**
               filters:
                 - StripPrefix=1
+            - id: hr-service
+              uri: lb://hr-service
+              predicates:
+                - Path=/hr-service/**
+              filters:
+                - StripPrefix=1
+            - id: patient-service
+              uri: lb://patient-service
+              predicates:
+                - Path=/patient-service/**
+              filters:
+                - StripPrefix=1
 
 jwt:
-  public-key: ${JWT_PUBLIC_KEY}
+  public-key: ${JWT_PUBLIC_KEY:-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs/yJcHARVAGn1xzVbndvyuj1spOinx4IXLP+r73zRpd9Aqjq8gKDnJolEPHXM55wdLxkvjXMEv3p665tbcRXUyHUWI6/p/UIeB6pEZyNUqUj6BiiE0lhv3nINmlAXeXibigMaOzUXBAIl7fuw29oG5bCWjjoUBWgVMFRkGAJfOBZDnqG1OgX1ibjCP4qDI5RgBuv32xAP3/n3eUmNel3+kxAj/ETVkmRbJfiJh61qc4n3bUxXXpJkPnAdGyNxcVPXArASLkKDlb1PSQOJ1x83s75yvXgLMxzt1hgThArM4vlFZRx8IjTbWIpJAjAqil0PLRIX6L3FzoRW6xuHRmMGwIDAQAB-----END PUBLIC KEY-----}
 
 server:
   port: ${API_GATEWAY_PORT:8080}

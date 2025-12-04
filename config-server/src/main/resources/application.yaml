@@ -10,5 +10,5 @@ spring:
           search-locations: classpath:/configuration
       override-system-properties: false
 server:
-  port: ${CONFIG_SERVER_PORT:8081}
+  port: ${CONFIG_SERVER_PORT:8888}
 

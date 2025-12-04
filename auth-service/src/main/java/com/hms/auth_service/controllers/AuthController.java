@@ -1,12 +1,12 @@
 package com.hms.auth_service.controllers;
 
-import com.hms.auth_service.dtos.account.AccountRequest;
-import com.hms.auth_service.dtos.account.AccountResponse;
-import com.hms.auth_service.dtos.auth.LoginRequest;
-import com.hms.auth_service.dtos.auth.LoginResponse;
-import com.hms.auth_service.dtos.auth.RefreshRequest;
 import com.hms.auth_service.services.AuthService;
 import com.hms.common.dtos.ApiResponse;
+import com.hms.common.dtos.account.AccountRequest;
+import com.hms.common.dtos.account.AccountResponse;
+import com.hms.common.dtos.auth.LoginRequest;
+import com.hms.common.dtos.auth.LoginResponse;
+import com.hms.common.dtos.auth.RefreshRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
