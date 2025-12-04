@@ -109,7 +109,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       # 3️⃣ Setup Buildx
-      - name: Set up Docker Buildx
+      - name: Set up Docker Build
         uses: docker/setup-buildx-action@v3
 
       # 4️⃣ Build & Push Image (each service builds only itself)

@@ -1,14 +1,15 @@
+# -------- Stage 0: Declaring build arguments (required for FROM) --------
+ARG JAVA_VERSION=23
+
 # -------- Stage 1: Build --------
 FROM eclipse-temurin:${JAVA_VERSION}-jdk AS builder
 
 ARG SERVICE
 WORKDIR /build
 
-# Copy root build files
 COPY settings.gradle.kts build.gradle.kts gradlew ./
 COPY gradle gradle
 
-# Copy only the service folder + common libs
 COPY common ./common
 COPY ${SERVICE} ./${SERVICE}
 
