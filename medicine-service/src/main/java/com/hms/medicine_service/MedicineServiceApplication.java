@@ -8,11 +8,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing
 @EnableDiscoveryClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.hms")
 public class MedicineServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MedicineServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(MedicineServiceApplication.class, args);
+    }
 
 }

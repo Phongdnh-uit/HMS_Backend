@@ -21,6 +21,7 @@ public class EmployeeRequest {
     @NotNull(message = "Role is required")
     private EmployeeRole role;
 
+    @NotBlank(message = "Department ID is required")
     private String departmentId;
 
     private String specialization;

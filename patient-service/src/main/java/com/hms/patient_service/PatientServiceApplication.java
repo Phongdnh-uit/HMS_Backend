@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing
 @EnableDiscoveryClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.hms")
 @EnableFeignClients(basePackages = "com.hms.common.clients")
 public class PatientServiceApplication {
 
