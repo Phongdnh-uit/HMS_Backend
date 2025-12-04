@@ -1,4 +1,4 @@
-package com.hms.patient_service.dtos.patient;
+package com.hms.common.dtos.patient;
 
 import com.hms.patient_service.constants.Gender;
 import jakarta.validation.constraints.*;

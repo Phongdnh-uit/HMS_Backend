@@ -1,4 +1,4 @@
-package com.hms.common.dtos.patient;
+package com.hms.patient_service.dtos.patient;
 
 import com.hms.patient_service.constants.Gender;
 
