@@ -1,7 +1,5 @@
-package com.hms.auth_service.dtos.account;
+package com.hms.common.dtos.auth;
 
-import com.hms.common.dtos.Action;
-import com.hms.common.enums.RoleEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -9,13 +7,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AccountRequest {
+public class LoginRequest {
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
 
-    @NotBlank(message = "Password is required", groups = {Action.Create.class})
+    @NotBlank(message = "Password is required")
     private String password;
-
-    private RoleEnum role;
 }

@@ -32,6 +32,8 @@ subprojects {
         compileOnly("org.projectlombok:lombok")
         annotationProcessor("org.projectlombok:lombok")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
+        implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.3.0")
+
     }
 
     tasks.withType<Test> {

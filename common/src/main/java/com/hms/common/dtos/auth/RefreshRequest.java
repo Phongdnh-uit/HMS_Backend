@@ -1,4 +1,4 @@
-package com.hms.auth_service.dtos.auth;
+package com.hms.common.dtos.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
