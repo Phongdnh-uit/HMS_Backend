@@ -16,6 +16,12 @@ spring:
                 - Path=/auth-service/**
               filters:
                 - StripPrefix=1
+            - id: hr-service
+              uri: lb://hr-service
+              predicates:
+                - Path=/hr-service/**
+              filters:
+                - StripPrefix=1
 
 jwt:
   public-key: ${JWT_PUBLIC_KEY}
