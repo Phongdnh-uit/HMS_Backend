@@ -1,37 +1,26 @@
 # -------- Stage 1: Build --------
-FROM eclipse-temurin:23-jdk AS builder
+FROM eclipse-temurin:${JAVA_VERSION}-jdk AS builder
+
+ARG SERVICE
 WORKDIR /build
 
-# Copy root build files first (tối ưu cache)
+# Copy root build files
 COPY settings.gradle.kts build.gradle.kts gradlew ./
 COPY gradle gradle
+
+# Copy only the service folder + common libs
+COPY common ./common
+COPY ${SERVICE} ./${SERVICE}
+
 RUN chmod +x gradlew
-
-# Copy source code tất cả module
-Copy common ./common
-COPY config-server ./config-server
-COPY discovery-service ./discovery-service
-COPY api-gateway ./api-gateway
-COPY auth-service ./auth-service
-COPY medicine-service ./medicine-service
-COPY patient-service ./patient-service
-
-# Build tất cả modules
-RUN ./gradlew clean bootJar --no-daemon
+RUN ./gradlew :${SERVICE}:bootJar --no-daemon
 
 # -------- Stage 2: Run --------
-FROM eclipse-temurin:23-jre-alpine
+FROM eclipse-temurin:${JAVA_VERSION}-jre
+
+ARG SERVICE
 WORKDIR /app
 
-# curl cho healthcheck
-RUN apk add --no-cache curl
+COPY --from=builder /build/${SERVICE}/build/libs/*.jar app.jar
 
-# Copy chỉ jar của từng service
-COPY --from=builder /build/api-gateway/build/libs/api-gateway-*.jar ./api-gateway.jar
-COPY --from=builder /build/auth-service/build/libs/auth-service-*.jar ./auth-service.jar
-COPY --from=builder /build/config-server/build/libs/config-server-*.jar ./config-server.jar
-COPY --from=builder /build/discovery-service/build/libs/discovery-service-*.jar ./discovery-service.jar
-COPY --from=builder /build/medicine-service/build/libs/medicine-service-*.jar ./medicine-service.jar
-COPY --from=builder /build/patient-service/build/libs/patient-service-*.jar ./patient-service.jar
-
-ENTRYPOINT ["sh","-c","java -jar /app/${SERVICE}.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
