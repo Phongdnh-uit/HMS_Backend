@@ -11,7 +11,7 @@ services:
       MYSQL_USER: ${AUTH_DB_USERNAME}
       MYSQL_PASSWORD: ${AUTH_DB_PASSWORD}
     healthcheck:
-      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,7 +29,7 @@ services:
       MYSQL_USER: ${MEDICINE_DB_USERNAME}
       MYSQL_PASSWORD: ${MEDICINE_DB_PASSWORD}
     healthcheck:
-      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,7 +47,7 @@ services:
       MYSQL_USER: ${PATIENT_DB_USERNAME}
       MYSQL_PASSWORD: ${PATIENT_DB_PASSWORD}
     healthcheck:
-      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -57,29 +57,31 @@ services:
 
   # Application Services
   config-server-pro:
-    build:
-      context: ../../
-      dockerfile: infrastructure/pro/Dockerfile
+    image: dnhphong2005/config-server:latest
     container_name: config-server-pro
     environment:
-      - 'SERVICE=config-server'
+      - SERVICE=config-server
     env_file:
       - .env
     networks:
       - app-network
     restart: always
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${CONFIG_SERVER_PORT}/actuator/health" ]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:${CONFIG_SERVER_PORT}/actuator/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
   discovery-service-pro:
-    build:
-      context: ../../
-      dockerfile: infrastructure/pro/Dockerfile
+    image: dnhphong2005/discovery-service:latest
     container_name: discovery-service-pro
     environment:
-      - 'SERVICE=discovery-service'
+      - SERVICE=discovery-service
     env_file:
       - .env
     ports:
@@ -91,12 +93,10 @@ services:
       - app-network
     restart: always
   api-gateway-pro:
-    build:
-      context: ../../
-      dockerfile: infrastructure/pro/Dockerfile
+    image: dnhphong2005/api-gateway:latest
     container_name: api-gateway-pro
     environment:
-      - 'SERVICE=api-gateway'
+      - SERVICE=api-gateway
     ports:
       - "${API_GATEWAY_PORT}:${API_GATEWAY_PORT}"
     depends_on:
@@ -108,12 +108,10 @@ services:
       - app-network
     restart: always
   auth-service-pro:
-    build:
-      context: ../../
-      dockerfile: infrastructure/pro/Dockerfile
+    image: dnhphong2005/auth-service:latest
     container_name: auth-service-pro
     environment:
-      - 'SERVICE=auth-service'
+      - SERVICE=auth-service
     depends_on:
       config-server-pro:
         condition: service_healthy
@@ -125,12 +123,10 @@ services:
       - app-network
     restart: always
   medicine-service-pro:
-    build:
-      context: ../../
-      dockerfile: infrastructure/pro/Dockerfile
+    image: dnhphong2005/medicine-service:latest
     container_name: medicine-service-pro
     environment:
-      - 'SERVICE=medicine-service'
+      - SERVICE=medicine-service
     depends_on:
       config-server-pro:
         condition: service_healthy
@@ -142,12 +138,10 @@ services:
       - app-network
     restart: always
   patient-service-pro:
-    build:
-      context: ../../
-      dockerfile: infrastructure/pro/Dockerfile
+    image: dnhphong2005/patient-service:latest
     container_name: patient-service-pro
     environment:
-      - 'SERVICE=patient-service'
+      - SERVICE=patient-service
     depends_on:
       config-server-pro:
         condition: service_healthy
