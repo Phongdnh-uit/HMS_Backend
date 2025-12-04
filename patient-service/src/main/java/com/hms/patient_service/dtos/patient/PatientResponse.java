@@ -3,13 +3,14 @@ package com.hms.patient_service.dtos.patient;
 import com.hms.patient_service.constants.Gender;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 public record PatientResponse(
-        Long id,
-        Long accountId,
+        String id,
+        String accountId,
         String fullName,
         String email,
-        Instant dateOfBirth,
+        LocalDate dateOfBirth,
         Gender gender,
         String phoneNumber,
         String address,
@@ -17,6 +18,9 @@ public record PatientResponse(
         String healthInsuranceNumber,
         String relativeFullName,
         String relativePhoneNumber,
+        String relativeRelationship,
+        String bloodType,
+        String allergies,
         Instant createdAt,
         Instant updatedAt,
         String createdBy,

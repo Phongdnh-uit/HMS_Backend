@@ -1,4 +1,4 @@
-package com.hms.auth_service.dtos.account;
+package com.hms.common.dtos.account;
 
 import com.hms.common.enums.RoleEnum;
 import lombok.Getter;
@@ -10,4 +10,5 @@ public class AccountResponse {
     private String email;
     private RoleEnum role;
     private boolean emailVerified;
+    private String id;
 }

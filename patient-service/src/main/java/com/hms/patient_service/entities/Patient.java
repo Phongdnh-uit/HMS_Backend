@@ -11,6 +11,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -22,14 +23,14 @@ public class Patient {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    private Long accountId;
+    private String accountId;
 
     @Column(nullable = false)
     private String fullName;
 
     private String email;
 
-    private Instant dateOfBirth;
+    private LocalDate dateOfBirth;
 
     private Gender gender;
 
@@ -44,6 +45,12 @@ public class Patient {
     private String relativeFullName;
 
     private String relativePhoneNumber;
+
+    private String relativeRelationship;
+
+    private String bloodType;
+    
+    private String allergies;
 
     @CreatedDate
     private Instant createdAt;

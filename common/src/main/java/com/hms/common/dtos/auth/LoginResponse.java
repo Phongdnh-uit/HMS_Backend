@@ -1,6 +1,6 @@
-package com.hms.auth_service.dtos.auth;
+package com.hms.common.dtos.auth;
 
-import com.hms.auth_service.dtos.account.AccountResponse;
+import com.hms.common.dtos.account.AccountResponse;
 import lombok.Getter;
 import lombok.Setter;
 

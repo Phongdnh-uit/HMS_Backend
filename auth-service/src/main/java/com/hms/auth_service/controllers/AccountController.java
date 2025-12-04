@@ -1,9 +1,9 @@
 package com.hms.auth_service.controllers;
 
-import com.hms.auth_service.dtos.account.AccountRequest;
-import com.hms.auth_service.dtos.account.AccountResponse;
 import com.hms.auth_service.entities.Account;
 import com.hms.common.controllers.GenericController;
+import com.hms.common.dtos.account.AccountRequest;
+import com.hms.common.dtos.account.AccountResponse;
 import com.hms.common.services.CrudService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
