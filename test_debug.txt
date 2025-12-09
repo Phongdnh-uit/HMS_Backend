@@ -1,0 +1,651 @@
+Initialized native services in: C:\Users\ASUS\.gradle\native
+Initialized jansi services in: C:\Users\ASUS\.gradle\native
+Found daemon DaemonInfo{pid=124, address=[876e5cad-11e9-4ce5-bae7-a90eac622f13 port:53377, addresses:[/127.0.0.1]], state=Idle, lastBusy=1761822690366, context=DefaultDaemonContext[uid=cb60c1bc-2a7e-440c-84f0-65431960296f,javaHome=C:\Users\ASUS\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64,javaVersion=21,javaVendor=Eclipse Adoptium,daemonRegistryDir=C:\Users\ASUS\.gradle\daemon,pid=124,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-XX:MaxMetaspaceSize=384m,-XX:+HeapDumpOnOutOfMemoryError,-Xms256m,-Xmx512m,-Dfile.encoding=UTF-8,-Duser.country=US,-Duser.language=en,-Duser.variant]} however its context does not match the desired criteria.
+JVM is incompatible.
+Wanted: DaemonRequestContext{jvmCriteria=C:\Users\ASUS\jdk-23.0.1 (no JDK specified, using current Java home), daemonOpts=[-XX:MaxMetaspaceSize=384m, -XX:+HeapDumpOnOutOfMemoryError, -Xms256m, -Xmx512m, -Dfile.encoding=UTF-8, -Duser.country=US, -Duser.language=en, -Duser.variant], applyInstrumentationAgent=true, nativeServicesMode=ENABLED, priority=NORMAL}
+Actual: DefaultDaemonContext[uid=cb60c1bc-2a7e-440c-84f0-65431960296f,javaHome=C:\Users\ASUS\.vscode\extensions\redhat.java-1.46.0-win32-x64\jre\21.0.8-win32-x86_64,javaVersion=21,javaVendor=Eclipse Adoptium,daemonRegistryDir=C:\Users\ASUS\.gradle\daemon,pid=124,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-XX:MaxMetaspaceSize=384m,-XX:+HeapDumpOnOutOfMemoryError,-Xms256m,-Xmx512m,-Dfile.encoding=UTF-8,-Duser.country=US,-Duser.language=en,-Duser.variant]
+
+  Looking for a different daemon...
+The client will now receive all logging from the daemon (pid: 12880). The daemon log file: C:\Users\ASUS\.gradle\daemon\8.14.3\daemon-12880.out.log
+Starting 10th build in daemon [uptime: 59 mins 2.893 secs, performance: 99%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 37% of 384 MiB]
+Using 4 worker leases.
+Now considering [C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\settings.gradle.kts'.
+Projects loaded. Root project using build file 'C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\build.gradle.kts'.
+Included projects: [root project 'HMS_BACKEND', project ':api-gateway', project ':auth-service', project ':common', project ':config-server', project ':discovery-service', project ':medical-exam-service', project ':medicine-service', project ':patient-service']
+
+> Configure project :
+Evaluating root project 'HMS_BACKEND' using build file 'C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\build.gradle.kts'.
+Resolved plugin [id: 'org.gradle.java']
+Resolved plugin [id: 'org.springframework.boot', version: '3.5.8', apply: false]
+Resolved plugin [id: 'io.spring.dependency-management', version: '1.1.7', apply: false]
+Applying dependency management to configuration 'annotationProcessor' in project 'api-gateway'
+Applying dependency management to configuration 'apiElements' in project 'api-gateway'
+Applying dependency management to configuration 'archives' in project 'api-gateway'
+Applying dependency management to configuration 'compileClasspath' in project 'api-gateway'
+Applying dependency management to configuration 'compileOnly' in project 'api-gateway'
+Applying dependency management to configuration 'default' in project 'api-gateway'
+Applying dependency management to configuration 'implementation' in project 'api-gateway'
+Applying dependency management to configuration 'mainSourceElements' in project 'api-gateway'
+Applying dependency management to configuration 'runtimeClasspath' in project 'api-gateway'
+Applying dependency management to configuration 'runtimeElements' in project 'api-gateway'
+Applying dependency management to configuration 'runtimeOnly' in project 'api-gateway'
+Applying dependency management to configuration 'testAnnotationProcessor' in project 'api-gateway'
+Applying dependency management to configuration 'testCompileClasspath' in project 'api-gateway'
+Applying dependency management to configuration 'testCompileOnly' in project 'api-gateway'
+Applying dependency management to configuration 'testImplementation' in project 'api-gateway'
+Applying dependency management to configuration 'testResultsElementsForTest' in project 'api-gateway'
+Applying dependency management to configuration 'testRuntimeClasspath' in project 'api-gateway'
+Applying dependency management to configuration 'testRuntimeOnly' in project 'api-gateway'
+Applying dependency management to configuration 'bootArchives' in project 'api-gateway'
+Applying dependency management to configuration 'productionRuntimeClasspath' in project 'api-gateway'
+Applying dependency management to configuration 'developmentOnly' in project 'api-gateway'
+Applying dependency management to configuration 'testAndDevelopmentOnly' in project 'api-gateway'
+Applying dependency management to configuration 'annotationProcessor' in project 'auth-service'
+Applying dependency management to configuration 'apiElements' in project 'auth-service'
+Applying dependency management to configuration 'archives' in project 'auth-service'
+Applying dependency management to configuration 'compileClasspath' in project 'auth-service'
+Applying dependency management to configuration 'compileOnly' in project 'auth-service'
+Applying dependency management to configuration 'default' in project 'auth-service'
+Applying dependency management to configuration 'implementation' in project 'auth-service'
+Applying dependency management to configuration 'mainSourceElements' in project 'auth-service'
+Applying dependency management to configuration 'runtimeClasspath' in project 'auth-service'
+Applying dependency management to configuration 'runtimeElements' in project 'auth-service'
+Applying dependency management to configuration 'runtimeOnly' in project 'auth-service'
+Applying dependency management to configuration 'testAnnotationProcessor' in project 'auth-service'
+Applying dependency management to configuration 'testCompileClasspath' in project 'auth-service'
+Applying dependency management to configuration 'testCompileOnly' in project 'auth-service'
+Applying dependency management to configuration 'testImplementation' in project 'auth-service'
+Applying dependency management to configuration 'testResultsElementsForTest' in project 'auth-service'
+Applying dependency management to configuration 'testRuntimeClasspath' in project 'auth-service'
+Applying dependency management to configuration 'testRuntimeOnly' in project 'auth-service'
+Applying dependency management to configuration 'bootArchives' in project 'auth-service'
+Applying dependency management to configuration 'productionRuntimeClasspath' in project 'auth-service'
+Applying dependency management to configuration 'developmentOnly' in project 'auth-service'
+Applying dependency management to configuration 'testAndDevelopmentOnly' in project 'auth-service'
+Applying dependency management to configuration 'annotationProcessor' in project 'common'
+Applying dependency management to configuration 'apiElements' in project 'common'
+Applying dependency management to configuration 'archives' in project 'common'
+Applying dependency management to configuration 'compileClasspath' in project 'common'
+Applying dependency management to configuration 'compileOnly' in project 'common'
+Applying dependency management to configuration 'default' in project 'common'
+Applying dependency management to configuration 'implementation' in project 'common'
+Applying dependency management to configuration 'mainSourceElements' in project 'common'
+Applying dependency management to configuration 'runtimeClasspath' in project 'common'
+Applying dependency management to configuration 'runtimeElements' in project 'common'
+Applying dependency management to configuration 'runtimeOnly' in project 'common'
+Applying dependency management to configuration 'testAnnotationProcessor' in project 'common'
+Applying dependency management to configuration 'testCompileClasspath' in project 'common'
+Applying dependency management to configuration 'testCompileOnly' in project 'common'
+Applying dependency management to configuration 'testImplementation' in project 'common'
+Applying dependency management to configuration 'testResultsElementsForTest' in project 'common'
+Applying dependency management to configuration 'testRuntimeClasspath' in project 'common'
+Applying dependency management to configuration 'testRuntimeOnly' in project 'common'
+Applying dependency management to configuration 'bootArchives' in project 'common'
+Applying dependency management to configuration 'productionRuntimeClasspath' in project 'common'
+Applying dependency management to configuration 'developmentOnly' in project 'common'
+Applying dependency management to configuration 'testAndDevelopmentOnly' in project 'common'
+Applying dependency management to configuration 'annotationProcessor' in project 'config-server'
+Applying dependency management to configuration 'apiElements' in project 'config-server'
+Applying dependency management to configuration 'archives' in project 'config-server'
+Applying dependency management to configuration 'compileClasspath' in project 'config-server'
+Applying dependency management to configuration 'compileOnly' in project 'config-server'
+Applying dependency management to configuration 'default' in project 'config-server'
+Applying dependency management to configuration 'implementation' in project 'config-server'
+Applying dependency management to configuration 'mainSourceElements' in project 'config-server'
+Applying dependency management to configuration 'runtimeClasspath' in project 'config-server'
+Applying dependency management to configuration 'runtimeElements' in project 'config-server'
+Applying dependency management to configuration 'runtimeOnly' in project 'config-server'
+Applying dependency management to configuration 'testAnnotationProcessor' in project 'config-server'
+Applying dependency management to configuration 'testCompileClasspath' in project 'config-server'
+Applying dependency management to configuration 'testCompileOnly' in project 'config-server'
+Applying dependency management to configuration 'testImplementation' in project 'config-server'
+Applying dependency management to configuration 'testResultsElementsForTest' in project 'config-server'
+Applying dependency management to configuration 'testRuntimeClasspath' in project 'config-server'
+Applying dependency management to configuration 'testRuntimeOnly' in project 'config-server'
+Applying dependency management to configuration 'bootArchives' in project 'config-server'
+Applying dependency management to configuration 'productionRuntimeClasspath' in project 'config-server'
+Applying dependency management to configuration 'developmentOnly' in project 'config-server'
+Applying dependency management to configuration 'testAndDevelopmentOnly' in project 'config-server'
+Applying dependency management to configuration 'annotationProcessor' in project 'discovery-service'
+Applying dependency management to configuration 'apiElements' in project 'discovery-service'
+Applying dependency management to configuration 'archives' in project 'discovery-service'
+Applying dependency management to configuration 'compileClasspath' in project 'discovery-service'
+Applying dependency management to configuration 'compileOnly' in project 'discovery-service'
+Applying dependency management to configuration 'default' in project 'discovery-service'
+Applying dependency management to configuration 'implementation' in project 'discovery-service'
+Applying dependency management to configuration 'mainSourceElements' in project 'discovery-service'
+Applying dependency management to configuration 'runtimeClasspath' in project 'discovery-service'
+Applying dependency management to configuration 'runtimeElements' in project 'discovery-service'
+Applying dependency management to configuration 'runtimeOnly' in project 'discovery-service'
+Applying dependency management to configuration 'testAnnotationProcessor' in project 'discovery-service'
+Applying dependency management to configuration 'testCompileClasspath' in project 'discovery-service'
+Applying dependency management to configuration 'testCompileOnly' in project 'discovery-service'
+Applying dependency management to configuration 'testImplementation' in project 'discovery-service'
+Applying dependency management to configuration 'testResultsElementsForTest' in project 'discovery-service'
+Applying dependency management to configuration 'testRuntimeClasspath' in project 'discovery-service'
+Applying dependency management to configuration 'testRuntimeOnly' in project 'discovery-service'
+Applying dependency management to configuration 'bootArchives' in project 'discovery-service'
+Applying dependency management to configuration 'productionRuntimeClasspath' in project 'discovery-service'
+Applying dependency management to configuration 'developmentOnly' in project 'discovery-service'
+Applying dependency management to configuration 'testAndDevelopmentOnly' in project 'discovery-service'
+Applying dependency management to configuration 'annotationProcessor' in project 'medical-exam-service'
+Applying dependency management to configuration 'apiElements' in project 'medical-exam-service'
+Applying dependency management to configuration 'archives' in project 'medical-exam-service'
+Applying dependency management to configuration 'compileClasspath' in project 'medical-exam-service'
+Applying dependency management to configuration 'compileOnly' in project 'medical-exam-service'
+Applying dependency management to configuration 'default' in project 'medical-exam-service'
+Applying dependency management to configuration 'implementation' in project 'medical-exam-service'
+Applying dependency management to configuration 'mainSourceElements' in project 'medical-exam-service'
+Applying dependency management to configuration 'runtimeClasspath' in project 'medical-exam-service'
+Applying dependency management to configuration 'runtimeElements' in project 'medical-exam-service'
+Applying dependency management to configuration 'runtimeOnly' in project 'medical-exam-service'
+Applying dependency management to configuration 'testAnnotationProcessor' in project 'medical-exam-service'
+Applying dependency management to configuration 'testCompileClasspath' in project 'medical-exam-service'
+Applying dependency management to configuration 'testCompileOnly' in project 'medical-exam-service'
+Applying dependency management to configuration 'testImplementation' in project 'medical-exam-service'
+Applying dependency management to configuration 'testResultsElementsForTest' in project 'medical-exam-service'
+Applying dependency management to configuration 'testRuntimeClasspath' in project 'medical-exam-service'
+Applying dependency management to configuration 'testRuntimeOnly' in project 'medical-exam-service'
+Applying dependency management to configuration 'bootArchives' in project 'medical-exam-service'
+Applying dependency management to configuration 'productionRuntimeClasspath' in project 'medical-exam-service'
+Applying dependency management to configuration 'developmentOnly' in project 'medical-exam-service'
+Applying dependency management to configuration 'testAndDevelopmentOnly' in project 'medical-exam-service'
+Applying dependency management to configuration 'annotationProcessor' in project 'medicine-service'
+Applying dependency management to configuration 'apiElements' in project 'medicine-service'
+Applying dependency management to configuration 'archives' in project 'medicine-service'
+Applying dependency management to configuration 'compileClasspath' in project 'medicine-service'
+Applying dependency management to configuration 'compileOnly' in project 'medicine-service'
+Applying dependency management to configuration 'default' in project 'medicine-service'
+Applying dependency management to configuration 'implementation' in project 'medicine-service'
+Applying dependency management to configuration 'mainSourceElements' in project 'medicine-service'
+Applying dependency management to configuration 'runtimeClasspath' in project 'medicine-service'
+Applying dependency management to configuration 'runtimeElements' in project 'medicine-service'
+Applying dependency management to configuration 'runtimeOnly' in project 'medicine-service'
+Applying dependency management to configuration 'testAnnotationProcessor' in project 'medicine-service'
+Applying dependency management to configuration 'testCompileClasspath' in project 'medicine-service'
+Applying dependency management to configuration 'testCompileOnly' in project 'medicine-service'
+Applying dependency management to configuration 'testImplementation' in project 'medicine-service'
+Applying dependency management to configuration 'testResultsElementsForTest' in project 'medicine-service'
+Applying dependency management to configuration 'testRuntimeClasspath' in project 'medicine-service'
+Applying dependency management to configuration 'testRuntimeOnly' in project 'medicine-service'
+Applying dependency management to configuration 'bootArchives' in project 'medicine-service'
+Applying dependency management to configuration 'productionRuntimeClasspath' in project 'medicine-service'
+Applying dependency management to configuration 'developmentOnly' in project 'medicine-service'
+Applying dependency management to configuration 'testAndDevelopmentOnly' in project 'medicine-service'
+Applying dependency management to configuration 'annotationProcessor' in project 'patient-service'
+Applying dependency management to configuration 'apiElements' in project 'patient-service'
+Applying dependency management to configuration 'archives' in project 'patient-service'
+Applying dependency management to configuration 'compileClasspath' in project 'patient-service'
+Applying dependency management to configuration 'compileOnly' in project 'patient-service'
+Applying dependency management to configuration 'default' in project 'patient-service'
+Applying dependency management to configuration 'implementation' in project 'patient-service'
+Applying dependency management to configuration 'mainSourceElements' in project 'patient-service'
+Applying dependency management to configuration 'runtimeClasspath' in project 'patient-service'
+Applying dependency management to configuration 'runtimeElements' in project 'patient-service'
+Applying dependency management to configuration 'runtimeOnly' in project 'patient-service'
+Applying dependency management to configuration 'testAnnotationProcessor' in project 'patient-service'
+Applying dependency management to configuration 'testCompileClasspath' in project 'patient-service'
+Applying dependency management to configuration 'testCompileOnly' in project 'patient-service'
+Applying dependency management to configuration 'testImplementation' in project 'patient-service'
+Applying dependency management to configuration 'testResultsElementsForTest' in project 'patient-service'
+Applying dependency management to configuration 'testRuntimeClasspath' in project 'patient-service'
+Applying dependency management to configuration 'testRuntimeOnly' in project 'patient-service'
+Applying dependency management to configuration 'bootArchives' in project 'patient-service'
+Applying dependency management to configuration 'productionRuntimeClasspath' in project 'patient-service'
+Applying dependency management to configuration 'developmentOnly' in project 'patient-service'
+Applying dependency management to configuration 'testAndDevelopmentOnly' in project 'patient-service'
+
+> Configure project :api-gateway
+Evaluating project ':api-gateway' using build file 'C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\api-gateway\build.gradle.kts'.
+
+> Configure project :auth-service
+Evaluating project ':auth-service' using build file 'C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\auth-service\build.gradle.kts'.
+
+> Configure project :common
+Evaluating project ':common' using build file 'C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\common\build.gradle.kts'.
+Resolved plugin [id: 'org.springframework.boot', version: '3.5.8', apply: false]
+Resolved plugin [id: 'java-library']
+Applying dependency management to configuration 'api' in project 'common'
+Applying dependency management to configuration 'compileOnlyApi' in project 'common'
+
+> Configure project :config-server
+Evaluating project ':config-server' using build file 'C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\config-server\build.gradle.kts'.
+
+> Configure project :discovery-service
+Evaluating project ':discovery-service' using build file 'C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\discovery-service\build.gradle.kts'.
+
+> Configure project :medical-exam-service
+Evaluating project ':medical-exam-service' using build file 'C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\medical-exam-service\build.gradle.kts'.
+
+> Configure project :medicine-service
+Evaluating project ':medicine-service' using build file 'C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\medicine-service\build.gradle.kts'.
+
+> Configure project :patient-service
+Evaluating project ':patient-service' using build file 'C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\patient-service\build.gradle.kts'.
+All projects evaluated.
+Task path ':medical-exam-service:test' matched project ':medical-exam-service'
+Task name matched 'test'
+Selected primary task 'test' from project :medical-exam-service
+Directory 'C:\Program Files\Java\jre-1.8' (Windows Registry) auto-detected used for java installations does not exist
+Resolving global dependency management for project 'medical-exam-service'
+Excluding []
+Excluding []
+Excluding [com.google.protobuf:protobuf-java]
+Excluding []
+Resolving global dependency management for project 'common'
+Excluding []
+Excluding []
+Excluding []
+Excluding []
+Excluding []
+Excluding []
+Tasks to be executed: [task ':common:compileJava', task ':common:processResources', task ':common:classes', task ':common:jar', task ':medical-exam-service:compileJava', task ':medical-exam-service:processResources', task ':medical-exam-service:classes', task ':medical-exam-service:compileTestJava', task ':medical-exam-service:processTestResources', task ':medical-exam-service:testClasses', task ':medical-exam-service:test']
+Tasks that were excluded: []
+Resolve mutations for :common:compileJava (Thread[#702,included builds,5,main]) started.
+:common:compileJava (Thread[#702,included builds,5,main]) started.
+
+> Task :common:compileJava UP-TO-DATE
+Custom actions are attached to task ':common:compileJava'.
+Caching disabled for task ':common:compileJava' because:
+  Build cache is disabled
+Skipping task ':common:compileJava' as it is up-to-date.
+work action resolve main (project :common) (Thread[#702,included builds,5,main]) started.
+Resolve mutations for :common:processResources (Thread[#702,included builds,5,main]) started.
+:common:processResources (Thread[#703,Execution worker,5,main]) started.
+
+> Task :common:processResources UP-TO-DATE
+Caching disabled for task ':common:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':common:processResources' as it is up-to-date.
+Resolve mutations for :common:classes (Thread[#703,Execution worker,5,main]) started.
+:common:classes (Thread[#703,Execution worker,5,main]) started.
+
+> Task :common:classes UP-TO-DATE
+Skipping task ':common:classes' as it has no actions.
+Resolve mutations for :common:jar (Thread[#703,Execution worker,5,main]) started.
+:common:jar (Thread[#703,Execution worker,5,main]) started.
+
+> Task :common:jar UP-TO-DATE
+Caching disabled for task ':common:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':common:jar' as it is up-to-date.
+work action resolve common-1.0.0-plain.jar (project :common) (Thread[#703,Execution worker,5,main]) started.
+Resolve mutations for :medical-exam-service:compileJava (Thread[#702,included builds,5,main]) started.
+:medical-exam-service:compileJava (Thread[#702,included builds,5,main]) started.
+
+> Task :medical-exam-service:compileJava UP-TO-DATE
+Custom actions are attached to task ':medical-exam-service:compileJava'.
+Caching disabled for task ':medical-exam-service:compileJava' because:
+  Build cache is disabled
+Skipping task ':medical-exam-service:compileJava' as it is up-to-date.
+Resolve mutations for :medical-exam-service:processResources (Thread[#705,Execution worker Thread 3,5,main]) started.
+:medical-exam-service:processResources (Thread[#705,Execution worker Thread 3,5,main]) started.
+
+> Task :medical-exam-service:processResources UP-TO-DATE
+Caching disabled for task ':medical-exam-service:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':medical-exam-service:processResources' as it is up-to-date.
+Resolve mutations for :medical-exam-service:classes (Thread[#705,Execution worker Thread 3,5,main]) started.
+:medical-exam-service:classes (Thread[#705,Execution worker Thread 3,5,main]) started.
+
+> Task :medical-exam-service:classes UP-TO-DATE
+Skipping task ':medical-exam-service:classes' as it has no actions.
+Resolve mutations for :medical-exam-service:compileTestJava (Thread[#705,Execution worker Thread 3,5,main]) started.
+:medical-exam-service:compileTestJava (Thread[#705,Execution worker Thread 3,5,main]) started.
+
+> Task :medical-exam-service:compileTestJava UP-TO-DATE
+Custom actions are attached to task ':medical-exam-service:compileTestJava'.
+Caching disabled for task ':medical-exam-service:compileTestJava' because:
+  Build cache is disabled
+Skipping task ':medical-exam-service:compileTestJava' as it is up-to-date.
+Resolve mutations for :medical-exam-service:processTestResources (Thread[#705,Execution worker Thread 3,5,main]) started.
+:medical-exam-service:processTestResources (Thread[#705,Execution worker Thread 3,5,main]) started.
+
+> Task :medical-exam-service:processTestResources NO-SOURCE
+Skipping task ':medical-exam-service:processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :medical-exam-service:testClasses (Thread[#705,Execution worker Thread 3,5,main]) started.
+:medical-exam-service:testClasses (Thread[#705,Execution worker Thread 3,5,main]) started.
+
+> Task :medical-exam-service:testClasses UP-TO-DATE
+Skipping task ':medical-exam-service:testClasses' as it has no actions.
+Resolve mutations for :medical-exam-service:test (Thread[#705,Execution worker Thread 3,5,main]) started.
+:medical-exam-service:test (Thread[#705,Execution worker Thread 3,5,main]) started.
+Gradle Test Executor 4 started executing tests.
+
+> Task :medical-exam-service:test
+Caching disabled for task ':medical-exam-service:test' because:
+  Build cache is disabled
+Task ':medical-exam-service:test' is not up-to-date because:
+  Task has failed previously.
+Starting process 'Gradle Test Executor 4'. Working directory: C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\medical-exam-service Command: C:\Users\ASUS\jdk-23.0.1\bin\java.exe -Dorg.gradle.internal.worker.tmpdir=C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\medical-exam-service\build\tmp\test\work @C:\Users\ASUS\.gradle\.tmp\gradle-worker-classpath5071730385631793298txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 4'
+Successfully started process 'Gradle Test Executor 4'
+
+MedicalExamControllerIntegrationTest STANDARD_OUT
+    14:36:10.970 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.hms.medical_exam_service.controllers.MedicalExamControllerIntegrationTest]: MedicalExamControllerIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+    14:36:11.284 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.hms.medical_exam_service.MedicalExamServiceApplication for test class com.hms.medical_exam_service.controllers.MedicalExamControllerIntegrationTest
+
+      .   ____          _            __ _ _
+     /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+    ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+     \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+      '  |____| .__|_| |_|_| |_\__, | / / / /
+     =========|_|==============|___/=/_/_/_/
+
+     :: Spring Boot ::                (v3.5.8)
+
+    2025-12-08T14:36:12.803+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] m.c.MedicalExamControllerIntegrationTest : Starting MedicalExamControllerIntegrationTest using Java 23.0.1 with PID 16744 (started by ASUS in C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\medical-exam-service)
+    2025-12-08T14:36:12.806+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] m.c.MedicalExamControllerIntegrationTest : No active profile set, falling back to 1 default profile: "default"
+    2025-12-08T14:36:15.058+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+    2025-12-08T14:36:15.360+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 284 ms. Found 3 JPA repository interfaces.
+    2025-12-08T14:36:15.892+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] o.s.cloud.context.scope.GenericScope     : BeanFactory id=88b4acf6-3268-3f66-aa79-20abb27efd7c
+    2025-12-08T14:36:16.999+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+    2025-12-08T14:36:17.085+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.36.Final
+    2025-12-08T14:36:17.143+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+    2025-12-08T14:36:17.607+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+    2025-12-08T14:36:17.645+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+    2025-12-08T14:36:17.885+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:medical_testdb user=SA
+    2025-12-08T14:36:17.887+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+    2025-12-08T14:36:17.969+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+    	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+    	Database driver: undefined/unknown
+    	Database version: 2.3.232
+    	Autocommit mode: undefined/unknown
+    	Isolation level: undefined/unknown
+    	Minimum pool size: undefined/unknown
+    	Maximum pool size: undefined/unknown
+    2025-12-08T14:36:19.335+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+    2025-12-08T14:36:19.388+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+    2025-12-08T14:36:21.139+07:00  WARN 16744 --- [medical-exam-service] [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+    2025-12-08T14:36:22.167+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] i.g.p.rsql.RSQLJPAAutoConfiguration      : RSQLJPAAutoConfiguration.rsqlCommonSupport(entityManagerMap:1)
+    2025-12-08T14:36:22.170+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] i.g.perplexhub.rsql.RSQLCommonSupport    : 1 EntityManager bean is found: {jpaSharedEM_AWC_entityManagerFactory=Shared EntityManager proxy for target factory [org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean@3647b274]}
+    2025-12-08T14:36:22.175+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] i.g.perplexhub.rsql.RSQLCommonSupport    : RSQLCommonSupport [6.0.32]  is initialized
+    2025-12-08T14:36:23.333+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+    2025-12-08T14:36:23.334+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+    2025-12-08T14:36:23.358+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+    2025-12-08T14:36:23.406+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 71 ms
+    2025-12-08T14:36:23.651+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] DiscoveryClientOptionalArgsConfiguration : Eureka HTTP Client uses RestTemplate.
+    2025-12-08T14:36:23.745+07:00  WARN 16744 --- [medical-exam-service] [    Test worker] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+    2025-12-08T14:36:24.231+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] m.c.MedicalExamControllerIntegrationTest : Started MedicalExamControllerIntegrationTest in 12.308 seconds (process running for 14.878)
+
+MedicalExamControllerIntegrationTest > Get By Appointment: Should return exam STANDARD_ERROR
+    Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+    WARNING: A Java agent has been loaded dynamically (C:\Users\ASUS\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy-agent\1.17.8\f09415827a71be7ed621c7bd02550678f28bc81c\byte-buddy-agent-1.17.8.jar)
+    WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+    WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+    WARNING: Dynamic loading of agents will be disallowed by default in a future release
+
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+Gradle Test Executor 4 finished executing tests.
+2025-12-08T14:36:26.029+07:00  INFO 16744 --- [medical-exam-service] [ionShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-12-08T14:36:26.041+07:00  INFO 16744 --- [medical-exam-service] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-12-08T14:36:26.047+07:00  INFO 16744 --- [medical-exam-service] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+
+> Task :medical-exam-service:test FAILED
+
+MedicalExamControllerIntegrationTest > Get By Appointment: Should return exam STANDARD_OUT
+
+    MockHttpServletRequest:
+          HTTP Method = GET
+          Request URI = /exams/by-appointment/appt-get
+           Parameters = {}
+              Headers = []
+                 Body = null
+        Session Attrs = {}
+
+    Handler:
+                 Type = com.hms.medical_exam_service.controllers.MedicalExamController
+               Method = com.hms.medical_exam_service.controllers.MedicalExamController#getByAppointment(String)
+
+    Async:
+        Async started = false
+         Async result = null
+
+    Resolved Exception:
+                 Type = null
+
+    ModelAndView:
+            View name = null
+                 View = null
+                Model = null
+
+    FlashMap:
+           Attributes = null
+
+    MockHttpServletResponse:
+               Status = 200
+        Error message = null
+              Headers = [Content-Type:"application/json"]
+         Content type = application/json
+                 Body = {"code":1000,"message":"success","data":{"id":"696cb118-b341-47a4-953b-56c69de3c3ce","appointment":{"id":"appt-get","appointmentTime":null},"patient":{"id":null,"fullName":null,"phoneNumber":null},"doctor":{"id":null,"fullName":null,"department":null,"phoneNumber":null},"diagnosis":"Healthy","symptoms":null,"treatment":null,"vitals":{"temperature":null,"bloodPressureSystolic":null,"bloodPressureDiastolic":null,"heartRate":null,"weight":null,"height":null},"notes":null,"examDate":null,"createdAt":"2025-12-08T07:36:25.102866Z","updatedAt":"2025-12-08T07:36:25.102866Z","createdBy":null,"updatedBy":null},"errors":null,"timestamp":"2025-12-08T07:36:25.226130300Z"}
+        Forwarded URL = null
+       Redirected URL = null
+              Cookies = []
+
+MedicalExamControllerIntegrationTest > Create Exam: Should create new exam when appointment is valid STANDARD_OUT
+    2025-12-08T14:36:25.456+07:00  INFO 16744 --- [medical-exam-service] [    Test worker] c.h.m.hooks.MedicalExamHook              : Medical exam created successfully: id=458b83ed-d29f-4a43-b255-7974cad9dd3d, appointmentId=appt-success
+
+    MockHttpServletRequest:
+          HTTP Method = POST
+          Request URI = /exams
+           Parameters = {}
+              Headers = [Content-Type:"application/json;charset=UTF-8", Content-Length:"231"]
+                 Body = {"appointmentId":"appt-success","diagnosis":"Flu","symptoms":null,"treatment":null,"temperature":null,"bloodPressureSystolic":null,"bloodPressureDiastolic":null,"heartRate":null,"weight":null,"height":null,"notes":"Rest and water"}
+        Session Attrs = {}
+
+    Handler:
+                 Type = com.hms.medical_exam_service.controllers.MedicalExamController
+               Method = com.hms.medical_exam_service.controllers.MedicalExamController#create(Object)
+
+    Async:
+        Async started = false
+         Async result = null
+
+    Resolved Exception:
+                 Type = null
+
+    ModelAndView:
+            View name = null
+                 View = null
+                Model = null
+
+    FlashMap:
+           Attributes = null
+
+    MockHttpServletResponse:
+               Status = 200
+        Error message = null
+              Headers = [Content-Type:"application/json"]
+         Content type = application/json
+                 Body = {"code":1000,"message":"success","data":{"id":"458b83ed-d29f-4a43-b255-7974cad9dd3d","appointment":{"id":"appt-success","appointmentTime":null},"patient":{"id":"patient-mock-001","fullName":"Mock Patient Name","phoneNumber":null},"doctor":{"id":"doctor-mock-001","fullName":"BS. Mock Doctor","department":null,"phoneNumber":null},"diagnosis":"Flu","symptoms":null,"treatment":null,"vitals":{"temperature":null,"bloodPressureSystolic":null,"bloodPressureDiastolic":null,"heartRate":null,"weight":null,"height":null},"notes":"Rest and water","examDate":"2025-12-08T07:36:25.454946900Z","createdAt":"2025-12-08T07:36:25.454946900Z","updatedAt":"2025-12-08T07:36:25.454946900Z","createdBy":null,"updatedBy":null},"errors":null,"timestamp":"2025-12-08T07:36:25.456947200Z"}
+        Forwarded URL = null
+       Redirected URL = null
+              Cookies = []
+
+    MockHttpServletRequest:
+          HTTP Method = POST
+          Request URI = /exams
+           Parameters = {}
+              Headers = [Content-Type:"application/json;charset=UTF-8", Content-Length:"231"]
+                 Body = {"appointmentId":"appt-success","diagnosis":"Flu","symptoms":null,"treatment":null,"temperature":null,"bloodPressureSystolic":null,"bloodPressureDiastolic":null,"heartRate":null,"weight":null,"height":null,"notes":"Rest and water"}
+        Session Attrs = {}
+
+    Handler:
+                 Type = com.hms.medical_exam_service.controllers.MedicalExamController
+               Method = com.hms.medical_exam_service.controllers.MedicalExamController#create(Object)
+
+    Async:
+        Async started = false
+         Async result = null
+
+    Resolved Exception:
+                 Type = null
+
+    ModelAndView:
+            View name = null
+                 View = null
+                Model = null
+
+    FlashMap:
+           Attributes = null
+
+    MockHttpServletResponse:
+               Status = 200
+        Error message = null
+              Headers = [Content-Type:"application/json"]
+         Content type = application/json
+                 Body = {"code":1000,"message":"success","data":{"id":"458b83ed-d29f-4a43-b255-7974cad9dd3d","appointment":{"id":"appt-success","appointmentTime":null},"patient":{"id":"patient-mock-001","fullName":"Mock Patient Name","phoneNumber":null},"doctor":{"id":"doctor-mock-001","fullName":"BS. Mock Doctor","department":null,"phoneNumber":null},"diagnosis":"Flu","symptoms":null,"treatment":null,"vitals":{"temperature":null,"bloodPressureSystolic":null,"bloodPressureDiastolic":null,"heartRate":null,"weight":null,"height":null},"notes":"Rest and water","examDate":"2025-12-08T07:36:25.454946900Z","createdAt":"2025-12-08T07:36:25.454946900Z","updatedAt":"2025-12-08T07:36:25.454946900Z","createdBy":null,"updatedBy":null},"errors":null,"timestamp":"2025-12-08T07:36:25.456947200Z"}
+        Forwarded URL = null
+       Redirected URL = null
+              Cookies = []
+
+MedicalExamControllerIntegrationTest > Create Exam: Should create new exam when appointment is valid FAILED
+    java.lang.AssertionError: No value at JSON path "$.data.appointmentId"
+        at org.springframework.test.util.JsonPathExpectationsHelper.evaluateJsonPath(JsonPathExpectationsHelper.java:351)
+        at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:106)
+        at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$0(JsonPathResultMatchers.java:88)
+        at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+        at com.hms.medical_exam_service.controllers.MedicalExamControllerIntegrationTest.createExamSuccess(MedicalExamControllerIntegrationTest.java:61)
+
+        Caused by:
+        com.jayway.jsonpath.PathNotFoundException: No results for path: $['data']['appointmentId']
+
+MedicalExamControllerIntegrationTest > Delete Exam: Should be forbidden by hook STANDARD_OUT
+    2025-12-08T14:36:25.494+07:00  WARN 16744 --- [medical-exam-service] [    Test worker] c.h.m.hooks.MedicalExamHook              : Attempted to delete medical exam 9180fa64-045b-4517-afb2-45f430bb8159 - operation blocked
+
+MedicalExamControllerIntegrationTest > Delete Exam: Should be forbidden by hook FAILED
+    jakarta.servlet.ServletException: Request processing failed: com.hms.common.exceptions.errors.ApiException: Medical exams cannot be deleted (audit/legal requirement). Contact administrator for data correction.
+        at app//org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1022)
+        at app//org.springframework.web.servlet.FrameworkServlet.doDelete(FrameworkServlet.java:936)
+        at app//jakarta.servlet.http.HttpServlet.service(HttpServlet.java:596)
+        at app//org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+        at app//org.springframework.test.web.servlet.TestDispatcherServlet.service(TestDispatcherServlet.java:72)
+        at app//jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+        at app//org.springframework.mock.web.MockFilterChain$ServletFilterProxy.doFilter(MockFilterChain.java:165)
+        at app//org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+        at app//com.hms.medical_exam_service.securities.UserContextFilter.doFilterInternal(UserContextFilter.java:43)
+        at app//org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+        at app//org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:162)
+        at app//org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+        at app//org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+        at app//org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+        at app//org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:162)
+        at app//org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+        at app//org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+        at app//org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+        at app//org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:162)
+        at app//org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+        at app//org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:110)
+        at app//org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+        at app//org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:162)
+        at app//org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+        at app//org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+        at app//org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+        at app//org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:162)
+        at app//org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+        at app//org.springframework.test.web.servlet.MockMvc.perform(MockMvc.java:201)
+        at app//com.hms.medical_exam_service.controllers.MedicalExamControllerIntegrationTest.deleteExamForbidden(MedicalExamControllerIntegrationTest.java:77)
+
+        Caused by:
+        com.hms.common.exceptions.errors.ApiException: Medical exams cannot be deleted (audit/legal requirement). Contact administrator for data correction.
+            at app//com.hms.medical_exam_service.hooks.MedicalExamHook.validateDelete(MedicalExamHook.java:199)
+            at app//com.hms.medical_exam_service.hooks.MedicalExamHook.validateDelete(MedicalExamHook.java:34)
+            at app//com.hms.common.services.CrudService.defaultDelete(CrudService.java:107)
+            at app//com.hms.common.services.GenericService.delete(GenericService.java:48)
+            at app//com.hms.common.controllers.GenericController.delete(GenericController.java:55)
+            at java.base@23.0.1/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+            at java.base@23.0.1/java.lang.reflect.Method.invoke(Method.java:580)
+            at app//org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)
+            at app//org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191)
+            at app//org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+            at app//org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:991)
+            at app//org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:896)
+            at app//org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+            at app//org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+            at app//org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+            at app//org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+            ... 29 more
+
+MedicalExamControllerIntegrationTest > Get By Appointment: Should return 404 if not found FAILED
+    jakarta.servlet.ServletException: Request processing failed: com.hms.common.exceptions.errors.ApiException: No medical exam found for appointment: appt-unknown
+        at app//org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1022)
+        at app//org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+        at app//jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+        at app//org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+        at app//org.springframework.test.web.servlet.TestDispatcherServlet.service(TestDispatcherServlet.java:72)
+        at app//jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+        at app//org.springframework.mock.web.MockFilterChain$ServletFilterProxy.doFilter(MockFilterChain.java:165)
+        at app//org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+        at app//com.hms.medical_exam_service.securities.UserContextFilter.doFilterInternal(UserContextFilter.java:43)
+        at app//org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+        at app//org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:162)
+        at app//org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+        at app//org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+        at app//org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+        at app//org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:162)
+        at app//org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+        at app//org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+        at app//org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+        at app//org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:162)
+        at app//org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+        at app//org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:110)
+        at app//org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+        at app//org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:162)
+        at app//org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+        at app//org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+        at app//org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+        at app//org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:162)
+        at app//org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132)
+        at app//org.springframework.test.web.servlet.MockMvc.perform(MockMvc.java:201)
+        at app//com.hms.medical_exam_service.controllers.MedicalExamControllerIntegrationTest.getByAppointmentNotFound(MedicalExamControllerIntegrationTest.java:102)
+
+        Caused by:
+        com.hms.common.exceptions.errors.ApiException: No medical exam found for appointment: appt-unknown
+            at app//com.hms.medical_exam_service.controllers.MedicalExamController.lambda$getByAppointment$0(MedicalExamController.java:55)
+            at java.base@23.0.1/java.util.Optional.orElseThrow(Optional.java:403)
+            at app//com.hms.medical_exam_service.controllers.MedicalExamController.getByAppointment(MedicalExamController.java:55)
+            at java.base@23.0.1/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+            at java.base@23.0.1/java.lang.reflect.Method.invoke(Method.java:580)
+            at app//org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)
+            at app//org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191)
+            at app//org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+            at app//org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:991)
+            at app//org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:896)
+            at app//org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+            at app//org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+            at app//org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+            at app//org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+            ... 29 more
+
+MedicalExamHookTest > validateCreate: should throw exception if exam already exists for appointment STANDARD_OUT
+    2025-12-08T14:36:25.889+07:00  WARN 16744 --- [medical-exam-service] [    Test worker] c.h.m.hooks.MedicalExamHook              : Exam already exists for appointmentId: appt-123
+
+MedicalExamHookTest > validateDelete: should always block deletion STANDARD_OUT
+    2025-12-08T14:36:25.927+07:00  WARN 16744 --- [medical-exam-service] [    Test worker] c.h.m.hooks.MedicalExamHook              : Attempted to delete medical exam exam-123 - operation blocked
+
+MedicalExamHookTest > validateUpdate: should throw exception if exam is older than 24 hours STANDARD_OUT
+    2025-12-08T14:36:25.935+07:00  WARN 16744 --- [medical-exam-service] [    Test worker] c.h.m.hooks.MedicalExamHook              : Exam exam-123 cannot be modified - created PT25H ago (limit: PT24H)
+
+10 tests completed, 3 failed
+Finished generating test XML results (0.004 secs) into: C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\medical-exam-service\build\test-results\test
+Generating HTML test report...
+Finished generating test html results (0.015 secs) into: C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend\medical-exam-service\build\reports\tests\test
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':medical-exam-service:test'.
+> There were failing tests. See the report at: file:///C:/Users/ASUS/Desktop/HMS_DOCS/HMS_Backend/medical-exam-service/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+BUILD FAILED in 20s
+7 actionable tasks: 1 executed, 6 up-to-date
+Watched directory hierarchies: [C:\Users\ASUS\Desktop\HMS_DOCS\HMS_Backend]

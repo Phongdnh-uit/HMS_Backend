@@ -16,6 +16,12 @@ spring:
                 - Path=/auth-service/**
               filters:
                 - StripPrefix=1
+            - id: medical-exam-service
+              uri: lb://medical-exam-service
+              predicates:
+                - Path=/medical-exam-service/**
+              filters:
+                - StripPrefix=1
 
 jwt:
   public-key: ${JWT_PUBLIC_KEY}

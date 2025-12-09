@@ -5,16 +5,18 @@ WORKDIR /build
 # Copy root build files first (tối ưu cache)
 COPY settings.gradle.kts build.gradle.kts gradlew ./
 COPY gradle gradle
+RUN sed -i 's/\r$//' gradlew
 RUN chmod +x gradlew
 
 # Copy source code tất cả module
-Copy common ./common
+COPY common ./common
 COPY config-server ./config-server
 COPY discovery-service ./discovery-service
 COPY api-gateway ./api-gateway
 COPY auth-service ./auth-service
 COPY medicine-service ./medicine-service
 COPY patient-service ./patient-service
+COPY medical-exam-service ./medical-exam-service
 
 # Build tất cả modules
 RUN ./gradlew clean bootJar --no-daemon
@@ -33,5 +35,6 @@ COPY --from=builder /build/config-server/build/libs/config-server-*.jar ./config
 COPY --from=builder /build/discovery-service/build/libs/discovery-service-*.jar ./discovery-service.jar
 COPY --from=builder /build/medicine-service/build/libs/medicine-service-*.jar ./medicine-service.jar
 COPY --from=builder /build/patient-service/build/libs/patient-service-*.jar ./patient-service.jar
+COPY --from=builder /build/medical-exam-service/build/libs/medical-exam-service-*.jar ./medical-exam-service.jar
 
 ENTRYPOINT ["sh","-c","java -jar /app/${SERVICE}.jar"]

@@ -1,0 +1,11 @@
+services:
+  mysql:
+    image: 'mysql:latest'
+    container_name: mysql-medical-exam-service-dev
+    environment:
+      - 'MYSQL_DATABASE=medical_exam_db'
+      - 'MYSQL_PASSWORD=secret'
+      - 'MYSQL_ROOT_PASSWORD=verysecret'
+      - 'MYSQL_USER=myuser'
+    ports:
+      - '3310:3306'
