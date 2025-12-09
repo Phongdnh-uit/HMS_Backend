@@ -1,17 +1,18 @@
-package com.hms.patient_service.controllers;
+package com.hms.appointment_service.controllers;
 
+import com.hms.appointment_service.dtos.appointment.AppointmentRequest;
+import com.hms.appointment_service.dtos.appointment.AppointmentResponse;
+import com.hms.appointment_service.entities.Appointment;
 import com.hms.common.controllers.GenericController;
 import com.hms.common.services.CrudService;
-import com.hms.patient_service.dtos.patient.PatientRequest;
-import com.hms.patient_service.dtos.patient.PatientResponse;
-import com.hms.patient_service.entities.Patient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/patients")
+
+@RequestMapping("/appointments")
 @RestController
-public class PatientController extends GenericController<Patient, String, PatientRequest, PatientResponse> {
-    public PatientController(CrudService<Patient, String, PatientRequest, PatientResponse> service) {
+public class AppointmentController extends GenericController<Appointment, String, AppointmentRequest, AppointmentResponse> {
+    public AppointmentController(CrudService<Appointment, String, AppointmentRequest, AppointmentResponse> service) {
         super(service);
     }
 }

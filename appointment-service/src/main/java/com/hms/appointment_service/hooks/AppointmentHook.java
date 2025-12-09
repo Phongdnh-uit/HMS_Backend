@@ -1,4 +1,4 @@
-package com.hms.patient_service.hooks;
+package com.hms.appointment_service.hooks;
 
 import com.hms.appointment_service.dtos.appointment.AppointmentRequest;
 import com.hms.appointment_service.dtos.appointment.AppointmentResponse;

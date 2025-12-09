@@ -1,6 +1,7 @@
-package com.hms.patient_service.entities;
+package com.hms.appointment_service.entities;
 
-import com.hms.patient_service.constants.Gender;
+import com.hms.appointment_service.constants.AppointmentStatus;
+import com.hms.appointment_service.constants.AppointmentType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,46 +12,35 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.time.LocalDate;
 
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 @Table
 @Entity
-public class Patient {
+public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    private String accountId;
+    private String patientId;
 
-    @Column(nullable = false)
-    private String fullName;
+    private String doctorId;
 
-    private String email;
+    private Instant appointmentTime;
 
-    private LocalDate dateOfBirth;
-
-    private Gender gender;
-
-    private String phoneNumber;
-
-    private String address;
-
-    private String identificationNumber;
-
-    private String healthInsuranceNumber;
-
-    private String relativeFullName;
-
-    private String relativePhoneNumber;
-
-    private String relativeRelationship;
-
-    private String bloodType;
+    private AppointmentStatus status;
     
-    private String allergies;
+    @Enumerated(EnumType.STRING)
+    private AppointmentType type;
+
+    private String reason;
+
+    private String notes;
+
+    private Instant cancelledAt;
+
+    private String cancelReason;
 
     @CreatedDate
     private Instant createdAt;

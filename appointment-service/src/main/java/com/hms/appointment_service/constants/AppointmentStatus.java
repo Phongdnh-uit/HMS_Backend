@@ -1,7 +1,8 @@
-package com.hms.patient_service.constants;
+package com.hms.appointment_service.constants;
 
-public enum Gender {
-    FEMALE,
-    MALE,
-    OTHER
+public enum AppointmentStatus {
+    PENDING,
+    CONFIRMED,
+    CANCELLED,
+    COMPLETED
 }

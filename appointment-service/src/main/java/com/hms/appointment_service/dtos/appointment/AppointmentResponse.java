@@ -1,29 +1,24 @@
-package com.hms.patient_service.dtos.patient;
+package com.hms.appointment_service.dtos.appointment;
 
-import com.hms.patient_service.constants.Gender;
+import com.hms.appointment_service.constants.AppointmentStatus;
+import com.hms.appointment_service.constants.AppointmentType;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Instant;
-import java.time.LocalDate;
 
-public record PatientResponse(
-        String id,
-        String accountId,
-        String fullName,
-        String email,
-        LocalDate dateOfBirth,
-        Gender gender,
-        String phoneNumber,
-        String address,
-        String identificationNumber,
-        String healthInsuranceNumber,
-        String relativeFullName,
-        String relativePhoneNumber,
-        String relativeRelationship,
-        String bloodType,
-        String allergies,
-        Instant createdAt,
-        Instant updatedAt,
-        String createdBy,
-        String updatedBy
-) {
+@Getter
+@Setter
+public class AppointmentResponse {
+    private String id;
+    private PatientResponse patient;
+    private DoctorResponse doctor;
+    private Instant appointmentTime;
+    private AppointmentStatus status;
+    private AppointmentType type;
+    private String reason;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private String createdBy;
+    private String updatedBy;
 }

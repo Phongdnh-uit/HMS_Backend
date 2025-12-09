@@ -2,12 +2,12 @@ spring:
   docker:
     compose:
       enabled: ${DOCKER_COMPOSE_ENABLED:false}
-      file: ${DOCKER_COMPOSE_FILE_PATIENT_SERVICE:file:infrastructure/dev/patient-service/compose.yaml}
+      file: ${DOCKER_COMPOSE_FILE_APPOINTMENT_SERVICE:file:infrastructure/dev/appointment-service/compose.yaml}
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${PATIENT_DB_HOST:localhost}:${PATIENT_DB_PORT:3308}/${PATIENT_DB_NAME:mydatabase}
-    username: ${PATIENT_DB_USERNAME:myuser}
-    password: ${PATIENT_DB_PASSWORD:secret}
+    url: jdbc:mysql://${APPOINTMENT_DB_HOST:localhost}:${APPOINTMENT_DB_PORT:3308}/${APPOINTMENT_DB_NAME:mydatabase}
+    username: ${APPOINTMENT_DB_USERNAME:myuser}
+    password: ${APPOINTMENT_DB_PASSWORD:secret}
   jpa:
     properties:
       hibernate.dialect: org.hibernate.dialect.MySQLDialect
@@ -16,7 +16,7 @@ spring:
     show-sql: true
 
 server:
-  port: ${PATIENT_SERVICE_PORT:8083}
+  port: ${APPOINTMENT_SERVICE_PORT:8083}
 
 eureka:
   instance:

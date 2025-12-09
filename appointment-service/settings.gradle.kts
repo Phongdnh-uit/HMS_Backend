@@ -1,1 +1,1 @@
-rootProject.name = "patient-service"
+rootProject.name = "appointment-service"
