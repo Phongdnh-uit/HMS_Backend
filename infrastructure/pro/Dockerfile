@@ -17,7 +17,7 @@ RUN chmod +x gradlew
 RUN ./gradlew :${SERVICE}:bootJar --no-daemon
 
 # -------- Stage 2: Run --------
-FROM eclipse-temurin:${JAVA_VERSION}-jre
+FROM eclipse-alpine:${JAVA_VERSION}-jre
 
 RUN apk add --no-cache curl
 
