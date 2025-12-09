@@ -54,6 +54,24 @@ services:
     networks:
       - app-network
     restart: always
+  mysql-hr-service:
+    image: mysql:8.0
+    container_name: mysql-hr-service
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${HR_DB_PASSWORD}
+      MYSQL_DATABASE: ${HR_DB_NAME}
+      MYSQL_USER: ${HR_DB_USERNAME}
+      MYSQL_PASSWORD: ${HR_DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: always
 
   # Application Services
   config-server-pro:
@@ -152,6 +170,23 @@ services:
       config-server-pro:
         condition: service_healthy
       mysql-patient-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+  hr-service-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+    container_name: hr-service-pro
+    environment:
+      - 'SERVICE=hr-service'
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-hr-service:
         condition: service_healthy
     env_file:
       - .env
