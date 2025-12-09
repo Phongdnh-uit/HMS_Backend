@@ -19,6 +19,8 @@ RUN ./gradlew :${SERVICE}:bootJar --no-daemon
 # -------- Stage 2: Run --------
 FROM eclipse-temurin:${JAVA_VERSION}-jre
 
+RUN apk add --no-cache curl
+
 ARG SERVICE
 WORKDIR /app
 
