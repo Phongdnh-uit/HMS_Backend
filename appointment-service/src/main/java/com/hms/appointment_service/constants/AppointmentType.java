@@ -1,20 +1,13 @@
 package com.hms.appointment_service.constants;
 
+/**
+ * Types of appointments in the HMS system.
+ * - CONSULTATION: First visit or regular checkup
+ * - FOLLOW_UP: Return visit after initial treatment
+ * - EMERGENCY: Urgent/priority cases
+ */
 public enum AppointmentType {
-
-    CONSULTATION("Khám tư vấn"),
-    FOLLOW_UP("Tái khám"),
-    DIAGNOSIS("Chuẩn đoán"),
-    TREATMENT("Điều trị"),
-    VACCINATION("Tiêm ngừa");
-
-    private final String label;
-
-    AppointmentType(String label) {
-        this.label = label;
-    }
-
-    public String getLabel() {
-        return label;
-    }
+    CONSULTATION,
+    FOLLOW_UP,
+    EMERGENCY
 }

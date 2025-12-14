@@ -6,14 +6,20 @@ import com.hms.hr_service.dtos.department.DepartmentRequest;
 import com.hms.hr_service.dtos.department.DepartmentResponse;
 import com.hms.hr_service.dtos.employee.EmployeeRequest;
 import com.hms.hr_service.dtos.employee.EmployeeResponse;
+import com.hms.hr_service.dtos.schedule.ScheduleRequest;
+import com.hms.hr_service.dtos.schedule.ScheduleResponse;
 import com.hms.hr_service.entities.Department;
 import com.hms.hr_service.entities.Employee;
+import com.hms.hr_service.entities.EmployeeSchedule;
 import com.hms.hr_service.hooks.DepartmentHook;
 import com.hms.hr_service.hooks.EmployeeHook;
+import com.hms.hr_service.hooks.ScheduleHook;
 import com.hms.hr_service.mappers.DepartmentMapper;
 import com.hms.hr_service.mappers.EmployeeMapper;
+import com.hms.hr_service.mappers.ScheduleMapper;
 import com.hms.hr_service.repositories.DepartmentRepository;
 import com.hms.hr_service.repositories.EmployeeRepository;
+import com.hms.hr_service.repositories.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +45,15 @@ public class ServiceRegistration {
                 context.getBean(EmployeeRepository.class),
                 context.getBean(EmployeeMapper.class),
                 context.getBean(EmployeeHook.class)
+        );
+    }
+
+    @Bean
+    CrudService<EmployeeSchedule, String, ScheduleRequest, ScheduleResponse> scheduleCrudService() {
+        return new GenericService<EmployeeSchedule, String, ScheduleRequest, ScheduleResponse>(
+                context.getBean(ScheduleRepository.class),
+                context.getBean(ScheduleMapper.class),
+                context.getBean(ScheduleHook.class)
         );
     }
 }

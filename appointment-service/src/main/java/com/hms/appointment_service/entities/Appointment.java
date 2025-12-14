@@ -25,7 +25,16 @@ public class Appointment {
 
     private String patientId;
 
+    // Snapshot at creation for historical accuracy
+    private String patientName;
+
     private String doctorId;
+
+    // Snapshot at creation for historical accuracy
+    private String doctorName;
+
+    // Snapshot at creation for historical accuracy
+    private String doctorDepartment;
 
     private Instant appointmentTime;
 

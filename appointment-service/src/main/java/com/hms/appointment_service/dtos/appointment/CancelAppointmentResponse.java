@@ -1,25 +1,26 @@
 package com.hms.appointment_service.dtos.appointment;
 
 import com.hms.appointment_service.constants.AppointmentStatus;
-import com.hms.appointment_service.constants.AppointmentType;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
 
+/**
+ * Response DTO for appointment cancellation.
+ * Contains only cancellation-relevant information.
+ */
 @Getter
 @Setter
-public class AppointmentResponse {
+@Builder
+public class CancelAppointmentResponse {
     private String id;
     private PatientResponse patient;
     private DoctorResponse doctor;
-    private Instant appointmentTime;
     private AppointmentStatus status;
-    private AppointmentType type;
-    private String reason;
-    private String notes;
-    private Instant createdAt;
+    private String cancelReason;
+    private Instant cancelledAt;
     private Instant updatedAt;
-    private String createdBy;
     private String updatedBy;
 }
