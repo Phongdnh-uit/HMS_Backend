@@ -9,5 +9,6 @@ include(
     "auth-service",
     "patient-service",
     "hr-service",
-    "appointment-service"
+    "appointment-service",
+    "medical-exam-service"
 )

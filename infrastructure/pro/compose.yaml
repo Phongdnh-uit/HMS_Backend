@@ -65,6 +65,8 @@ services:
       - 'SERVICE=config-server'
     env_file:
       - .env
+    ports:
+      - "${CONFIG_SERVER_PORT}:${CONFIG_SERVER_PORT}"
     networks:
       - app-network
     restart: always
@@ -158,6 +160,45 @@ services:
     networks:
       - app-network
     restart: always
+  
+  # Added for Manual Testing
+  mysql-medical-exam-service-dev:
+    image: mysql:8.0
+    container_name: mysql-medical-exam-service-dev
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MEDICAL_EXAM_DB_PASSWORD:-secret}
+      MYSQL_DATABASE: ${MEDICAL_EXAM_DB_NAME:-medical_exam_db}
+      MYSQL_USER: ${MEDICAL_EXAM_DB_USERNAME:-myuser}
+      MYSQL_PASSWORD: ${MEDICAL_EXAM_DB_PASSWORD:-secret}
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: always
+
+  medical-exam-service-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+    container_name: medical-exam-service-pro
+    environment:
+      - 'SERVICE=medical-exam-service'
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-medical-exam-service-dev:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+
 networks:
   app-network:
     driver: bridge

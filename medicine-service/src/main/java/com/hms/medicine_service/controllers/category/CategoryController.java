@@ -8,7 +8,7 @@ import com.hms.medicine_service.entities.Category;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/categories")
+@RequestMapping("/api/categories")
 @RestController
 public class CategoryController extends GenericController<Category, String, CategoryRequest, CategoryResponse> {
     public CategoryController(CrudService<Category, String, CategoryRequest, CategoryResponse> service) {
