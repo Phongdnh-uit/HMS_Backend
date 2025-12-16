@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface PatientRepository extends SimpleRepository<Patient, String> {
     Optional<Patient> findByEmail(String name);
+    Optional<Patient> findByAccountId(String accountId);
 }

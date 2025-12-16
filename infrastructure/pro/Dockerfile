@@ -1,27 +1,44 @@
-# -------- Stage 0: Declaring build arguments (required for FROM) --------
-ARG JAVA_VERSION=23
-
 # -------- Stage 1: Build --------
-FROM eclipse-temurin:${JAVA_VERSION}-jdk AS builder
-
-ARG SERVICE
+FROM eclipse-temurin:23-jdk AS builder
 WORKDIR /build
 
+# Copy root build files first (tối ưu cache)
 COPY settings.gradle.kts build.gradle.kts gradlew ./
 COPY gradle gradle
-
-COPY common ./common
-COPY ${SERVICE} ./${SERVICE}
-
+RUN sed -i 's/\r$//' gradlew
 RUN chmod +x gradlew
-RUN ./gradlew :${SERVICE}:bootJar --no-daemon
+
+# Copy source code tất cả module
+COPY common ./common
+COPY config-server ./config-server
+COPY discovery-service ./discovery-service
+COPY api-gateway ./api-gateway
+COPY auth-service ./auth-service
+COPY medicine-service ./medicine-service
+COPY patient-service ./patient-service
+COPY hr-service ./hr-service
+COPY appointment-service ./appointment-service
+COPY medical-exam-service ./medical-exam-service
+
+# Build tất cả modules
+RUN ./gradlew clean bootJar --no-daemon
 
 # -------- Stage 2: Run --------
-FROM eclipse-temurin:${JAVA_VERSION}-jre
-
-ARG SERVICE
+FROM eclipse-temurin:23-jre-alpine
 WORKDIR /app
 
-COPY --from=builder /build/${SERVICE}/build/libs/*.jar app.jar
+# curl cho healthcheck
+RUN apk add --no-cache curl
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Copy chỉ jar của từng service
+COPY --from=builder /build/api-gateway/build/libs/api-gateway-*.jar ./api-gateway.jar
+COPY --from=builder /build/auth-service/build/libs/auth-service-*.jar ./auth-service.jar
+COPY --from=builder /build/config-server/build/libs/config-server-*.jar ./config-server.jar
+COPY --from=builder /build/discovery-service/build/libs/discovery-service-*.jar ./discovery-service.jar
+COPY --from=builder /build/medicine-service/build/libs/medicine-service-*.jar ./medicine-service.jar
+COPY --from=builder /build/patient-service/build/libs/patient-service-*.jar ./patient-service.jar
+COPY --from=builder /build/hr-service/build/libs/hr-service-*.jar ./hr-service.jar
+COPY --from=builder /build/appointment-service/build/libs/appointment-service-*.jar ./appointment-service.jar
+COPY --from=builder /build/medical-exam-service/build/libs/medical-exam-service-*.jar ./medical-exam-service.jar
+
+ENTRYPOINT ["sh","-c","java -jar /app/${SERVICE}.jar"]

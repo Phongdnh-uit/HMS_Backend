@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
  * - DELETE /exams/{id} - Delete exam (blocked in hook)
  */
 @RestController
-@RequestMapping("/api/exams")
+@RequestMapping("/exams")
 public class MedicalExamController extends GenericController<MedicalExam, String, MedicalExamRequest, MedicalExamResponse> {
 
     private final MedicalExamRepository medicalExamRepository;

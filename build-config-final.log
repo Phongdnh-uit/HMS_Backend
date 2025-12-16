@@ -1,0 +1,53 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.fast
+#1 transferring dockerfile:
+#1 transferring dockerfile: 516B 0.0s done
+#1 DONE 0.8s
+
+#2 [internal] load metadata for docker.io/library/eclipse-temurin:23-jre-alpine
+#2 DONE 4.9s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.1s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [1/4] FROM docker.io/library/eclipse-temurin:23-jre-alpine@sha256:88593498863c64b43be16e8357a3c70ea475fc20a93bf1e07f4609213a357c87
+#5 resolve docker.io/library/eclipse-temurin:23-jre-alpine@sha256:88593498863c64b43be16e8357a3c70ea475fc20a93bf1e07f4609213a357c87 0.1s done
+#5 DONE 0.1s
+
+#4 [internal] load build context
+#4 transferring context: 5.77MB 5.0s
+#4 transferring context: 14.95MB 10.1s
+#4 transferring context: 20.71MB 15.2s
+#4 transferring context: 33.17MB 20.3s
+#4 transferring context: 44.22MB 25.4s
+#4 transferring context: 46.28MB 26.4s done
+#4 DONE 26.5s
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] RUN apk add --no-cache curl
+#7 CACHED
+
+#8 [4/4] COPY config-server/build/libs/config-server-*.jar ./app.jar
+#8 DONE 4.5s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 17.3s done
+#9 exporting manifest sha256:90a1146ca9ca89e130fb3cb50937bcf1ce988d5e3d9d5ffe57cf4794b441ac1d 0.1s done
+#9 exporting config sha256:4b4e179c92614a367c9c9d80dfdd48a44d09337a05fa3f57fc1f18acbe5a0674
+#9 exporting config sha256:4b4e179c92614a367c9c9d80dfdd48a44d09337a05fa3f57fc1f18acbe5a0674 0.0s done
+#9 exporting attestation manifest sha256:9bc74987fb667507f25242eeacce4b2e45afdac0d44215fcb650e90e1c33e42c
+#9 exporting attestation manifest sha256:9bc74987fb667507f25242eeacce4b2e45afdac0d44215fcb650e90e1c33e42c 0.1s done
+#9 exporting manifest list sha256:4d53428b0ce34cdbe23300ecf9b1d5b5f17de571996489cbc0e51eb0540630a3
+#9 exporting manifest list sha256:4d53428b0ce34cdbe23300ecf9b1d5b5f17de571996489cbc0e51eb0540630a3 0.1s done
+#9 naming to docker.io/dnhphong2005/config-server:latest 0.0s done
+#9 unpacking to docker.io/dnhphong2005/config-server:latest
+#9 unpacking to docker.io/dnhphong2005/config-server:latest 8.6s done
+#9 DONE 26.6s

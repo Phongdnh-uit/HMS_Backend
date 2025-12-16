@@ -11,8 +11,8 @@ import com.hms.common.dtos.PageResponse;
 import com.hms.common.exceptions.errors.ApiException;
 import com.hms.common.exceptions.errors.ErrorCode;
 import com.hms.common.hooks.GenericHook;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -23,7 +23,6 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
-@RequiredArgsConstructor
 @Component
 @Slf4j
 public class AppointmentHook implements GenericHook<Appointment, String, AppointmentRequest, AppointmentResponse> {
@@ -31,6 +30,16 @@ public class AppointmentHook implements GenericHook<Appointment, String, Appoint
     private final HrClient hrClient;
     private final PatientClient patientClient;
     private final AppointmentRepository appointmentRepository;
+
+    // Manual constructor to apply @Lazy
+    public AppointmentHook(
+            @Lazy HrClient hrClient,
+            @Lazy PatientClient patientClient,
+            AppointmentRepository appointmentRepository) {
+        this.hrClient = hrClient;
+        this.patientClient = patientClient;
+        this.appointmentRepository = appointmentRepository;
+    }
 
     private static final int APPOINTMENT_DURATION_MINUTES = 30;
     private static final String SCHEDULE_KEY = "schedule";

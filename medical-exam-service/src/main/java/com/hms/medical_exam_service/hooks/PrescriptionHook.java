@@ -13,7 +13,7 @@ import com.hms.medical_exam_service.entities.PrescriptionItem;
 import com.hms.medical_exam_service.mappers.PrescriptionItemMapper;
 import com.hms.medical_exam_service.repositories.MedicalExamRepository;
 import com.hms.medical_exam_service.repositories.PrescriptionRepository;
-import com.hms.medical_exam_service.securities.UserContext;
+import com.hms.common.securities.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

@@ -43,7 +43,7 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/exams")
+@RequestMapping("/exams")
 public class PrescriptionController {
 
     private final PrescriptionRepository prescriptionRepository;

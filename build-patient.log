@@ -1,0 +1,61 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.fast
+#1 transferring dockerfile:
+#1 transferring dockerfile: 516B 0.1s done
+#1 DONE 2.9s
+
+#2 [internal] load metadata for docker.io/library/eclipse-temurin:23-jre-alpine
+#2 DONE 4.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context:
+#3 transferring context: 2B 0.0s done
+#3 DONE 2.0s
+
+#4 [1/4] FROM docker.io/library/eclipse-temurin:23-jre-alpine@sha256:88593498863c64b43be16e8357a3c70ea475fc20a93bf1e07f4609213a357c87
+#4 resolve docker.io/library/eclipse-temurin:23-jre-alpine@sha256:88593498863c64b43be16e8357a3c70ea475fc20a93bf1e07f4609213a357c87 0.5s done
+#4 DONE 0.6s
+
+#5 [internal] load build context
+#5 ...
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] RUN apk add --no-cache curl
+#7 CACHED
+
+#5 [internal] load build context
+#5 transferring context: 5.31MB 3.2s
+#5 transferring context: 10.55MB 8.6s
+#5 transferring context: 17.31MB 13.6s
+#5 transferring context: 25.27MB 18.7s
+#5 transferring context: 29.73MB 23.8s
+#5 transferring context: 40.77MB 28.9s
+#5 transferring context: 48.48MB 33.9s
+#5 transferring context: 55.82MB 39.0s
+#5 transferring context: 66.04MB 44.0s
+#5 transferring context: 74.80MB 49.1s
+#5 transferring context: 80.99MB 54.6s
+#5 transferring context: 85.35MB 59.7s
+#5 transferring context: 85.89MB 60.1s done
+#5 DONE 60.7s
+
+#8 [4/4] COPY patient-service/build/libs/patient-service-*.jar ./app.jar
+#8 CACHED
+
+#9 exporting to image
+#9 exporting layers 0.1s done
+#9 exporting manifest sha256:16e9106a8935007f14cb3e1f8d3d89ef0e99b6d184a10545d3a80be5da97b4cd 0.0s done
+#9 exporting config sha256:60c5f6aa39b86a82d7d0f77791fbb554e5d39bbe11ff7710a72ec0c55aa4fa75
+#9 exporting config sha256:60c5f6aa39b86a82d7d0f77791fbb554e5d39bbe11ff7710a72ec0c55aa4fa75 0.1s done
+#9 exporting attestation manifest sha256:d07e5dcd65a9bb8c0b4ba9a9af614d84d5dfa2d37a6834af1816bb967c3927b5
+#9 exporting attestation manifest sha256:d07e5dcd65a9bb8c0b4ba9a9af614d84d5dfa2d37a6834af1816bb967c3927b5 1.0s done
+#9 exporting manifest list sha256:d993c5ed45e437283d9a41d3cc5c4059e88fa5144d452a7f41170c62dafb91cd
+#9 exporting manifest list sha256:d993c5ed45e437283d9a41d3cc5c4059e88fa5144d452a7f41170c62dafb91cd 1.0s done
+#9 naming to docker.io/dnhphong2005/patient-service:latest
+#9 naming to docker.io/dnhphong2005/patient-service:latest 0.2s done
+#9 unpacking to docker.io/dnhphong2005/patient-service:latest
+#9 unpacking to docker.io/dnhphong2005/patient-service:latest 0.8s done
+#9 DONE 4.7s

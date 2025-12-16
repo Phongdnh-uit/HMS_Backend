@@ -4,19 +4,67 @@ This guide explains how to test the appointment-service and its integration with
 
 ## Prerequisites
 
-### Required Services Running
-1. **auth-service** (port 8081) - For JWT tokens
-2. **patient-service** (port 8083) - For patient validation
-3. **hr-service** (port 8084) - For doctor/schedule validation
-4. **appointment-service** (port 8085) - The service under test
+### Environment Setup
+1. **Copy and configure .env file**:
+   ```bash
+   cd HMS_Backend
+   cp .env.example .env
+   # Edit .env to set the following minimum required variables:
+   # DOCKER_COMPOSE_ENABLED=true
+   # DISCOVERY_SERVICE_PORT=8761
+   # DISCOVERY_SERVICE_HOST=localhost
+   # CONFIG_SERVER_PORT=8888
+   # CONFIG_SERVER_HOST=localhost
+   # API_GATEWAY=8080
+   # AUTH_SERVICE_PORT=8081
+   # AUTH_DB_HOST=localhost
+   # AUTH_DB_PORT=3307
+   # PATIENT_SERVICE_PORT=8083
+   # PATIENT_DB_HOST=localhost
+   # PATIENT_DB_PORT=3308
+   # HR_SERVICE_PORT=8084
+   # HR_DB_HOST=localhost
+   # HR_DB_PORT=3309
+   # APPOINTMENT_SERVICE_PORT=8085
+   # APPOINTMENT_DB_HOST=localhost
+   # APPOINTMENT_DB_PORT=3310  # Note: Fix the port conflict in compose.yaml
+   # JWT_PRIVATE_KEY, JWT_PUBLIC_KEY, etc.
+   ```
 
-### Start Services
+2. **Start Docker services** (if using DOCKER_COMPOSE_ENABLED=true):
+   ```bash
+   # This will start MySQL databases for each service automatically
+   # Note: There's a port conflict between hr-service and appointment-service compose files (both use 3309)
+   # Fix appointment-service compose.yaml to use port 3310
+   ```
+
+### Required Services Running
+1. **config-server** (port 8888) - Centralized configuration
+2. **discovery-service** (port 8761) - Service registration/discovery
+3. **api-gateway** (port 8080) - API routing and authentication
+4. **auth-service** (port 8081) - JWT token generation
+5. **patient-service** (port 8083) - Patient validation
+6. **hr-service** (port 8084) - Doctor/schedule validation
+7. **appointment-service** (port 8085) - The service under test
+
+### Start Services (in recommended order)
 ```bash
 # Start each service in separate terminals
 cd HMS_Backend
+
+# 1. Infrastructure services
+./gradlew :config-server:bootRun
+./gradlew :discovery-service:bootRun
+
+# 2. Business services
 ./gradlew :auth-service:bootRun
 ./gradlew :patient-service:bootRun
 ./gradlew :hr-service:bootRun
+
+# 3. API Gateway (last)
+./gradlew :api-gateway:bootRun
+
+# 4. Service under test
 ./gradlew :appointment-service:bootRun
 ```
 

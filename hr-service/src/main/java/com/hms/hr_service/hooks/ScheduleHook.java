@@ -13,8 +13,8 @@ import com.hms.hr_service.enums.ScheduleStatus;
 import com.hms.hr_service.repositories.DepartmentRepository;
 import com.hms.hr_service.repositories.EmployeeRepository;
 import com.hms.hr_service.repositories.ScheduleRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -27,7 +27,6 @@ import java.util.Optional;
  * Hook for EmployeeSchedule business logic.
  * Handles validation, enrichment, and cascade operations.
  */
-@RequiredArgsConstructor
 @Component
 @Slf4j
 public class ScheduleHook implements GenericHook<EmployeeSchedule, String, ScheduleRequest, ScheduleResponse> {
@@ -36,6 +35,18 @@ public class ScheduleHook implements GenericHook<EmployeeSchedule, String, Sched
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
     private final AppointmentClient appointmentClient;
+
+    // Manual constructor to apply @Lazy
+    public ScheduleHook(
+            ScheduleRepository scheduleRepository,
+            EmployeeRepository employeeRepository,
+            DepartmentRepository departmentRepository,
+            @Lazy AppointmentClient appointmentClient) {
+        this.scheduleRepository = scheduleRepository;
+        this.employeeRepository = employeeRepository;
+        this.departmentRepository = departmentRepository;
+        this.appointmentClient = appointmentClient;
+    }
 
     // Context keys
     private static final String EMPLOYEE_KEY = "employee";

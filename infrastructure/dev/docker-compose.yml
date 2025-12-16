@@ -3,3 +3,4 @@ include:
   - ./medicine-service/compose.yaml
   - ./patient-service/compose.yaml
   - ./appointment-service/compose.yaml
+  - ./hr-service/compose.yaml

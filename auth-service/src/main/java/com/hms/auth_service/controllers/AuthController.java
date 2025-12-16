@@ -1,5 +1,6 @@
 package com.hms.auth_service.controllers;
 
+import com.hms.auth_service.securities.SecurityUtil;
 import com.hms.auth_service.services.AuthService;
 import com.hms.common.dtos.ApiResponse;
 import com.hms.common.dtos.account.AccountRequest;
@@ -10,10 +11,7 @@ import com.hms.common.dtos.auth.RefreshRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -64,5 +62,12 @@ public class AuthController {
                         null
                 )
         );
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<AccountResponse>> getCurrentUser() {
+        String userId = SecurityUtil.getCurrentUserId();
+        AccountResponse account = authService.findById(userId);
+        return ResponseEntity.ok(ApiResponse.ok(account));
     }
 }

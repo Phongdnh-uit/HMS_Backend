@@ -2,6 +2,7 @@ package com.hms.medicine_service.controllers.medicine;
 
 import com.hms.common.controllers.GenericController;
 import com.hms.common.dtos.ApiResponse;
+import com.hms.common.dtos.PageResponse;
 import com.hms.common.exceptions.errors.ApiException;
 import com.hms.common.exceptions.errors.ErrorCode;
 import com.hms.common.services.CrudService;
@@ -11,8 +12,12 @@ import com.hms.medicine_service.dtos.medicine.StockUpdateRequest;
 import com.hms.medicine_service.dtos.medicine.StockUpdateResponse;
 import com.hms.medicine_service.entities.Medicine;
 import com.hms.medicine_service.repositories.MedicineRepository;
+import io.github.perplexhub.rsql.RSQLJPASupport;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +34,17 @@ public class MedicineController extends GenericController<Medicine, String, Medi
             MedicineRepository medicineRepository) {
         super(service);
         this.medicineRepository = medicineRepository;
+    }
+
+    /**
+     * Override to match API contract: GET /api/medicines (instead of /api/medicines/all)
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<PageResponse<MedicineResponse>>> listMedicines(
+            Pageable pageable,
+            @RequestParam(value = "search", required = false) @Nullable String search) {
+        Specification<Medicine> specification = RSQLJPASupport.toSpecification(search);
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable, specification)));
     }
 
     /**

@@ -15,8 +15,8 @@ import com.hms.hr_service.mappers.ScheduleMapper;
 import com.hms.hr_service.repositories.DepartmentRepository;
 import com.hms.hr_service.repositories.EmployeeRepository;
 import com.hms.hr_service.repositories.ScheduleRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
  * The generic CRUD is handled by GenericService, this handles specialized queries.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class ScheduleService {
 
@@ -42,6 +41,20 @@ public class ScheduleService {
     private final DepartmentRepository departmentRepository;
     private final ScheduleMapper scheduleMapper;
     private final AppointmentClient appointmentClient;
+
+    // Manual constructor to apply @Lazy
+    public ScheduleService(
+            ScheduleRepository scheduleRepository,
+            EmployeeRepository employeeRepository,
+            DepartmentRepository departmentRepository,
+            ScheduleMapper scheduleMapper,
+            @Lazy AppointmentClient appointmentClient) {
+        this.scheduleRepository = scheduleRepository;
+        this.employeeRepository = employeeRepository;
+        this.departmentRepository = departmentRepository;
+        this.scheduleMapper = scheduleMapper;
+        this.appointmentClient = appointmentClient;
+    }
 
     /**
      * Get current user's schedules.
