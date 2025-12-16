@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/api/medicines/categories")
+@RequestMapping("/medicines/categories")
 @RestController
 public class CategoryController extends GenericController<Category, String, CategoryRequest, CategoryResponse> {
     public CategoryController(CrudService<Category, String, CategoryRequest, CategoryResponse> service) {

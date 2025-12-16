@@ -6,14 +6,15 @@ public interface SecurityConstant {
             "/api/auth/login",
             "/api/auth/register",
             "/api/auth/refresh",
+            "/api/auth/logout",
             // Direct service access paths (for service-to-service communication)
             "/auth-service/auth/login",
             "/auth-service/auth/register",
             "/auth-service/auth/refresh",
-            // Public read-only access to medicines and categories
-            "/api/medicines",
-            "/api/medicines/**",
-            "/api/medicines/categories",
-            "/api/medicines/categories/**",
+            "/auth-service/auth/logout",
+            // Actuator health endpoints for monitoring
+            "/actuator/health",
+            "/actuator/health/**",
     };
 }
+

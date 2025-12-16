@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestBody;
                 "auth-service",
         configuration = FeignConfig.class)
 public interface AccountClient {
-    @GetMapping("/accounts/{id}")
+    @GetMapping("/auth/accounts/{id}")
     ApiResponse<AccountResponse> findById(@PathVariable("id") String id);
 
-    @PostMapping("/accounts")
+    @PostMapping("/auth/accounts")
     ResponseEntity<ApiResponse<AccountResponse>> create(@Valid @RequestBody AccountRequest accountRequest);
 }

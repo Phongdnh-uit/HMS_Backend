@@ -2,11 +2,13 @@ spring:
   cloud:
     gateway:
       routes:
-        # Auth Service - /api/auth/** (forward as-is)
+        # Auth Service - /api/auth/** (strip /api prefix)
         - id: auth-service-api
           uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
         
         # Auth Service - direct access (for service-to-service)
         - id: auth-service-direct
@@ -16,11 +18,13 @@ spring:
           filters:
             - StripPrefix=1
         
-        # Patient Service - /api/patients/** (forward as-is)
+        # Patient Service - /api/patients/** (strip /api prefix)
         - id: patient-service-api
           uri: lb://patient-service
           predicates:
             - Path=/api/patients/**
+          filters:
+            - StripPrefix=1
         
         # Patient Service - direct access
         - id: patient-service-direct
@@ -30,17 +34,13 @@ spring:
           filters:
             - StripPrefix=1
         
-        # Medicine Service - /api/medicines/** (forward as-is)
+        # Medicine Service - /api/medicines/** (strip /api prefix)
         - id: medicine-service-medicines-api
           uri: lb://medicine-service
           predicates:
             - Path=/api/medicines/**
-        
-        # Medicine Service - /api/medicines/categories/** (forward as-is)
-        - id: medicine-service-categories-api
-          uri: lb://medicine-service
-          predicates:
-            - Path=/api/medicines/categories/**
+          filters:
+            - StripPrefix=1
         
         # Medicine Service - direct access
         - id: medicine-service-direct
@@ -50,11 +50,13 @@ spring:
           filters:
             - StripPrefix=1
         
-        # HR Service - /api/hr/** (forward as-is)
+        # HR Service - /api/hr/** (strip /api prefix)
         - id: hr-service-api
           uri: lb://hr-service
           predicates:
             - Path=/api/hr/**
+          filters:
+            - StripPrefix=1
         
         # HR Service - direct access
         - id: hr-service-direct
@@ -64,11 +66,13 @@ spring:
           filters:
             - StripPrefix=1
         
-        # Appointment Service - /api/appointments/** (forward as-is)
+        # Appointment Service - /api/appointments/** (strip /api prefix)
         - id: appointment-service-api
           uri: lb://appointment-service
           predicates:
             - Path=/api/appointments/**
+          filters:
+            - StripPrefix=1
         
         # Appointment Service - direct access
         - id: appointment-service-direct
@@ -78,17 +82,21 @@ spring:
           filters:
             - StripPrefix=1
         
-        # Medical Exam Service - /api/exams/** (forward as-is)
+        # Medical Exam Service - /api/exams/** (strip /api prefix)
         - id: medical-exam-service-exams-api
           uri: lb://medical-exam-service
           predicates:
             - Path=/api/exams/**
+          filters:
+            - StripPrefix=1
         
-        # Medical Exam Service - /api/prescriptions/** (forward as-is)
+        # Medical Exam Service - /api/prescriptions/** (strip /api prefix)
         - id: medical-exam-service-prescriptions-api
           uri: lb://medical-exam-service
           predicates:
             - Path=/api/prescriptions/**
+          filters:
+            - StripPrefix=1
         
         # Medical Exam Service - direct access
         - id: medical-exam-service-direct

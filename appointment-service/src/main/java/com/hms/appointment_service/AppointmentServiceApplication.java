@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing
 @EnableDiscoveryClient
 @SpringBootApplication(scanBasePackages = "com.hms")
-@EnableFeignClients(basePackages = "com.hms.common.clients")
+@EnableFeignClients(basePackages = {"com.hms.common.clients", "com.hms.appointment_service.clients"})
 public class AppointmentServiceApplication {
 
     public static void main(String[] args) {

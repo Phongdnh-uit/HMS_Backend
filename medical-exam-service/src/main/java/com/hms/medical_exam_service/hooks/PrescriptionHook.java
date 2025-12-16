@@ -245,7 +245,7 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
                         attempt, MAX_RETRY_ATTEMPTS, record.medicineId(), record.quantity());
                     
                     medicineClient.patch()
-                        .uri("/api/medicines/{id}/stock", record.medicineId())
+                        .uri("/medicines/{id}/stock", record.medicineId())
                         .bodyValue(Map.of("delta", record.quantity()))
                         .retrieve()
                         .toBodilessEntity()
@@ -299,7 +299,7 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
             try {
                 // Call medicine-service to get medicine details
                 MedicineApiResponse response = medicineClient.get()
-                    .uri("/api/medicines/{id}", medicineId)
+                    .uri("/medicines/{id}", medicineId)
                     .retrieve()
                     .bodyToMono(MedicineApiResponse.class)
                     .block();
@@ -373,7 +373,7 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
                 
                 // Call PATCH /api/medicines/{id}/stock with negative delta
                 medicineClient.patch()
-                    .uri("/api/medicines/{id}/stock", medicineId)
+                    .uri("/medicines/{id}/stock", medicineId)
                     .bodyValue(Map.of("delta", -quantity))
                     .retrieve()
                     .toBodilessEntity()
@@ -435,7 +435,7 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
                     
                     // Call PATCH with positive delta to restore stock
                     medicineClient.patch()
-                        .uri("/api/medicines/{id}/stock", record.medicineId())
+                        .uri("/medicines/{id}/stock", record.medicineId())
                         .bodyValue(Map.of("delta", record.quantity())) // Positive = add back
                         .retrieve()
                         .toBodilessEntity()

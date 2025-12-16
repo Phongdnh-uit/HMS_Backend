@@ -100,7 +100,7 @@ services:
   config-server-pro:
     build:
       context: ../../
-      dockerfile: infrastructure/pro/Dockerfile.fast
+      dockerfile: infrastructure/pro/Dockerfile
       args:
         SERVICE: config-server
     container_name: config-server-pro
@@ -122,7 +122,7 @@ services:
   discovery-service-pro:
     build:
       context: ../../
-      dockerfile: infrastructure/pro/Dockerfile.fast
+      dockerfile: infrastructure/pro/Dockerfile
       args:
         SERVICE: discovery-service
     container_name: discovery-service-pro
@@ -141,7 +141,7 @@ services:
   api-gateway-pro:
     build:
       context: ../../
-      dockerfile: infrastructure/pro/Dockerfile.fast
+      dockerfile: infrastructure/pro/Dockerfile
       args:
         SERVICE: api-gateway
     container_name: api-gateway-pro
@@ -161,7 +161,7 @@ services:
   auth-service-pro:
     build:
       context: ../../
-      dockerfile: infrastructure/pro/Dockerfile.fast
+      dockerfile: infrastructure/pro/Dockerfile
       args:
         SERVICE: auth-service
     container_name: auth-service-pro
@@ -205,7 +205,7 @@ services:
   patient-service-pro:
     build:
       context: ../../
-      dockerfile: infrastructure/pro/Dockerfile.fast
+      dockerfile: infrastructure/pro/Dockerfile
       args:
         SERVICE: patient-service
     container_name: patient-service-pro
@@ -227,7 +227,7 @@ services:
   hr-service-pro:
     build:
       context: ../../
-      dockerfile: infrastructure/pro/Dockerfile.fast
+      dockerfile: infrastructure/pro/Dockerfile
       args:
         SERVICE: hr-service
     container_name: hr-service-pro
@@ -249,7 +249,7 @@ services:
   appointment-service-pro:
     build:
       context: ../../
-      dockerfile: infrastructure/pro/Dockerfile.fast
+      dockerfile: infrastructure/pro/Dockerfile
       args:
         SERVICE: appointment-service
     container_name: appointment-service-pro
@@ -293,7 +293,7 @@ services:
   medical-exam-service-pro:
     build:
       context: ../../
-      dockerfile: infrastructure/pro/Dockerfile.fast
+      dockerfile: infrastructure/pro/Dockerfile
       args:
         SERVICE: medical-exam-service
     container_name: medical-exam-service-pro

@@ -21,7 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/api/patients")
+@RequestMapping("/patients")
 @RestController
 public class PatientController extends GenericController<Patient, String, PatientRequest, PatientResponse> {
     

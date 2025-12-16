@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 
-@RequestMapping("/api/medicines")
+@RequestMapping("/medicines")
 @RestController
 public class MedicineController extends GenericController<Medicine, String, MedicineRequest, MedicineResponse> {
 
