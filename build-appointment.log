@@ -1,0 +1,62 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.fast
+#1 transferring dockerfile:
+#1 transferring dockerfile: 516B 0.0s done
+#1 DONE 3.0s
+
+#2 [internal] load metadata for docker.io/library/eclipse-temurin:23-jre-alpine
+#2 DONE 3.7s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B 0.1s done
+#3 DONE 0.2s
+
+#4 [internal] load build context
+#4 ...
+
+#5 [1/4] FROM docker.io/library/eclipse-temurin:23-jre-alpine@sha256:88593498863c64b43be16e8357a3c70ea475fc20a93bf1e07f4609213a357c87
+#5 resolve docker.io/library/eclipse-temurin:23-jre-alpine@sha256:88593498863c64b43be16e8357a3c70ea475fc20a93bf1e07f4609213a357c87 0.5s done
+#5 DONE 0.6s
+
+#4 [internal] load build context
+#4 ...
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] RUN apk add --no-cache curl
+#7 CACHED
+
+#4 [internal] load build context
+#4 transferring context: 9.93MB 4.8s
+#4 transferring context: 16.49MB 10.0s
+#4 transferring context: 21.63MB 15.0s
+#4 transferring context: 30.06MB 20.1s
+#4 transferring context: 35.89MB 25.2s
+#4 transferring context: 46.61MB 30.4s
+#4 transferring context: 56.60MB 35.5s
+#4 transferring context: 64.34MB 40.6s
+#4 transferring context: 75.45MB 45.7s
+#4 transferring context: 84.56MB 50.8s
+#4 transferring context: 85.90MB 51.8s done
+#4 DONE 51.8s
+
+#8 [4/4] COPY appointment-service/build/libs/appointment-service-*.jar ./app.jar
+#8 DONE 1.7s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 46.5s done
+#9 exporting manifest sha256:0d3699282ea1c0b40f62e0d06eb3f39e417c04dd9d6cd280e95126866325605f 0.1s done
+#9 exporting config sha256:066044212299aa6af133ac92a53a8f4300bfe5fdd2366370486d13db5b06e672
+#9 exporting config sha256:066044212299aa6af133ac92a53a8f4300bfe5fdd2366370486d13db5b06e672 0.3s done
+#9 exporting attestation manifest sha256:1635e0771045cfe9e9cb684a20a3c9b9f8955dd98cf5844099cd8d02dbda5e8a
+#9 exporting attestation manifest sha256:1635e0771045cfe9e9cb684a20a3c9b9f8955dd98cf5844099cd8d02dbda5e8a 0.1s done
+#9 exporting manifest list sha256:4edcd12f5d589b9b940c520d696a158665ce7a836b76ed8eaf7fae271d047b5a
+#9 exporting manifest list sha256:4edcd12f5d589b9b940c520d696a158665ce7a836b76ed8eaf7fae271d047b5a 0.1s done
+#9 naming to docker.io/dnhphong2005/appointment-service:latest
+#9 naming to docker.io/dnhphong2005/appointment-service:latest 0.0s done
+#9 unpacking to docker.io/dnhphong2005/appointment-service:latest
+#9 unpacking to docker.io/dnhphong2005/appointment-service:latest 9.9s done
+#9 DONE 58.3s

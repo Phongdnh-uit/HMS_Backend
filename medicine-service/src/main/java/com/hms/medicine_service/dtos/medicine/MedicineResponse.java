@@ -27,4 +27,6 @@ public class MedicineResponse {
     private Instant updatedAt;
     private String createdBy;
     private String updatedBy;
+    private String categoryId;
+    private String categoryName;
 }

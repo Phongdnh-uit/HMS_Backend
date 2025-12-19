@@ -14,7 +14,10 @@ import com.hms.hr_service.repositories.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import com.hms.hr_service.entities.Department;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
@@ -25,12 +28,30 @@ public class EmployeeHook implements GenericHook<Employee, String, EmployeeReque
 
     @Override
     public void enrichFindAll(PageResponse<EmployeeResponse> response) {
+        List<String> departmentIds = response.getContent().stream()
+                .map(EmployeeResponse::getDepartmentId)
+                .filter(id -> id != null && !id.isBlank())
+                .distinct()
+                .collect(Collectors.toList());
 
+        if (!departmentIds.isEmpty()) {
+            Map<String, String> departmentMap = departmentRepository.findAllById(departmentIds).stream()
+                    .collect(Collectors.toMap(Department::getId, Department::getName));
+
+            response.getContent().forEach(e -> {
+                if (e.getDepartmentId() != null) {
+                    e.setDepartmentName(departmentMap.get(e.getDepartmentId()));
+                }
+            });
+        }
     }
 
     @Override
     public void enrichFindById(EmployeeResponse response) {
-
+        if (response.getDepartmentId() != null) {
+            departmentRepository.findById(response.getDepartmentId())
+                    .ifPresent(d -> response.setDepartmentName(d.getName()));
+        }
     }
 
     @Override
@@ -87,7 +108,7 @@ public class EmployeeHook implements GenericHook<Employee, String, EmployeeReque
         Map<String, String> errors = new java.util.HashMap<>();
 
         // validate accountId if provided
-        if (!request.getAccountId().isBlank()) {
+        if (request.getAccountId() != null && !request.getAccountId().isBlank()) {
             var response = FeignHelper.safeCall(() -> accountClient.findById(request.getAccountId()));
             if (response.getCode() != 1000) {
                 errors.put("accountId", "Account with ID " + request.getAccountId() + " does not exist");

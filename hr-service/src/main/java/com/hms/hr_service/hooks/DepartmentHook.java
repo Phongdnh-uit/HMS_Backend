@@ -7,18 +7,44 @@ import com.hms.hr_service.dtos.department.DepartmentResponse;
 import com.hms.hr_service.entities.Department;
 import org.springframework.stereotype.Component;
 
+import com.hms.hr_service.entities.Employee;
+import com.hms.hr_service.repositories.EmployeeRepository;
+import lombok.RequiredArgsConstructor;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Component
 public class DepartmentHook implements GenericHook<Department, String, DepartmentRequest, DepartmentResponse> {
+    private final EmployeeRepository employeeRepository;
+
     @Override
     public void enrichFindAll(PageResponse<DepartmentResponse> response) {
+        List<String> doctorIds = response.getContent().stream()
+                .map(DepartmentResponse::getHeadDoctorId)
+                .filter(id -> id != null && !id.isBlank())
+                .distinct()
+                .collect(Collectors.toList());
 
+        if (!doctorIds.isEmpty()) {
+            Map<String, String> doctorMap = employeeRepository.findAllById(doctorIds).stream()
+                    .collect(Collectors.toMap(Employee::getId, Employee::getFullName));
+
+            response.getContent().forEach(d -> {
+                if (d.getHeadDoctorId() != null) {
+                    d.setHeadDoctorName(doctorMap.get(d.getHeadDoctorId()));
+                }
+            });
+        }
     }
 
     @Override
     public void enrichFindById(DepartmentResponse response) {
-
+        if (response.getHeadDoctorId() != null) {
+            employeeRepository.findById(response.getHeadDoctorId())
+                    .ifPresent(e -> response.setHeadDoctorName(e.getFullName()));
+        }
     }
 
     @Override

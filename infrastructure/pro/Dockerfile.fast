@@ -1,0 +1,16 @@
+# Fast Dockerfile using pre-built JARs from host
+# Usage: First build on host with `./gradlew clean bootJar`, then docker-compose build
+
+FROM eclipse-temurin:23-jre-alpine
+WORKDIR /app
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
+# ARG to specify which service to run
+ARG SERVICE
+
+# Copy pre-built JARs from host (already built via gradlew)
+COPY ${SERVICE}/build/libs/${SERVICE}-*.jar ./app.jar
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

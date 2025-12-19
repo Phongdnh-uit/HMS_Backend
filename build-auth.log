@@ -1,0 +1,62 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.fast
+#1 transferring dockerfile:
+#1 transferring dockerfile: 516B 0.0s done
+#1 DONE 3.3s
+
+#2 [internal] load metadata for docker.io/library/eclipse-temurin:23-jre-alpine
+#2 DONE 3.5s
+
+#3 [internal] load .dockerignore
+#3 transferring context:
+#3 transferring context: 2B 0.0s done
+#3 DONE 2.2s
+
+#4 [1/4] FROM docker.io/library/eclipse-temurin:23-jre-alpine@sha256:88593498863c64b43be16e8357a3c70ea475fc20a93bf1e07f4609213a357c87
+#4 resolve docker.io/library/eclipse-temurin:23-jre-alpine@sha256:88593498863c64b43be16e8357a3c70ea475fc20a93bf1e07f4609213a357c87 0.5s done
+#4 DONE 0.6s
+
+#5 [internal] load build context
+#5 ...
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] RUN apk add --no-cache curl
+#7 CACHED
+
+#5 [internal] load build context
+#5 transferring context: 4.65MB 3.8s
+#5 transferring context: 9.67MB 8.9s
+#5 transferring context: 16.81MB 14.0s
+#5 transferring context: 23.93MB 19.0s
+#5 transferring context: 29.63MB 24.0s
+#5 transferring context: 41.07MB 29.1s
+#5 transferring context: 48.08MB 34.2s
+#5 transferring context: 55.72MB 39.3s
+#5 transferring context: 66.99MB 44.4s
+#5 transferring context: 75.06MB 49.5s
+#5 transferring context: 80.69MB 54.6s
+#5 transferring context: 85.05MB 59.7s
+#5 transferring context: 90.49MB 64.8s
+#5 transferring context: 90.84MB 65.1s done
+#5 DONE 65.9s
+
+#8 [4/4] COPY auth-service/build/libs/auth-service-*.jar ./app.jar
+#8 DONE 14.2s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 36.2s done
+#9 exporting manifest sha256:ae4b9f14d87799a3080f8b98b7a954bb26b8c3471e9727519b72aa80f6a8bd3b 0.1s done
+#9 exporting config sha256:3ee29ce2768ec0e8a3da19d8ff232cb4e8621ccfcdf5e45d9c7bf4d6af934c55
+#9 exporting config sha256:3ee29ce2768ec0e8a3da19d8ff232cb4e8621ccfcdf5e45d9c7bf4d6af934c55 0.4s done
+#9 exporting attestation manifest sha256:9f89ce564e26dd64c38fe49dc04d224af2d0f9ee52ccc3230f94ea3098a97b5a
+#9 exporting attestation manifest sha256:9f89ce564e26dd64c38fe49dc04d224af2d0f9ee52ccc3230f94ea3098a97b5a 0.5s done
+#9 exporting manifest list sha256:450a14f4def0dc215d6a9c446e8189afe72abaa496b07f640d16a9fb2a2b5d2d
+#9 exporting manifest list sha256:450a14f4def0dc215d6a9c446e8189afe72abaa496b07f640d16a9fb2a2b5d2d 0.2s done
+#9 naming to docker.io/dnhphong2005/auth-service:latest 0.0s done
+#9 unpacking to docker.io/dnhphong2005/auth-service:latest
+#9 unpacking to docker.io/dnhphong2005/auth-service:latest 11.4s done
+#9 DONE 49.5s
