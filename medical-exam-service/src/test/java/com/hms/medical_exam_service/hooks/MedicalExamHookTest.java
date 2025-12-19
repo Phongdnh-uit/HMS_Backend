@@ -88,8 +88,11 @@ class MedicalExamHookTest {
         // Given
         // Simulate context populated by validateCreate with a mock appointment
         AppointmentResponse mockAppt = new AppointmentResponse(
-                "appt-123", "p-1", "John Doe", "doc-1", "Dr. Smith", 
-                java.time.LocalDateTime.now(), "COMPLETED", "CONSULTATION", "Checkup", "None"
+                "appt-123", 
+                new AppointmentResponse.PatientInfo("p-1", "John Doe"),
+                new AppointmentResponse.DoctorInfo("doc-1", "Dr. Smith"),
+                java.time.LocalDateTime.now(), 
+                "COMPLETED", "CONSULTATION", "Checkup", "None"
         );
         context.put("appointment", mockAppt);
 
