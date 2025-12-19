@@ -16,6 +16,7 @@ import com.hms.hr_service.repositories.ScheduleRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import com.hms.common.helpers.FeignHelper;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -191,8 +192,9 @@ public class ScheduleHook implements GenericHook<EmployeeSchedule, String, Sched
         
         try {
             // Call appointment-service to count active appointments
-            var response = appointmentClient.countByDoctorAndDate(
-                    schedule.getEmployeeId(), schedule.getWorkDate());
+            var response = FeignHelper.safeCall(() -> 
+                appointmentClient.countByDoctorAndDate(
+                    schedule.getEmployeeId(), schedule.getWorkDate()));
             
             int appointmentCount = response.getData() != null ? response.getData() : 0;
             
@@ -230,8 +232,9 @@ public class ScheduleHook implements GenericHook<EmployeeSchedule, String, Sched
             EmployeeSchedule schedule = scheduleOpt.get();
             
             try {
-                var response = appointmentClient.countByDoctorAndDate(
-                        schedule.getEmployeeId(), schedule.getWorkDate());
+                var response = FeignHelper.safeCall(() -> 
+                    appointmentClient.countByDoctorAndDate(
+                        schedule.getEmployeeId(), schedule.getWorkDate()));
                 int count = response.getData() != null ? response.getData() : 0;
                 
                 if (count > 0) {

@@ -9,6 +9,7 @@ import com.hms.medical_exam_service.dtos.exam.MedicalExamResponse;
 import com.hms.medical_exam_service.dtos.external.AppointmentResponse;
 import com.hms.medical_exam_service.entities.MedicalExam;
 import com.hms.medical_exam_service.repositories.MedicalExamRepository;
+import com.hms.medical_exam_service.repositories.PrescriptionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -37,26 +38,37 @@ import java.util.Map;
 public class MedicalExamHook implements GenericHook<MedicalExam, String, MedicalExamRequest, MedicalExamResponse> {
 
     private final MedicalExamRepository medicalExamRepository;
+    private final PrescriptionRepository prescriptionRepository;
     private final WebClient.Builder webClientBuilder;
+    
+    // Injected from config: appointment-service.base-url
+    @org.springframework.beans.factory.annotation.Value("${appointment-service.base-url:http://appointment-service-pro:8085}")
+    private String appointmentServiceBaseUrl;
     
     // 24-hour rule for exam modification
     private static final Duration MODIFICATION_WINDOW = Duration.ofHours(24);
     
     // MVP flag: set to false to enable real appointment-service calls
-    private static final boolean USE_MOCK_APPOINTMENT = true;
+    private static final boolean USE_MOCK_APPOINTMENT = false;
 
     // ============================ VIEW ============================
     
     @Override
     public void enrichFindAll(PageResponse<MedicalExamResponse> response) {
-        // No cross-service calls needed - data comes from entity snapshots
-        log.debug("FindAll response with {} items (using snapshot data)", response.getContent().size());
+        // Populate hasPrescription for each exam
+        for (MedicalExamResponse exam : response.getContent()) {
+            boolean hasPrescription = prescriptionRepository.existsByMedicalExamId(exam.getId());
+            exam.setHasPrescription(hasPrescription);
+        }
+        log.debug("FindAll response with {} items, populated hasPrescription flags", response.getContent().size());
     }
 
     @Override
     public void enrichFindById(MedicalExamResponse response) {
-        // No cross-service calls needed - data comes from entity snapshots
-        log.debug("FindById response for exam: {} (using snapshot data)", response.getId());
+        // Populate hasPrescription by checking if prescription exists
+        boolean hasPrescription = prescriptionRepository.existsByMedicalExamId(response.getId());
+        response.setHasPrescription(hasPrescription);
+        log.debug("FindById response for exam: {}, hasPrescription: {}", response.getId(), hasPrescription);
     }
 
     // ============================ CREATE ============================
@@ -104,23 +116,36 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
         
         // 2. Get appointment from context (fetched in validateCreate)
         AppointmentResponse appointment = (AppointmentResponse) context.get("appointment");
+        log.debug("📋 [enrichCreate] Appointment from context: {}", appointment != null ? "FOUND" : "NULL");
+        
         if (appointment == null) {
             // Fallback: fetch again if not in context
+            log.warn("⚠️ [enrichCreate] Appointment not in context, fetching again for: {}", input.getAppointmentId());
             appointment = fetchAppointment(input.getAppointmentId());
+            log.debug("📋 [enrichCreate] Fallback fetch result: {}", appointment != null ? "SUCCESS" : "FAILED");
+        }
+        
+        if (appointment == null) {
+            log.error("❌ [enrichCreate] CRITICAL: Appointment is NULL! Cannot populate snapshot data for exam");
+            // Continue anyway - exam will be created but with null fields
+            return;
         }
         
         // 3. Copy snapshot data from appointment (Snapshot Propagation Pattern)
         // No cross-service calls to patient-service or employee-service needed!
+        log.debug("📝 [enrichCreate] Copying snapshot data from appointment: patientId={}, patientName={}, doctorId={}, doctorName={}", 
+            appointment.patientId(), appointment.patientName(), appointment.doctorId(), appointment.doctorName());
+            
         entity.setPatientId(appointment.patientId());
         entity.setPatientName(appointment.patientName());
         entity.setDoctorId(appointment.doctorId());
         entity.setDoctorName(appointment.doctorName());
         
-        log.debug("Enriched exam with examDate: {}, patient: {} ({}), doctor: {} ({})", 
+        log.debug("✅ [enrichCreate] Enriched exam with examDate: {}, patient: {} ({}), doctor: {} ({})", 
             entity.getExamDate(), entity.getPatientId(), entity.getPatientName(),
             entity.getDoctorId(), entity.getDoctorName());
     }
-    
+
     /**
      * Fetches appointment data from appointment-service.
      * MVP: Uses mock data; set USE_MOCK_APPOINTMENT=false to call real service.
@@ -131,14 +156,32 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
             return AppointmentResponse.createMock(appointmentId);
         }
         
-        // Real service call via WebClient
-        log.debug("Fetching appointment from appointment-service: {}", appointmentId);
-        return webClientBuilder.build()
-            .get()
-            .uri("http://APPOINTMENT-SERVICE/api/v1/appointments/{id}", appointmentId)
-            .retrieve()
-            .bodyToMono(AppointmentResponse.class)
-            .block();
+        // Real service call via WebClient using configurable base URL
+        // NOTE: Using WebClient.create() instead of @LoadBalanced webClientBuilder.build()
+        // because appointmentServiceBaseUrl is a direct Docker network URL, not an Eureka-registered service name
+        String url = appointmentServiceBaseUrl + "/appointments/" + appointmentId;
+        log.info("📞 Fetching appointment from: {}", url);
+        
+        try {
+            var apiResponse = org.springframework.web.reactive.function.client.WebClient.create()
+                .get()
+                .uri(url)
+                .retrieve()
+                .bodyToMono(new org.springframework.core.ParameterizedTypeReference<com.hms.common.dtos.ApiResponse<AppointmentResponse>>() {})
+                .block();
+            
+            if (apiResponse != null && apiResponse.getData() != null) {
+                log.info("✅ Successfully fetched appointment: {} with patient={}, doctor={}",
+                    appointmentId, apiResponse.getData().patientName(), apiResponse.getData().doctorName());
+                return apiResponse.getData();
+            }
+            
+            log.warn("⚠️ Appointment service returned null data for: {}", appointmentId);
+            return null;
+        } catch (Exception e) {
+            log.error("❌ Error fetching appointment {}: {}", appointmentId, e.getMessage(), e);
+            return null;
+        }
     }
 
     @Override

@@ -14,9 +14,12 @@ import java.time.LocalDate;
  * Used for:
  * - Cascade cancel when schedule is cancelled
  * - Checking appointment count before schedule delete
+ * 
+ * Note: Using direct URL to bypass Eureka service discovery issues.
  */
 @FeignClient(
         name = "appointment-service",
+        url = "${feign.client.config.appointment-service.url:}",
         configuration = FeignConfig.class
 )
 public interface AppointmentClient {

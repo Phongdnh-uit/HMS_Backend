@@ -28,3 +28,7 @@ eureka:
 # Medicine service integration
 medicine-service:
   base-url: http://${MEDICINE_SERVICE_HOST:localhost}:${MEDICINE_SERVICE_PORT:8082}
+
+# Appointment service integration (for fetching appointment data during exam creation)
+appointment-service:
+  base-url: http://${APPOINTMENT_SERVICE_HOST:appointment-service-pro}:${APPOINTMENT_SERVICE_PORT:8085}

@@ -25,6 +25,83 @@ import java.util.List;
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
+    private final com.hms.appointment_service.clients.HrClient hrClient;
+    private final com.hms.appointment_service.mappers.AppointmentMapper appointmentMapper;
+
+    /**
+     * Get available time slots for a doctor on a specific date.
+     * Integrates with hr-service to get schedule and checks existing appointments.
+     *
+     * @param doctorId The doctor's employee ID
+     * @param date     The date to check
+     * @return List of time slots with availability status
+     */
+    public List<com.hms.appointment_service.dtos.appointment.TimeSlotResponse> getAvailableSlots(String doctorId, LocalDate date) {
+        log.info("🔍 [getAvailableSlots] Fetching slots for doctor {} on {}", doctorId, date);
+
+        // 1. Get Doctor Schedule from HR Service
+        com.hms.common.dtos.ApiResponse<com.hms.appointment_service.clients.HrClient.ScheduleInfo> scheduleResponse;
+        try {
+            log.info("📞 [getAvailableSlots] Calling HR service for schedule: doctorId={}, date={}", doctorId, date);
+            scheduleResponse = com.hms.common.helpers.FeignHelper.safeCall(() -> 
+                hrClient.getScheduleByDoctorAndDate(doctorId, date));
+            log.info("✅ [getAvailableSlots] HR service response received: {}", scheduleResponse != null ? "Not null" : "NULL");
+            if (scheduleResponse != null) {
+                log.info("📊 [getAvailableSlots] Schedule response data: {}", scheduleResponse.getData());
+            }
+        } catch (Exception e) {
+            log.error("❌ [getAvailableSlots] Failed to fetch schedule for doctor {}: {}", doctorId, e.getMessage(), e);
+            return List.of(); // Return empty if no schedule or error
+        }
+
+        if (scheduleResponse == null || scheduleResponse.getData() == null) {
+            log.warn("⚠️ [getAvailableSlots] No schedule found for doctor {} on {}. Response was: {}", 
+                doctorId, date, scheduleResponse);
+            return List.of();
+        }
+
+        var schedule = scheduleResponse.getData();
+        log.info("✅ [getAvailableSlots] Found schedule: startTime={}, endTime={}", schedule.startTime(), schedule.endTime());
+
+        // 2. Get existing booked appointments
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+        Instant startOfDay = date.atStartOfDay(zoneId).toInstant();
+        Instant endOfDay = date.plusDays(1).atStartOfDay(zoneId).toInstant();
+
+        List<Appointment> bookedAppointments = appointmentRepository
+                .findByDoctorIdAndAppointmentTimeBetween(doctorId, startOfDay, endOfDay);
+        
+        log.info("📅 [getAvailableSlots] Found {} booked appointments for doctor on {}", bookedAppointments.size(), date);
+        
+        // Filter out CANCELLED
+        List<String> bookedTimes = bookedAppointments.stream()
+                .filter(a -> a.getStatus() != AppointmentStatus.CANCELLED)
+                .map(a -> a.getAppointmentTime().atZone(zoneId).toLocalTime().toString().substring(0, 5)) // HH:mm
+                .toList();
+
+        log.info("🚫 [getAvailableSlots] Booked times (excluding cancelled): {}", bookedTimes);
+
+        // 3. Generate Slots
+        List<com.hms.appointment_service.dtos.appointment.TimeSlotResponse> slots = new java.util.ArrayList<>();
+        java.time.LocalTime start = schedule.startTime(); // Already LocalTime
+        java.time.LocalTime end = schedule.endTime(); // Already LocalTime
+
+        while (start.isBefore(end)) {
+            String timeStr = start.toString();
+            if (timeStr.length() == 8) timeStr = timeStr.substring(0, 5); // Ensure HH:mm
+
+            boolean isBooked = bookedTimes.contains(timeStr);
+            slots.add(com.hms.appointment_service.dtos.appointment.TimeSlotResponse.builder()
+                    .time(timeStr)
+                    .available(!isBooked)
+                    .build());
+
+            start = start.plusMinutes(30);
+        }
+
+        log.info("✅ [getAvailableSlots] Generated {} total slots", slots.size());
+        return slots;
+    }
 
     /**
      * Bulk cancel all SCHEDULED appointments for a doctor on a specific date.
@@ -38,7 +115,7 @@ public class AppointmentService {
     @Transactional
     public int cancelByDoctorAndDate(String doctorId, LocalDate date, String reason) {
         // Convert LocalDate to Instant range for query
-        ZoneId zoneId = ZoneId.systemDefault();
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
         Instant startOfDay = date.atStartOfDay(zoneId).toInstant();
         Instant endOfDay = date.plusDays(1).atStartOfDay(zoneId).toInstant();
 
@@ -77,7 +154,7 @@ public class AppointmentService {
      * @return Count of active appointments
      */
     public int countByDoctorAndDate(String doctorId, LocalDate date) {
-        ZoneId zoneId = ZoneId.systemDefault();
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
         Instant startOfDay = date.atStartOfDay(zoneId).toInstant();
         Instant endOfDay = date.plusDays(1).atStartOfDay(zoneId).toInstant();
 
@@ -99,7 +176,7 @@ public class AppointmentService {
      */
     @Transactional
     public int restoreByDoctorAndDate(String doctorId, LocalDate date) {
-        ZoneId zoneId = ZoneId.systemDefault();
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
         Instant startOfDay = date.atStartOfDay(zoneId).toInstant();
         Instant endOfDay = date.plusDays(1).atStartOfDay(zoneId).toInstant();
 
@@ -201,5 +278,27 @@ public class AppointmentService {
         log.info("Completed appointment {}", id);
 
         return appointment;
+    }
+
+    /**
+     * Get appointments for a specific patient with pagination.
+     * Used by patient detail page to show only that patient's appointments.
+     *
+     * @param patientId The patient ID
+     * @param pageable  Pagination parameters
+     * @return PageResponse of appointments for this patient
+     */
+    public com.hms.common.dtos.PageResponse<com.hms.appointment_service.dtos.appointment.AppointmentResponse> getByPatientId(
+            String patientId, org.springframework.data.domain.Pageable pageable) {
+        log.debug("Getting appointments for patient: {}", patientId);
+        
+        org.springframework.data.domain.Page<Appointment> appointments = 
+                appointmentRepository.findByPatientId(patientId, pageable);
+        
+        // Convert to response DTOs using the mapper
+        org.springframework.data.domain.Page<com.hms.appointment_service.dtos.appointment.AppointmentResponse> responsePageData = 
+                appointments.map(appointmentMapper::entityToResponse);
+        
+        return com.hms.common.dtos.PageResponse.fromPage(responsePageData);
     }
 }

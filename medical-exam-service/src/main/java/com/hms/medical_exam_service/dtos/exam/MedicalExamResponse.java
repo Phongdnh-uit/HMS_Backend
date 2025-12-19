@@ -36,6 +36,9 @@ public class MedicalExamResponse {
     private String createdBy;
     private String updatedBy;
     
+    // Whether this exam has a prescription (populated by hook)
+    private Boolean hasPrescription;
+    
     // Nested DTOs
     @Getter
     @Setter

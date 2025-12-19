@@ -24,3 +24,19 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://${DISCOVERY_SERVICE_HOST:localhost}:${DISCOVERY_SERVICE_PORT:8761}/eureka/
+
+# Feign client configuration for direct service URLs (bypass Eureka when configured)
+feign:
+  client:
+    config:
+      hr-service:
+        url: ${HR_SERVICE_URL:http://hr-service-pro:8084}
+  autoconfiguration:
+    jackson:
+      enabled: true
+
+# Feign logging - WARN level for error visibility
+logging:
+  level:
+    com.hms.common.exceptions.FeignCustomErrorDecoder: WARN
+    com.hms.common.helpers.FeignHelper: WARN

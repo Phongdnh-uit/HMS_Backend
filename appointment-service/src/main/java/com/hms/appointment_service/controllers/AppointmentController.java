@@ -34,6 +34,27 @@ public class AppointmentController extends GenericController<Appointment, String
     }
 
     /**
+     * Get available time slots for a doctor on a specific date.
+     */
+    @GetMapping("/slots")
+    public ResponseEntity<ApiResponse<java.util.List<com.hms.appointment_service.dtos.appointment.TimeSlotResponse>>> getAvailableSlots(
+            @RequestParam("doctorId") String doctorId,
+            @RequestParam("date") LocalDate date) {
+        return ResponseEntity.ok(ApiResponse.ok(appointmentService.getAvailableSlots(doctorId, date)));
+    }
+
+    /**
+     * Get appointments for a specific patient.
+     * Used by patient detail page to show only that patient's appointments.
+     */
+    @GetMapping("/by-patient/{patientId}")
+    public ResponseEntity<ApiResponse<com.hms.common.dtos.PageResponse<AppointmentResponse>>> getByPatient(
+            @PathVariable String patientId,
+            org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.ok(appointmentService.getByPatientId(patientId, pageable)));
+    }
+
+    /**
      * Cancel a scheduled appointment.
      * Access: ADMIN, DOCTOR, NURSE, PATIENT (own)
      */

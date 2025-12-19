@@ -23,4 +23,11 @@ public interface AppointmentRepository extends SimpleRepository<Appointment, Str
      */
     List<Appointment> findByDoctorIdAndAppointmentTimeBetween(
             String doctorId, Instant startTime, Instant endTime);
+    
+    /**
+     * Find appointments by patient ID with pagination.
+     * Used by patient detail page to show only that patient's appointments.
+     */
+    org.springframework.data.domain.Page<Appointment> findByPatientId(
+            String patientId, org.springframework.data.domain.Pageable pageable);
 }

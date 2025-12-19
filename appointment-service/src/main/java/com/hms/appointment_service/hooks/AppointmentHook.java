@@ -122,9 +122,10 @@ public class AppointmentHook implements GenericHook<Appointment, String, Appoint
         }
         
         // Validate time is within schedule hours
-        LocalTime appointmentTime = appointmentInstant.atZone(ZoneId.systemDefault()).toLocalTime();
-        LocalTime scheduleStart = LocalTime.parse(schedule.startTime());
-        LocalTime scheduleEnd = LocalTime.parse(schedule.endTime());
+        // Use fixed timezone Asia/Ho_Chi_Minh for clinic time
+        LocalTime appointmentTime = appointmentInstant.atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalTime();
+        LocalTime scheduleStart = schedule.startTime(); // Already LocalTime
+        LocalTime scheduleEnd = schedule.endTime(); // Already LocalTime
         
         if (appointmentTime.isBefore(scheduleStart) || 
             appointmentTime.plusMinutes(APPOINTMENT_DURATION_MINUTES).isAfter(scheduleEnd)) {
@@ -217,7 +218,7 @@ public class AppointmentHook implements GenericHook<Appointment, String, Appoint
     private void checkAndUpdateScheduleStatus(Appointment appointment) {
         try {
             LocalDate appointmentDate = appointment.getAppointmentTime()
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(ZoneId.of("Asia/Ho_Chi_Minh"))
                     .toLocalDate();
             
             var scheduleResponse = hrClient.getScheduleByDoctorAndDate(

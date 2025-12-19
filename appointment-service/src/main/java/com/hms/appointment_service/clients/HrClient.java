@@ -15,20 +15,25 @@ import java.time.LocalDate;
  * Used for:
  * - Validating doctor exists and is available
  * - Updating schedule status when appointments are created/cancelled
+ * 
+ * Note: Using direct URL to bypass Eureka service discovery issues.
+ * The URL uses Docker container hostname which works on the same network.
  */
 @FeignClient(
         name = "hr-service",
+        url = "${feign.client.config.hr-service.url:}",
         configuration = FeignConfig.class
 )
 public interface HrClient {
 
     /**
      * Get schedule for a doctor on a specific date.
+     * Uses @DateTimeFormat to ensure date is serialized as ISO format (yyyy-MM-dd)
      */
     @GetMapping("/hr/schedules/by-doctor-date")
     ApiResponse<ScheduleInfo> getScheduleByDoctorAndDate(
             @RequestParam("doctorId") String doctorId,
-            @RequestParam("date") LocalDate date
+            @RequestParam("date") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate date
     );
 
     /**
@@ -45,22 +50,25 @@ public interface HrClient {
 
     /**
      * DTO for schedule info from hr-service.
+     * Uses @JsonIgnoreProperties to ignore fields not needed by this service.
+     * Uses @JsonFormat to ensure LocalTime is correctly parsed from "HH:mm:ss" format.
      */
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
     record ScheduleInfo(
             String id,
             String employeeId,
-            LocalDate workDate,
-            String startTime,  // HH:mm format
-            String endTime,    // HH:mm format
+            java.time.LocalDate workDate,
+            @com.fasterxml.jackson.annotation.JsonFormat(pattern = "HH:mm:ss")
+            java.time.LocalTime startTime,
+            @com.fasterxml.jackson.annotation.JsonFormat(pattern = "HH:mm:ss")
+            java.time.LocalTime endTime,
             String status
     ) {
         /**
          * Calculate how many 30-minute slots this schedule has.
          */
         public int getTotalSlots() {
-            var start = java.time.LocalTime.parse(startTime);
-            var end = java.time.LocalTime.parse(endTime);
-            long minutes = java.time.Duration.between(start, end).toMinutes();
+            long minutes = java.time.Duration.between(startTime, endTime).toMinutes();
             return (int) (minutes / 30); // 30-minute slots
         }
     }

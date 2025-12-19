@@ -10,12 +10,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
- * Admin seeder that creates the default admin account on application startup.
- * Only creates the admin if no admin account exists in the database.
+ * Account seeder that creates default accounts for all roles on application startup.
+ * Only creates accounts if they don't already exist.
  * 
- * Default credentials:
- * - Email: admin@hms.com
- * - Password: Admin123!@
+ * Default credentials (password format: {Role}123!@):
+ * - ADMIN:        admin@hms.com       / Admin123!@
+ * - DOCTOR:       doctor@hms.com      / Doctor123!@
+ * - NURSE:        nurse@hms.com       / Nurse123!@
+ * - RECEPTIONIST: receptionist@hms.com / Receptionist123!@
+ * - PATIENT:      patient@hms.com     / Patient123!@
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -25,31 +28,39 @@ public class AdminSeeder implements CommandLineRunner {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private static final String ADMIN_EMAIL = "admin@hms.com";
-    private static final String ADMIN_PASSWORD = "Admin123!@";
+    // Seed account configurations: email, password, role
+    private static final Object[][] SEED_ACCOUNTS = {
+        {"admin@hms.com", "Admin123!@", RoleEnum.ADMIN},
+        {"doctor@hms.com", "Doctor123!@", RoleEnum.DOCTOR},
+        {"nurse@hms.com", "Nurse123!@", RoleEnum.NURSE},
+        {"receptionist@hms.com", "Receptionist123!@", RoleEnum.RECEPTIONIST},
+        {"patient@hms.com", "Patient123!@", RoleEnum.PATIENT}
+    };
 
     @Override
     public void run(String... args) {
-        // Check if admin already exists
-        if (accountRepository.existsByEmail(ADMIN_EMAIL)) {
-            log.info("Admin account already exists: {}", ADMIN_EMAIL);
+        for (Object[] accountData : SEED_ACCOUNTS) {
+            String email = (String) accountData[0];
+            String password = (String) accountData[1];
+            RoleEnum role = (RoleEnum) accountData[2];
+            
+            createAccountIfNotExists(email, password, role);
+        }
+    }
+
+    private void createAccountIfNotExists(String email, String password, RoleEnum role) {
+        if (accountRepository.existsByEmail(email)) {
+            log.debug("Account already exists: {} ({})", email, role);
             return;
         }
 
-        // Check if ANY admin exists
-        if (accountRepository.existsByRole(RoleEnum.ADMIN)) {
-            log.info("An admin account already exists in the system");
-            return;
-        }
+        Account account = new Account();
+        account.setEmail(email);
+        account.setPassword(passwordEncoder.encode(password));
+        account.setRole(role);
+        account.setEmailVerified(true);
 
-        // Create default admin account
-        Account admin = new Account();
-        admin.setEmail(ADMIN_EMAIL);
-        admin.setPassword(passwordEncoder.encode(ADMIN_PASSWORD));
-        admin.setRole(RoleEnum.ADMIN);
-        admin.setEmailVerified(true);
-
-        accountRepository.save(admin);
-        log.info("Created default admin account: {}", ADMIN_EMAIL);
+        accountRepository.save(account);
+        log.info("Created seed account: {} with role {}", email, role);
     }
 }

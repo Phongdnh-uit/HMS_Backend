@@ -234,6 +234,7 @@ services:
     environment:
       - 'SERVICE=hr-service'
       - 'EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/'
+      - 'APPOINTMENT_SERVICE_URL=http://appointment-service-pro:8085'
     ports:
       - "${HR_SERVICE_PORT}:${HR_SERVICE_PORT}"
     depends_on:
