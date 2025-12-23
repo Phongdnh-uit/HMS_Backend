@@ -1,5 +1,6 @@
+ARG JAVA_VERSION=23
 # -------- Stage 1: Build --------
-FROM eclipse-temurin:23-jdk AS builder
+FROM eclipse-temurin:${JAVA_VERSION}-jdk AS builder
 WORKDIR /build
 
 # Copy root build files first (tối ưu cache)
