@@ -80,23 +80,51 @@ public class PatientHelper {
     }
 
     public static boolean isAccountExists(PatientRequest patientRequest, PatientRepository patientRepository) {
-        //CHECK IF FIELDS ALREADY EXIST IN ANOTHER ACCOUNT
-        // EMAIL, IDENTIFICATION NUMBER, HEALTH INSURANCE NUMBER
+        Specification<Patient> existsPatientSpec = Specification.where(null);
+        boolean hasCondition = false;
 
-        Specification<Patient> existsPatientSpec = PatientHelper.emailLike(patientRequest.getEmail())
-                .or(PatientHelper.healthInsuranceNumberLike(patientRequest.getHealthInsuranceNumber()))
-                .or(PatientHelper.identificationNumberLike(patientRequest.getIdentificationNumber()));
+        if (patientRequest.getEmail() != null && !patientRequest.getEmail().isEmpty()) {
+            existsPatientSpec = existsPatientSpec.or(PatientHelper.emailLike(patientRequest.getEmail()));
+            hasCondition = true;
+        }
 
-        return patientRepository.exists(existsPatientSpec);
+        if (patientRequest.getHealthInsuranceNumber() != null && !patientRequest.getHealthInsuranceNumber().isEmpty()) {
+            existsPatientSpec = (existsPatientSpec == null) 
+                ? PatientHelper.healthInsuranceNumberLike(patientRequest.getHealthInsuranceNumber())
+                : existsPatientSpec.or(PatientHelper.healthInsuranceNumberLike(patientRequest.getHealthInsuranceNumber()));
+            hasCondition = true;
+        }
+
+        if (patientRequest.getIdentificationNumber() != null && !patientRequest.getIdentificationNumber().isEmpty()) {
+            existsPatientSpec = (existsPatientSpec == null) 
+                ? PatientHelper.identificationNumberLike(patientRequest.getIdentificationNumber())
+                : existsPatientSpec.or(PatientHelper.identificationNumberLike(patientRequest.getIdentificationNumber()));
+            hasCondition = true;
+        }
+
+        return hasCondition && patientRepository.exists(existsPatientSpec);
     }
 
     public static boolean isAccountExists(PatientRequest patientRequest, PatientRepository patientRepository, String ownId) {
-        //CHECK IF FIELDS ALREADY EXIST IN ANOTHER ACCOUNT
-        // EMAIL, IDENTIFICATION NUMBER, HEALTH INSURANCE NUMBER
+        Specification<Patient> existsPatientSpec = null;
 
-        Specification<Patient> existsPatientSpec = PatientHelper.emailLike(patientRequest.getEmail())
-                .or(PatientHelper.healthInsuranceNumberLike(patientRequest.getHealthInsuranceNumber()))
-                .or(PatientHelper.identificationNumberLike(patientRequest.getIdentificationNumber()));
+        if (patientRequest.getEmail() != null && !patientRequest.getEmail().isEmpty()) {
+            existsPatientSpec = PatientHelper.emailLike(patientRequest.getEmail());
+        }
+
+        if (patientRequest.getHealthInsuranceNumber() != null && !patientRequest.getHealthInsuranceNumber().isEmpty()) {
+            existsPatientSpec = (existsPatientSpec == null) 
+                ? PatientHelper.healthInsuranceNumberLike(patientRequest.getHealthInsuranceNumber())
+                : existsPatientSpec.or(PatientHelper.healthInsuranceNumberLike(patientRequest.getHealthInsuranceNumber()));
+        }
+
+        if (patientRequest.getIdentificationNumber() != null && !patientRequest.getIdentificationNumber().isEmpty()) {
+            existsPatientSpec = (existsPatientSpec == null) 
+                ? PatientHelper.identificationNumberLike(patientRequest.getIdentificationNumber())
+                : existsPatientSpec.or(PatientHelper.identificationNumberLike(patientRequest.getIdentificationNumber()));
+        }
+
+        if (existsPatientSpec == null) return false;
 
         return patientRepository.findAll(existsPatientSpec).stream().anyMatch(p -> !p.getId().equals(ownId));
     }

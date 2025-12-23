@@ -116,4 +116,11 @@ public class AuthServiceImpl implements AuthService {
         account.setRefreshToken(null);
         accountRepository.save(account);
     }
+
+    @Override
+    public AccountResponse findById(String userId) {
+        var account = accountRepository.findById(userId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Account not found"));
+        return accountMapper.entityToResponse(account);
+    }
 }

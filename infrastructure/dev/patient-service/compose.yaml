@@ -3,9 +3,10 @@ services:
     image: 'mysql:latest'
     container_name: mysql-patient-service-dev
     environment:
-      - 'MYSQL_DATABASE=mydatabase'
+      - 'MYSQL_DATABASE=patient_db'
       - 'MYSQL_PASSWORD=secret'
       - 'MYSQL_ROOT_PASSWORD=verysecret'
       - 'MYSQL_USER=myuser'
     ports:
       - '3308:3306'
+  

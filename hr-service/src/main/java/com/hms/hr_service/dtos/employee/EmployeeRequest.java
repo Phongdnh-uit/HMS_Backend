@@ -34,6 +34,9 @@ public class EmployeeRequest {
 
     private String address;
 
+    @jakarta.validation.constraints.Email(message = "Email should be valid")
+    private String email;
+
     @NotNull(message = "Status is required")
     private EmployeeStatus status;
 

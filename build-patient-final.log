@@ -1,0 +1,55 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.fast
+#1 transferring dockerfile:
+#1 transferring dockerfile: 516B 0.0s done
+#1 DONE 0.4s
+
+#2 [internal] load metadata for docker.io/library/eclipse-temurin:23-jre-alpine
+#2 DONE 4.9s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.1s
+
+#4 [1/4] FROM docker.io/library/eclipse-temurin:23-jre-alpine@sha256:88593498863c64b43be16e8357a3c70ea475fc20a93bf1e07f4609213a357c87
+#4 resolve docker.io/library/eclipse-temurin:23-jre-alpine@sha256:88593498863c64b43be16e8357a3c70ea475fc20a93bf1e07f4609213a357c87 0.1s done
+#4 DONE 0.1s
+
+#5 [internal] load build context
+#5 transferring context: 3.61MB 5.0s
+#5 transferring context: 13.01MB 10.1s
+#5 transferring context: 19.40MB 15.1s
+#5 transferring context: 32.06MB 20.2s
+#5 transferring context: 42.12MB 25.3s
+#5 ...
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] RUN apk add --no-cache curl
+#7 CACHED
+
+#5 [internal] load build context
+#5 transferring context: 48.93MB 30.4s
+#5 transferring context: 61.49MB 35.4s
+#5 transferring context: 70.76MB 40.5s
+#5 transferring context: 85.84MB 45.6s
+#5 transferring context: 85.89MB 45.7s done
+#5 DONE 46.4s
+
+#8 [4/4] COPY patient-service/build/libs/patient-service-*.jar ./app.jar
+#8 DONE 13.6s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 19.2s done
+#9 exporting manifest sha256:3e3fac2b310ac8cc0e502ebffbac5bad7ce0f7f135b4bb2fa9c2e43db5a06245 0.1s done
+#9 exporting config sha256:6c6fea419f92aa16d44bc9ae0eb30dd45776839539c27dede1a42a1d5c8c4158 0.1s done
+#9 exporting attestation manifest sha256:49e64c68c41d3804f8e663c10d7031582d8d75afbf00f0c2b8047750ac85d25f 0.1s done
+#9 exporting manifest list sha256:bb71f690c43f90d6b515bd32a9391dcb9554228f92d499d7c50e77745d7a74e6
+#9 exporting manifest list sha256:bb71f690c43f90d6b515bd32a9391dcb9554228f92d499d7c50e77745d7a74e6 0.0s done
+#9 naming to docker.io/dnhphong2005/patient-service:latest 0.0s done
+#9 unpacking to docker.io/dnhphong2005/patient-service:latest
+#9 unpacking to docker.io/dnhphong2005/patient-service:latest 12.5s done
+#9 DONE 32.3s

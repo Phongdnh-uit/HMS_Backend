@@ -1,0 +1,42 @@
+spring:
+  docker:
+    compose:
+      enabled: ${DOCKER_COMPOSE_ENABLED:false}
+      file: ${DOCKER_COMPOSE_FILE_APPOINTMENT_SERVICE:file:infrastructure/dev/appointment-service/compose.yaml}
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${APPOINTMENT_DB_HOST:localhost}:${APPOINTMENT_DB_PORT:3308}/${APPOINTMENT_DB_NAME:mydatabase}
+    username: ${APPOINTMENT_DB_USERNAME:myuser}
+    password: ${APPOINTMENT_DB_PASSWORD:secret}
+  jpa:
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: ${APPOINTMENT_SERVICE_PORT:8083}
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://${DISCOVERY_SERVICE_HOST:localhost}:${DISCOVERY_SERVICE_PORT:8761}/eureka/
+
+# Feign client configuration for direct service URLs (bypass Eureka when configured)
+feign:
+  client:
+    config:
+      hr-service:
+        url: ${HR_SERVICE_URL:http://hr-service-pro:8084}
+  autoconfiguration:
+    jackson:
+      enabled: true
+
+# Feign logging - WARN level for error visibility
+logging:
+  level:
+    com.hms.common.exceptions.FeignCustomErrorDecoder: WARN
+    com.hms.common.helpers.FeignHelper: WARN

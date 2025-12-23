@@ -13,4 +13,6 @@ public interface AuthService {
     LoginResponse refreshToken(String refreshToken);
 
     void logout(String refreshToken);
+
+    AccountResponse findById(String userId);
 }

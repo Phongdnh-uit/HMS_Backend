@@ -15,9 +15,11 @@ public class EmployeeResponse {
     private String fullName;
     private EmployeeRole role;
     private String departmentId;
+    private String departmentName;
     private String specialization;
     private String licenseNumber;
     private String phoneNumber;
+    private String email;
     private String address;
     private EmployeeStatus status;
     private Instant hiredAt;

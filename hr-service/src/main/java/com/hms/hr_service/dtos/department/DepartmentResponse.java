@@ -13,6 +13,7 @@ public class DepartmentResponse {
     private String name;
     private String description;
     private String headDoctorId;
+    private String headDoctorName;
     private String location;
     private String phoneExtension;
     private DepartmentStatus status;

@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing
-@EnableFeignClients(basePackages = "com.hms.common.clients")
+@EnableFeignClients(basePackages = {"com.hms.common.clients", "com.hms.hr_service.clients"})
 @SpringBootApplication(scanBasePackages = "com.hms")
 public class HrServiceApplication {
 

@@ -14,7 +14,8 @@ services:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 60s
     networks:
       - app-network
     restart: always
@@ -32,7 +33,8 @@ services:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 60s
     networks:
       - app-network
     restart: always
@@ -50,7 +52,46 @@ services:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 60s
+    networks:
+      - app-network
+    restart: always
+  mysql-hr-service:
+    image: mysql:8.0
+    container_name: mysql-hr-service
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${HR_DB_PASSWORD}
+      MYSQL_DATABASE: ${HR_DB_NAME}
+      MYSQL_USER: ${HR_DB_USERNAME}
+      MYSQL_PASSWORD: ${HR_DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - app-network
+    restart: always
+  mysql-appointment-service:
+    image: mysql:8.0
+    container_name: mysql-appointment-service
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${APPOINTMENT_DB_PASSWORD}
+      MYSQL_DATABASE: ${APPOINTMENT_DB_NAME}
+      MYSQL_USER: ${APPOINTMENT_DB_USERNAME}
+      MYSQL_PASSWORD: ${APPOINTMENT_DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
     networks:
       - app-network
     restart: always
@@ -78,23 +119,30 @@ services:
     build:
       context: ../../
       dockerfile: infrastructure/pro/Dockerfile
+      args:
+        SERVICE: config-server
     container_name: config-server-pro
     environment:
       - 'SERVICE=config-server'
     env_file:
       - .env
+    ports:
+      - "${CONFIG_SERVER_PORT}:${CONFIG_SERVER_PORT}"
     networks:
       - app-network
     restart: always
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:${CONFIG_SERVER_PORT}/actuator/health" ]
-      interval: 30s
+      interval: 15s
       timeout: 10s
-      retries: 5
+      retries: 10
+      start_period: 90s
   discovery-service-pro:
     build:
       context: ../../
       dockerfile: infrastructure/pro/Dockerfile
+      args:
+        SERVICE: discovery-service
     container_name: discovery-service-pro
     environment:
       - 'SERVICE=discovery-service'
@@ -112,9 +160,12 @@ services:
     build:
       context: ../../
       dockerfile: infrastructure/pro/Dockerfile
+      args:
+        SERVICE: api-gateway
     container_name: api-gateway-pro
     environment:
       - 'SERVICE=api-gateway'
+      - 'EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/'
     ports:
       - "${API_GATEWAY_PORT}:${API_GATEWAY_PORT}"
     depends_on:
@@ -129,9 +180,14 @@ services:
     build:
       context: ../../
       dockerfile: infrastructure/pro/Dockerfile
+      args:
+        SERVICE: auth-service
     container_name: auth-service-pro
     environment:
       - 'SERVICE=auth-service'
+      - 'EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/'
+    ports:
+      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
     depends_on:
       config-server-pro:
         condition: service_healthy
@@ -146,9 +202,14 @@ services:
     build:
       context: ../../
       dockerfile: infrastructure/pro/Dockerfile
+      args:
+        SERVICE: medicine-service
     container_name: medicine-service-pro
     environment:
       - 'SERVICE=medicine-service'
+      - 'EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/'
+    ports:
+      - "${MEDICINE_SERVICE_PORT}:${MEDICINE_SERVICE_PORT}"
     depends_on:
       config-server-pro:
         condition: service_healthy
@@ -163,9 +224,14 @@ services:
     build:
       context: ../../
       dockerfile: infrastructure/pro/Dockerfile
+      args:
+        SERVICE: patient-service
     container_name: patient-service-pro
     environment:
       - 'SERVICE=patient-service'
+      - 'EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/'
+    ports:
+      - "${PATIENT_SERVICE_PORT}:${PATIENT_SERVICE_PORT}"
     depends_on:
       config-server-pro:
         condition: service_healthy
@@ -180,9 +246,15 @@ services:
     build:
       context: ../../
       dockerfile: infrastructure/pro/Dockerfile
+      args:
+        SERVICE: hr-service
     container_name: hr-service-pro
     environment:
       - 'SERVICE=hr-service'
+      - 'EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/'
+      - 'APPOINTMENT_SERVICE_URL=http://appointment-service-pro:8085'
+    ports:
+      - "${HR_SERVICE_PORT}:${HR_SERVICE_PORT}"
     depends_on:
       config-server-pro:
         condition: service_healthy
@@ -193,6 +265,73 @@ services:
     networks:
       - app-network
     restart: always
+  appointment-service-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+      args:
+        SERVICE: appointment-service
+    container_name: appointment-service-pro
+    environment:
+      - 'SERVICE=appointment-service'
+      - 'EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/'
+    ports:
+      - "${APPOINTMENT_SERVICE_PORT}:${APPOINTMENT_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-appointment-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+  
+  # Medical Exam Service (merged from feature/medical-exam-service)
+  mysql-medical-exam-service:
+    image: mysql:8.0
+    container_name: mysql-medical-exam-service
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MEDICAL_EXAM_DB_PASSWORD}
+      MYSQL_DATABASE: ${MEDICAL_EXAM_DB_NAME}
+      MYSQL_USER: ${MEDICAL_EXAM_DB_USERNAME}
+      MYSQL_PASSWORD: ${MEDICAL_EXAM_DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - app-network
+    restart: always
+
+  medical-exam-service-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+      args:
+        SERVICE: medical-exam-service
+    container_name: medical-exam-service-pro
+    environment:
+      - 'SERVICE=medical-exam-service'
+      - 'EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/'
+    ports:
+      - "${MEDICAL_EXAM_SERVICE_PORT}:${MEDICAL_EXAM_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-medical-exam-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+
 networks:
   app-network:
     driver: bridge

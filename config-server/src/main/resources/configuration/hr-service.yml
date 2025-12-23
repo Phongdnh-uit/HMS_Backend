@@ -22,3 +22,12 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://${DISCOVERY_SERVICE_HOST:localhost}:${DISCOVERY_SERVICE_PORT:8761}/eureka/
+
+# Feign client configuration for direct service URLs
+# Uses service discovery (Eureka) by default when URL is empty
+# For explicit URL: set APPOINTMENT_SERVICE_URL env var in compose.yaml
+feign:
+  client:
+    config:
+      appointment-service:
+        url: ${APPOINTMENT_SERVICE_URL:}
