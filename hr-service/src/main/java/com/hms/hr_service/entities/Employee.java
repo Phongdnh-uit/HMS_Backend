@@ -44,9 +44,6 @@ public class Employee {
 
     private String phoneNumber;
 
-    @jakarta.validation.constraints.Email(message = "Email should be valid")
-    private String email;
-
     private String address;
 
     @Column(nullable = false)

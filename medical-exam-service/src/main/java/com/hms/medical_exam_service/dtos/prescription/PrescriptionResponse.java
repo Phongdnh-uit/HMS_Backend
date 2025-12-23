@@ -26,6 +26,9 @@ public class PrescriptionResponse {
 
     // Cancellation info (populated when status=CANCELLED)
     private CancellationInfo cancellation;
+
+    // Dispense info (populated when status=DISPENSED)
+    private DispenseInfo dispense;
     
     private Instant prescribedAt;
     private String notes;
@@ -66,5 +69,12 @@ public class PrescriptionResponse {
         private Instant cancelledAt;
         private String cancelledBy;
         private String reason;
+    }
+
+    @Getter
+    @Setter
+    public static class DispenseInfo {
+        private Instant dispensedAt;
+        private String dispensedBy;
     }
 }

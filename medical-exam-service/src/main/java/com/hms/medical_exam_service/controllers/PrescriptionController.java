@@ -200,4 +200,38 @@ public class PrescriptionController {
         log.info("Prescription cancelled: id={}", saved.getId());
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
+
+    /**
+     * Dispense a prescription (pharmacy gives medicines to patient).
+     * Transitions status from ACTIVE to DISPENSED.
+     * Only ACTIVE prescriptions can be dispensed.
+     * 
+     * @param id The prescription ID
+     * @return The dispensed prescription
+     */
+    @PostMapping("/prescriptions/{id}/dispense")
+    @Transactional
+    public ResponseEntity<ApiResponse<PrescriptionResponse>> dispense(@PathVariable String id) {
+        
+        log.info("Dispensing prescription: id={}", id);
+        
+        // 1. Fetch prescription
+        Prescription prescription = prescriptionRepository.findById(id)
+            .orElseThrow(() -> new ApiException(ErrorCode.PRESCRIPTION_NOT_FOUND, 
+                "Prescription not found: " + id));
+        
+        // 2. Dispense via hook (validates status, updates fields)
+        // TODO: Get actual user ID from security context
+        String dispensedBy = "system"; // Placeholder - will be from SecurityContext
+        prescriptionHook.dispensePrescription(prescription, dispensedBy);
+        
+        // 3. Save
+        Prescription saved = prescriptionRepository.save(prescription);
+        
+        // 4. Map to response
+        PrescriptionResponse response = prescriptionMapper.entityToResponse(saved);
+        
+        log.info("Prescription dispensed: id={}", saved.getId());
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
 }

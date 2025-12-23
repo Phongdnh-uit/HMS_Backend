@@ -49,6 +49,19 @@ public class PatientHook implements GenericHook<Patient, String, PatientRequest,
 
     @Override
     public void enrichCreate(PatientRequest input, Patient entity, Map<String, Object> context) {
+        // Auto-fill email from Account if accountId is provided and email is empty
+        if (entity.getAccountId() != null && !entity.getAccountId().isEmpty() 
+                && (entity.getEmail() == null || entity.getEmail().isEmpty())) {
+            try {
+                var accountResponse = authClient.findById(entity.getAccountId());
+                if (accountResponse != null && accountResponse.getData() != null) {
+                    entity.setEmail(accountResponse.getData().getEmail());
+                }
+            } catch (Exception e) {
+                // If account fetch fails, proceed with enrichDefaultData which sets "N/A"
+            }
+        }
+        
         PatientHelper.enrichDefaultData(entity);
     }
 

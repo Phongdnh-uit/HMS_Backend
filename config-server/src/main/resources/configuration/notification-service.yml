@@ -1,0 +1,65 @@
+spring:
+  docker:
+    compose:
+      enabled: ${DOCKER_COMPOSE_ENABLED:false}
+      file: ${DOCKER_COMPOSE_FILE_NOTIFICATION_SERVICE:file:infrastructure/dev/notification-service/compose.yaml}
+  
+  # Email configuration (SMTP)
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+server:
+  port: ${NOTIFICATION_SERVICE_PORT:8089}
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://${DISCOVERY_SERVICE_HOST:localhost}:${DISCOVERY_SERVICE_PORT:8761}/eureka/
+
+# Feign client configuration
+feign:
+  client:
+    config:
+      appointment-service:
+        url: ${APPOINTMENT_SERVICE_URL:http://appointment-service-pro:8083}
+      patient-service:
+        url: ${PATIENT_SERVICE_URL:http://patient-service-pro:8082}
+      medical-exam-service:
+        url: ${MEDICAL_EXAM_SERVICE_URL:http://medical-exam-service-pro:8084}
+  autoconfiguration:
+    jackson:
+      enabled: true
+
+# Notification settings
+notification:
+  followup:
+    # Cron expression: 8 AM every day (production)
+    # For testing: "*/20 * * * * ?" runs every 20 seconds
+    cron: "${FOLLOWUP_CRON:0 0 8 * * ?}"
+    # Days offset: 1 = tomorrow (production), 0 = today (testing)
+    days-offset: ${FOLLOWUP_DAYS_OFFSET:1}
+
+# App name for emails
+app:
+  name: ${APP_NAME:Hospital Management System}
+
+# Logging
+logging:
+  level:
+    com.hms.notification_service: INFO
+    com.hms.common.exceptions.FeignCustomErrorDecoder: WARN

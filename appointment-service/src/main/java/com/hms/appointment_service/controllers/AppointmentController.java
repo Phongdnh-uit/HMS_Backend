@@ -1,7 +1,9 @@
 package com.hms.appointment_service.controllers;
 
+import com.hms.appointment_service.clients.PatientClient;
 import com.hms.appointment_service.dtos.appointment.AppointmentRequest;
 import com.hms.appointment_service.dtos.appointment.AppointmentResponse;
+import com.hms.appointment_service.dtos.appointment.AppointmentStatsResponse;
 import com.hms.appointment_service.dtos.appointment.CancelAppointmentResponse;
 import com.hms.appointment_service.dtos.appointment.CancelRequest;
 import com.hms.appointment_service.entities.Appointment;
@@ -9,9 +11,17 @@ import com.hms.appointment_service.mappers.AppointmentMapper;
 import com.hms.appointment_service.services.AppointmentService;
 import com.hms.common.controllers.GenericController;
 import com.hms.common.dtos.ApiResponse;
+import com.hms.common.dtos.PageResponse;
+import com.hms.common.securities.UserContext;
 import com.hms.common.services.CrudService;
+import io.github.perplexhub.rsql.RSQLJPASupport;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -19,18 +29,70 @@ import java.time.LocalDate;
 
 @RequestMapping("/appointments")
 @RestController
+@Slf4j
 public class AppointmentController extends GenericController<Appointment, String, AppointmentRequest, AppointmentResponse> {
 
     private final AppointmentService appointmentService;
     private final AppointmentMapper appointmentMapper;
+    private final PatientClient patientClient;
 
     public AppointmentController(
             CrudService<Appointment, String, AppointmentRequest, AppointmentResponse> service,
             AppointmentService appointmentService,
-            AppointmentMapper appointmentMapper) {
+            AppointmentMapper appointmentMapper,
+            PatientClient patientClient) {
         super(service);
         this.appointmentService = appointmentService;
         this.appointmentMapper = appointmentMapper;
+        this.patientClient = patientClient;
+    }
+
+    /**
+     * Override findAll to enforce PATIENT role can only see their own appointments.
+     * For PATIENT users, this automatically filters by their patientId.
+     */
+    @Override
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<PageResponse<AppointmentResponse>>> findAll(
+            Pageable pageable,
+            @RequestParam(value = "filter", required = false) @Nullable String filter,
+            @RequestParam(value = "all", defaultValue = "false") boolean all) {
+        
+        String effectiveFilter = filter;
+        
+        // Check if current user is PATIENT role
+        UserContext.User currentUser = UserContext.getUser();
+        if (currentUser != null && "PATIENT".equals(currentUser.getRole())) {
+            try {
+                // Fetch patient profile to get patientId
+                var patientResponse = patientClient.getMyPatientProfile();
+                if (patientResponse != null && patientResponse.getData() != null) {
+                    String patientId = patientResponse.getData().id();
+                    log.info("PATIENT role detected. Enforcing filter for patientId: {}", patientId);
+                    
+                    // Prepend patient filter to existing filter
+                    String patientFilter = "patientId==" + patientId;
+                    if (effectiveFilter != null && !effectiveFilter.isBlank()) {
+                        effectiveFilter = patientFilter + ";" + effectiveFilter;
+                    } else {
+                        effectiveFilter = patientFilter;
+                    }
+                } else {
+                    log.warn("PATIENT role but no patient profile found. Returning empty results.");
+                    // Return empty page for patients without profile
+                    return ResponseEntity.ok(ApiResponse.ok(PageResponse.empty()));
+                }
+            } catch (Exception e) {
+                log.error("Failed to fetch patient profile for PATIENT role: {}", e.getMessage());
+                return ResponseEntity.ok(ApiResponse.ok(PageResponse.empty()));
+            }
+        }
+        
+        Specification<Appointment> specification = RSQLJPASupport.toSpecification(effectiveFilter);
+        if (all) {
+            pageable = Pageable.unpaged(pageable.getSort());
+        }
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable, specification)));
     }
 
     /**
@@ -116,4 +178,17 @@ public class AppointmentController extends GenericController<Appointment, String
         int restoredCount = appointmentService.restoreByDoctorAndDate(doctorId, date);
         return ResponseEntity.ok(ApiResponse.ok("Restored " + restoredCount + " appointments", restoredCount));
     }
+    
+    /**
+     * Get appointment statistics for reporting.
+     * Pre-aggregated data for report-service consumption.
+     */
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<AppointmentStatsResponse>> getStats(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        var stats = appointmentService.getStats(startDate, endDate);
+        return ResponseEntity.ok(ApiResponse.ok(stats));
+    }
 }
+

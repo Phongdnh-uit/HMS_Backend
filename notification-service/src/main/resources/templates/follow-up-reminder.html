@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Follow-up Appointment Reminder</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #0ea5e9;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #0ea5e9;
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            margin-bottom: 20px;
+        }
+        .highlight {
+            background-color: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .highlight .date {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0369a1;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #0ea5e9;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e5e5;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 th:text="${appName}">Hospital Management System</h1>
+            <p>Follow-up Appointment Reminder</p>
+        </div>
+
+        <div class="content">
+            <p>Dear <strong th:text="${patientName}">Patient</strong>,</p>
+            
+            <p>This is a friendly reminder that you have a recommended follow-up appointment tomorrow.</p>
+
+            <div class="highlight">
+                <p><strong>Recommended Follow-up Date:</strong></p>
+                <p class="date" th:text="${followUpDate}">January 1, 2025</p>
+                <p><strong>Doctor:</strong> <span th:text="${doctorName}">Dr. Smith</span></p>
+                <p th:if="${appointmentReason != null and !appointmentReason.isEmpty()}">
+                    <strong>Previous Visit Reason:</strong> <span th:text="${appointmentReason}">Check-up</span>
+                </p>
+            </div>
+
+            <p>Please schedule your follow-up appointment as soon as possible to ensure continuity of care.</p>
+
+            <p style="text-align: center;">
+                <a th:href="${bookingUrl}" href="http://localhost:3000/login" class="cta-button">Book Appointment</a>
+            </p>
+
+            <p>If you have any questions, please contact our reception desk.</p>
+
+            <p>Best regards,<br/>
+            <strong th:text="${appName}">Hospital Management System</strong> Team</p>
+        </div>
+
+        <div class="footer">
+            <p>This is an automated reminder. Please do not reply to this email.</p>
+            <p>&copy; 2024 <span th:text="${appName}">Hospital Management System</span>. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

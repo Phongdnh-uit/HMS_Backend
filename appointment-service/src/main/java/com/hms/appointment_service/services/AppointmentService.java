@@ -1,10 +1,18 @@
 package com.hms.appointment_service.services;
 
+import com.hms.appointment_service.clients.HrClient;
 import com.hms.appointment_service.constants.AppointmentStatus;
+import com.hms.appointment_service.dtos.appointment.AppointmentStatsResponse;
+import com.hms.appointment_service.dtos.appointment.AppointmentResponse;
+import com.hms.appointment_service.dtos.appointment.TimeSlotResponse;
 import com.hms.appointment_service.entities.Appointment;
+import com.hms.appointment_service.mappers.AppointmentMapper;
 import com.hms.appointment_service.repositories.AppointmentRepository;
+import com.hms.common.dtos.ApiResponse;
+import com.hms.common.dtos.PageResponse;
 import com.hms.common.exceptions.errors.ApiException;
 import com.hms.common.exceptions.errors.ErrorCode;
+import com.hms.common.helpers.FeignHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,8 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service for appointment-specific business logic.
@@ -25,8 +38,8 @@ import java.util.List;
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
-    private final com.hms.appointment_service.clients.HrClient hrClient;
-    private final com.hms.appointment_service.mappers.AppointmentMapper appointmentMapper;
+    private final HrClient hrClient;
+    private final AppointmentMapper appointmentMapper;
 
     /**
      * Get available time slots for a doctor on a specific date.
@@ -36,14 +49,14 @@ public class AppointmentService {
      * @param date     The date to check
      * @return List of time slots with availability status
      */
-    public List<com.hms.appointment_service.dtos.appointment.TimeSlotResponse> getAvailableSlots(String doctorId, LocalDate date) {
+    public List<TimeSlotResponse> getAvailableSlots(String doctorId, LocalDate date) {
         log.info("🔍 [getAvailableSlots] Fetching slots for doctor {} on {}", doctorId, date);
 
         // 1. Get Doctor Schedule from HR Service
-        com.hms.common.dtos.ApiResponse<com.hms.appointment_service.clients.HrClient.ScheduleInfo> scheduleResponse;
+        ApiResponse<HrClient.ScheduleInfo> scheduleResponse;
         try {
             log.info("📞 [getAvailableSlots] Calling HR service for schedule: doctorId={}, date={}", doctorId, date);
-            scheduleResponse = com.hms.common.helpers.FeignHelper.safeCall(() -> 
+            scheduleResponse = FeignHelper.safeCall(() -> 
                 hrClient.getScheduleByDoctorAndDate(doctorId, date));
             log.info("✅ [getAvailableSlots] HR service response received: {}", scheduleResponse != null ? "Not null" : "NULL");
             if (scheduleResponse != null) {
@@ -82,16 +95,16 @@ public class AppointmentService {
         log.info("🚫 [getAvailableSlots] Booked times (excluding cancelled): {}", bookedTimes);
 
         // 3. Generate Slots
-        List<com.hms.appointment_service.dtos.appointment.TimeSlotResponse> slots = new java.util.ArrayList<>();
-        java.time.LocalTime start = schedule.startTime(); // Already LocalTime
-        java.time.LocalTime end = schedule.endTime(); // Already LocalTime
+        List<TimeSlotResponse> slots = new ArrayList<>();
+        LocalTime start = schedule.startTime();
+        LocalTime end = schedule.endTime();
 
         while (start.isBefore(end)) {
             String timeStr = start.toString();
             if (timeStr.length() == 8) timeStr = timeStr.substring(0, 5); // Ensure HH:mm
 
             boolean isBooked = bookedTimes.contains(timeStr);
-            slots.add(com.hms.appointment_service.dtos.appointment.TimeSlotResponse.builder()
+            slots.add(TimeSlotResponse.builder()
                     .time(timeStr)
                     .available(!isBooked)
                     .build());
@@ -288,7 +301,7 @@ public class AppointmentService {
      * @param pageable  Pagination parameters
      * @return PageResponse of appointments for this patient
      */
-    public com.hms.common.dtos.PageResponse<com.hms.appointment_service.dtos.appointment.AppointmentResponse> getByPatientId(
+    public PageResponse<AppointmentResponse> getByPatientId(
             String patientId, org.springframework.data.domain.Pageable pageable) {
         log.debug("Getting appointments for patient: {}", patientId);
         
@@ -296,9 +309,102 @@ public class AppointmentService {
                 appointmentRepository.findByPatientId(patientId, pageable);
         
         // Convert to response DTOs using the mapper
-        org.springframework.data.domain.Page<com.hms.appointment_service.dtos.appointment.AppointmentResponse> responsePageData = 
+        org.springframework.data.domain.Page<AppointmentResponse> responsePageData = 
                 appointments.map(appointmentMapper::entityToResponse);
         
-        return com.hms.common.dtos.PageResponse.fromPage(responsePageData);
+        return PageResponse.fromPage(responsePageData);
+    }
+    
+    /**
+     * Get aggregated appointment statistics for reporting.
+     * Pre-aggregates data at source for efficient reporting.
+     *
+     * @param startDate Start date for stats period
+     * @param endDate   End date for stats period
+     * @return Pre-aggregated appointment statistics
+     */
+    public AppointmentStatsResponse getStats(LocalDate startDate, LocalDate endDate) {
+        log.info("Generating appointment statistics from {} to {}", startDate, endDate);
+        
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+        Instant startInstant = startDate.atStartOfDay(zoneId).toInstant();
+        Instant endInstant = endDate.plusDays(1).atStartOfDay(zoneId).toInstant();
+        
+        // Get total count
+        long totalCount = appointmentRepository.countInDateRange(startInstant, endInstant);
+        
+        // Get counts by status
+        List<Object[]> statusCounts = appointmentRepository.countByStatusInDateRange(startInstant, endInstant);
+        Map<String, Integer> appointmentsByStatus = new HashMap<>();
+        for (Object[] row : statusCounts) {
+            String status = row[0] != null ? row[0].toString() : "UNKNOWN";
+            int count = ((Number) row[1]).intValue();
+            appointmentsByStatus.put(status, count);
+        }
+        
+        // Get counts by type
+        List<Object[]> typeCounts = appointmentRepository.countByTypeInDateRange(startInstant, endInstant);
+        Map<String, Integer> appointmentsByType = new HashMap<>();
+        for (Object[] row : typeCounts) {
+            String type = row[0] != null ? row[0].toString() : "UNKNOWN";
+            int count = ((Number) row[1]).intValue();
+            appointmentsByType.put(type, count);
+        }
+        
+        // Get counts by department
+        List<Object[]> deptCounts = appointmentRepository.countByDepartmentInDateRange(startInstant, endInstant);
+        List<AppointmentStatsResponse.DepartmentStats> departmentStats = new ArrayList<>();
+        for (Object[] row : deptCounts) {
+            String deptName = row[0] != null ? row[0].toString() : "Unknown";
+            int count = ((Number) row[1]).intValue();
+            double percentage = totalCount > 0 ? (count * 100.0 / totalCount) : 0;
+            departmentStats.add(AppointmentStatsResponse.DepartmentStats.builder()
+                    .departmentName(deptName)
+                    .count(count)
+                    .percentage(Math.round(percentage * 10) / 10.0)
+                    .build());
+        }
+        
+        // Calculate average per day
+        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        double averagePerDay = daysBetween > 0 ? Math.round((totalCount * 10.0 / daysBetween)) / 10.0 : 0;
+        
+        // Get daily counts for trend
+        List<Object[]> dailyCounts = appointmentRepository.countByDateInDateRange(startInstant, endInstant);
+        List<AppointmentStatsResponse.DailyCount> dailyTrend = new ArrayList<>();
+        for (Object[] row : dailyCounts) {
+            LocalDate date = null;
+            if (row[0] != null) {
+                if (row[0] instanceof java.sql.Date) {
+                    date = ((java.sql.Date) row[0]).toLocalDate();
+                } else if (row[0] instanceof LocalDate) {
+                    date = (LocalDate) row[0];
+                } else {
+                    date = LocalDate.parse(row[0].toString().substring(0, 10));
+                }
+            }
+            int count = ((Number) row[1]).intValue();
+            if (date != null) {
+                dailyTrend.add(AppointmentStatsResponse.DailyCount.builder()
+                        .date(date)
+                        .count(count)
+                        .build());
+            }
+        }
+        
+        return AppointmentStatsResponse.builder()
+                .startDate(startDate)
+                .endDate(endDate)
+                .totalAppointments((int) totalCount)
+                .appointmentsByStatus(appointmentsByStatus)
+                .appointmentsByType(appointmentsByType)
+                .appointmentsByDepartment(departmentStats)
+                .appointmentsByDoctor(new ArrayList<>())
+                .dailyTrend(dailyTrend)
+                .averagePerDay(averagePerDay)
+                .generatedAt(Instant.now())
+                .build();
     }
 }
+
+

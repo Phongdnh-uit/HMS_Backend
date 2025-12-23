@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 public class MedicalExamRequest {
@@ -45,4 +47,18 @@ public class MedicalExamRequest {
     
     @Size(max = 2000, message = "Notes cannot exceed 2000 characters")
     private String notes;
+    
+    /**
+     * Indicates if a prescription will be created for this exam.
+     * - false/null: Invoice auto-generated immediately after exam creation (consultation only)
+     * - true: Invoice will be auto-generated when prescription is dispensed
+     */
+    private Boolean hasPrescription;
+
+    /**
+     * Optional follow-up date for scheduling a reminder notification.
+     * When set, patient will receive an email reminder on this date.
+     */
+    @FutureOrPresent(message = "Follow-up date must be today or in the future")
+    private LocalDate followUpDate;
 }

@@ -1,7 +1,9 @@
 package com.hms.common.configs;
 
 import com.hms.common.exceptions.FeignCustomErrorDecoder;
+import com.hms.common.securities.UserContext;
 import feign.Request;
+import feign.RequestInterceptor;
 import feign.Retryer;
 import feign.codec.ErrorDecoder;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +17,28 @@ public class FeignConfig {
     @Bean
     public ErrorDecoder errorDecoder() {
         return new FeignCustomErrorDecoder();
+    }
+
+    /**
+     * Request interceptor to forward user context headers to downstream services.
+     * This ensures that when service A calls service B, the user identity is preserved.
+     */
+    @Bean
+    public RequestInterceptor userContextRequestInterceptor() {
+        return requestTemplate -> {
+            UserContext.User user = UserContext.getUser();
+            if (user != null) {
+                if (user.getId() != null) {
+                    requestTemplate.header("X-User-ID", user.getId());
+                }
+                if (user.getRole() != null) {
+                    requestTemplate.header("X-User-Role", user.getRole());
+                }
+                if (user.getEmail() != null) {
+                    requestTemplate.header("X-User-Email", user.getEmail());
+                }
+            }
+        };
     }
 
     /**

@@ -58,7 +58,11 @@ public class SecurityConfig {
                         // ============================================
                         // ADMIN ONLY - Account & HR Management
                         // ============================================
-                        .pathMatchers("/api/auth/accounts/**").hasAuthority("ADMIN")
+                        // Account search allowed for RECEPTIONIST (to link patient accounts)
+                        .pathMatchers(HttpMethod.GET, "/api/auth/accounts/**").hasAnyAuthority("ADMIN", "RECEPTIONIST")
+                        .pathMatchers(HttpMethod.POST, "/api/auth/accounts/**").hasAuthority("ADMIN")
+                        .pathMatchers(HttpMethod.PUT, "/api/auth/accounts/**").hasAuthority("ADMIN")
+                        .pathMatchers(HttpMethod.DELETE, "/api/auth/accounts/**").hasAuthority("ADMIN")
                         .pathMatchers(HttpMethod.POST, "/api/hr/departments/**").hasAuthority("ADMIN")
                         .pathMatchers(HttpMethod.PUT, "/api/hr/departments/**").hasAuthority("ADMIN")
                         .pathMatchers(HttpMethod.DELETE, "/api/hr/departments/**").hasAuthority("ADMIN")
@@ -67,9 +71,9 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.DELETE, "/api/hr/employees/**").hasAuthority("ADMIN")
                         
                         // ============================================
-                        // STAFF - Read HR Data (Admin, Doctor, Nurse, Receptionist)
+                        // STAFF + PATIENT - Read HR Data (for booking)
                         // ============================================
-                        .pathMatchers(HttpMethod.GET, "/api/hr/**").hasAnyAuthority("ADMIN", "DOCTOR", "NURSE", "RECEPTIONIST")
+                        .pathMatchers(HttpMethod.GET, "/api/hr/**").hasAnyAuthority("ADMIN", "DOCTOR", "NURSE", "RECEPTIONIST", "PATIENT")
                         
                         // ============================================
                         // MEDICAL STAFF - Exams & Prescriptions
@@ -107,6 +111,20 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/api/hr/schedules/**").hasAnyAuthority("ADMIN", "RECEPTIONIST")
                         .pathMatchers(HttpMethod.PUT, "/api/hr/schedules/**").hasAnyAuthority("ADMIN", "RECEPTIONIST")
                         .pathMatchers(HttpMethod.GET, "/api/hr/schedules/**").authenticated()
+                        
+                        // ============================================
+                        // BILLING - Admin and Receptionist for invoices
+                        // ============================================
+                        .pathMatchers(HttpMethod.POST, "/api/invoices/**").hasAnyAuthority("ADMIN", "RECEPTIONIST")
+                        .pathMatchers(HttpMethod.PUT, "/api/invoices/**").hasAnyAuthority("ADMIN", "RECEPTIONIST")
+                        .pathMatchers(HttpMethod.DELETE, "/api/invoices/**").hasAuthority("ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/api/invoices/**").hasAnyAuthority("ADMIN", "RECEPTIONIST", "PATIENT")
+                        .pathMatchers("/api/vnpay/**").authenticated()  // VNPay payment
+                        
+                        // ============================================
+                        // REPORTS - Admin only for analytics
+                        // ============================================
+                        .pathMatchers("/api/reports/**").hasAuthority("ADMIN")
                         
                         // Default: require authentication
                         .anyExchange().authenticated()

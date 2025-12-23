@@ -19,7 +19,6 @@ public class EmployeeResponse {
     private String specialization;
     private String licenseNumber;
     private String phoneNumber;
-    private String email;
     private String address;
     private EmployeeStatus status;
     private Instant hiredAt;

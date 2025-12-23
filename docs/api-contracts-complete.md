@@ -2551,15 +2551,15 @@ X-User-Email: doctor1@hms.com
 
 ---
 
-## 💰 7. Billing Service API (`/api/billing`)
+## 💰 7. Billing Service API (`/api/invoices`)
 
-**Base Path:** `/api/billing`  
+**Base Path:** `/api/invoices`  
 **Service Port:** 8087  
-**Purpose:** Invoice and payment management
+**Purpose:** Invoice management (Payment endpoints planned for future implementation)
 
 ### 7.1 Auto-Generate Invoice
 
-**Endpoint:** `POST /api/billing/invoices/generate`  
+**Endpoint:** `POST /api/invoices/generate`  
 **Access:** Internal (triggered by prescription creation)  
 **Request Body:**
 ```json
@@ -2621,7 +2621,7 @@ X-User-Email: doctor1@hms.com
 
 ### 7.2 Get Invoice by ID
 
-**Endpoint:** `GET /api/billing/invoices/{id}`  
+**Endpoint:** `GET /api/invoices/{id}`  
 **Access:** ADMIN, PATIENT (own)  
 **Description:** Retrieve invoice details by invoice ID
 
@@ -2679,7 +2679,7 @@ X-User-Email: doctor1@hms.com
 
 ### 7.3 Get Invoice by Appointment
 
-**Endpoint:** `GET /api/billing/invoices/by-appointment/{appointmentId}`  
+**Endpoint:** `GET /api/invoices/by-appointment/{appointmentId}`  
 **Access:** ADMIN, PATIENT (own)  
 **Description:** Retrieve invoice by appointment ID
 
@@ -2719,9 +2719,9 @@ X-User-Email: doctor1@hms.com
 
 ### 7.4 List Invoices
 
-**Endpoint:** `GET /api/billing/invoices`  
-**Access:** ADMIN  
-**Description:** List all invoices with filters (admin only)
+**Endpoint:** `GET /api/invoices`  
+**Access:** RECEPTIONIST, ADMIN  
+**Description:** List all invoices with filters
 
 **Query Parameters:**
 - `patientId` (string, optional): Filter by patient
@@ -2772,8 +2772,8 @@ X-User-Email: doctor1@hms.com
 
 ### 7.5 Get Patient Invoices
 
-**Endpoint:** `GET /api/billing/invoices/by-patient/{patientId}`  
-**Access:** ADMIN, PATIENT (own)  
+**Endpoint:** `GET /api/invoices/by-patient/{patientId}`  
+**Access:** RECEPTIONIST, ADMIN, PATIENT (own)  
 **Description:** Retrieve all invoices for a specific patient
 
 **Query Parameters:**
@@ -2787,22 +2787,16 @@ X-User-Email: doctor1@hms.com
   "status": "success",
   "data": {
     "content": [
-      {
-        "id": "inv001",
-        "invoiceNumber": "INV-20251205-0001",
-        "invoiceDate": "2025-12-05T10:30:00Z",
-        "dueDate": "2025-12-12T10:30:00Z",
-        "totalAmount": 396000,
-        "paidAmount": 0,
-        "status": "UNPAID"
-      }
-    ],
-    "page": 0,
-    "size": 20,
-    "totalElements": 1,
-    "totalPages": 1,
-    "last": true
-  }
+    {
+      "id": "inv001",
+      "invoiceNumber": "INV-20251205-0001",
+      "invoiceDate": "2025-12-05T10:30:00Z",
+      "dueDate": "2025-12-12T10:30:00Z",
+      "totalAmount": 396000,
+      "paidAmount": 0,
+      "status": "UNPAID"
+    }
+  ]
 }
 ```
 
@@ -2812,10 +2806,102 @@ X-User-Email: doctor1@hms.com
 
 ---
 
-### 7.6 Create Payment
+### 7.6 Get Invoice by Medical Exam
 
-**Endpoint:** `POST /api/billing/payments`  
-**Access:** ADMIN, PATIENT (own invoices)  
+**Endpoint:** `GET /api/invoices/by-exam/{examId}`  
+**Access:** RECEPTIONIST, ADMIN, PATIENT (own)  
+**Description:** Retrieve invoice by medical exam ID
+
+**Response:** `200 OK`
+```json
+{
+  "code": 1000,
+  "message": "success",
+  "data": {
+    "id": "inv001",
+    "invoiceNumber": "INV-20251205-0001",
+    "patient": {
+      "id": "p001",
+      "fullName": "Nguyen Van A"
+    },
+    "medicalExam": {
+      "id": "exam001"
+    },
+    "appointment": {
+      "id": "apt001",
+      "appointmentTime": "2025-12-05T09:00:00"
+    },
+    "invoiceDate": "2025-12-05T10:30:00Z",
+    "dueDate": "2025-12-12T10:30:00Z",
+    "subtotal": 360000,
+    "discount": 0,
+    "tax": 36000,
+    "totalAmount": 396000,
+    "paidAmount": 0,
+    "status": "UNPAID"
+  }
+}
+```
+
+**Error Codes:**
+- `403 FORBIDDEN`: Patient trying to access another patient's invoice
+- `404 EXAM_NOT_FOUND`: Medical exam doesn't exist
+- `404 INVOICE_NOT_FOUND`: No invoice found for this exam
+
+---
+
+### 7.7 Cancel Invoice
+
+**Endpoint:** `POST /api/invoices/{id}/cancel`  
+**Access:** RECEPTIONIST, ADMIN  
+**Description:** Cancel an invoice with a reason
+
+**Request Body:**
+```json
+{
+  "cancelReason": "Patient requested cancellation"
+}
+```
+
+**Validation:**
+- `cancelReason`: Required, minimum 5 characters
+- Only UNPAID or PARTIALLY_PAID invoices can be cancelled
+
+**Response:** `200 OK`
+```json
+{
+  "code": 1000,
+  "message": "success",
+  "data": {
+    "id": "inv001",
+    "invoiceNumber": "INV-20251205-0001",
+    "status": "CANCELLED",
+    "cancellation": {
+      "cancelledAt": "2025-12-06T09:00:00Z",
+      "cancelledBy": "user123",
+      "reason": "Patient requested cancellation"
+    }
+  }
+}
+```
+
+**Error Codes:**
+- `400 VALIDATION_ERROR`: cancelReason is required or too short
+- `400 INVOICE_ALREADY_CANCELLED`: Invoice is already cancelled
+- `400 INVOICE_ALREADY_PAID`: Cannot cancel a fully paid invoice
+- `404 INVOICE_NOT_FOUND`: Invoice doesn't exist
+
+---
+
+## 💳 7.8-7.11 Payment Endpoints (PLANNED - NOT YET IMPLEMENTED)
+
+> [!NOTE]
+> The following payment endpoints are planned for future implementation. Payment processing will be integrated into the billing-service.
+
+### 7.8 Create Payment (PLANNED)
+
+**Endpoint:** `POST /api/payments`  
+**Access:** RECEPTIONIST, ADMIN, PATIENT (own invoices)  
 **Request Body:**
 ```json
 {
@@ -2878,10 +2964,10 @@ X-User-Email: doctor1@hms.com
 
 ---
 
-### 7.7 Get Payment by ID
+### 7.9 Get Payment by ID (PLANNED)
 
-**Endpoint:** `GET /api/billing/payments/{id}`  
-**Access:** ADMIN, PATIENT (own)  
+**Endpoint:** `GET /api/payments/{id}`  
+**Access:** RECEPTIONIST, ADMIN, PATIENT (own)  
 **Description:** Retrieve payment details by payment ID
 
 **Response:** `200 OK`
@@ -2912,10 +2998,10 @@ X-User-Email: doctor1@hms.com
 
 ---
 
-### 7.8 List Payments by Invoice
+### 7.10 List Payments by Invoice (PLANNED)
 
-**Endpoint:** `GET /api/billing/payments/by-invoice/{invoiceId}`  
-**Access:** ADMIN, PATIENT (own)  
+**Endpoint:** `GET /api/payments/by-invoice/{invoiceId}`  
+**Access:** RECEPTIONIST, ADMIN, PATIENT (own)  
 **Description:** Retrieve all payments made for a specific invoice
 
 **Response:** `200 OK`

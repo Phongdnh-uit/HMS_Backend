@@ -23,3 +23,4 @@ public class AppointmentResponse {
     private String createdBy;
     private String updatedBy;
 }
+
