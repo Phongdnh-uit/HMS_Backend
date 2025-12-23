@@ -14,7 +14,7 @@ spring:
     show-sql: true
 
 server:
-  port: ${HR_SERVICE_PORT:8082}
+  port: ${HR_SERVICE_PORT:8084}
 
 eureka:
   instance:

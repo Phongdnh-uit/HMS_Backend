@@ -24,7 +24,11 @@ COPY medical-exam-service ./medical-exam-service
 RUN ./gradlew clean bootJar --no-daemon
 
 # -------- Stage 2: Run --------
-FROM eclipse-temurin:23-jre-alpine
+FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
+
+RUN apk add --no-cache curl
+
+ARG SERVICE
 WORKDIR /app
 
 # curl cho healthcheck
