@@ -2,9 +2,9 @@ name: CI Build and Push Docker Images
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
 
 jobs:
   test:
@@ -34,8 +34,19 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [ config-server, discovery-service, api-gateway, auth-service, medicine-service, patient-service, hr-service ]
-        java-version: [ "23" ]
+        service:
+          [
+            config-server,
+            discovery-service,
+            api-gateway,
+            auth-service,
+            medicine-service,
+            patient-service,
+            hr-service,
+            appointment-service,
+            medical-exam-service,
+          ]
+        java-version: ["23"]
 
     steps:
       # 1️⃣ Checkout source
@@ -57,7 +68,7 @@ jobs:
       - name: Build & Push ${{ matrix.service }} Image
         uses: docker/build-push-action@v5
         with:
-          context: .                     # build toàn project nhưng Dockerfile chỉ dùng đúng service
+          context: . # build toàn project nhưng Dockerfile chỉ dùng đúng service
           file: infrastructure/pro/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
