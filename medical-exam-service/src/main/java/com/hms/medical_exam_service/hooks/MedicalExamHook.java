@@ -4,6 +4,8 @@ import com.hms.common.dtos.PageResponse;
 import com.hms.common.exceptions.errors.ApiException;
 import com.hms.common.exceptions.errors.ErrorCode;
 import com.hms.common.hooks.GenericHook;
+import com.hms.common.helpers.FeignHelper;
+import com.hms.medical_exam_service.clients.BillingClient;
 import com.hms.medical_exam_service.dtos.exam.MedicalExamRequest;
 import com.hms.medical_exam_service.dtos.exam.MedicalExamResponse;
 import com.hms.medical_exam_service.dtos.external.AppointmentResponse;
@@ -40,6 +42,7 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
     private final MedicalExamRepository medicalExamRepository;
     private final PrescriptionRepository prescriptionRepository;
     private final WebClient.Builder webClientBuilder;
+    private final BillingClient billingClient;
     
     // Injected from config: appointment-service.base-url
     @org.springframework.beans.factory.annotation.Value("${appointment-service.base-url:http://appointment-service-pro:8085}")
@@ -141,9 +144,13 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
         entity.setDoctorId(appointment.doctorId());
         entity.setDoctorName(appointment.doctorName());
         
-        log.debug("✅ [enrichCreate] Enriched exam with examDate: {}, patient: {} ({}), doctor: {} ({})", 
+        // 4. Set hasPrescription flag from input (defaults to false if not specified)
+        Boolean hasPrescription = input.getHasPrescription();
+        entity.setHasPrescription(hasPrescription != null ? hasPrescription : false);
+        
+        log.debug("✅ [enrichCreate] Enriched exam with examDate: {}, patient: {} ({}), doctor: {} ({}), hasPrescription: {}", 
             entity.getExamDate(), entity.getPatientId(), entity.getPatientName(),
-            entity.getDoctorId(), entity.getDoctorName());
+            entity.getDoctorId(), entity.getDoctorName(), entity.getHasPrescription());
     }
 
     /**
@@ -188,7 +195,29 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
     public void afterCreate(MedicalExam entity, MedicalExamResponse response, Map<String, Object> context) {
         log.info("Medical exam created successfully: id={}, appointmentId={}", 
             entity.getId(), entity.getAppointmentId());
-        // Response already populated by mapper from entity snapshots
+        
+        // Auto-generate invoice if hasPrescription=false
+        // Logic: 
+        // - hasPrescription=false → Invoice created immediately (consultation only)
+        // - hasPrescription=true → Invoice created when prescription is dispensed (PrescriptionHook)
+        if (entity.getHasPrescription() == null || !entity.getHasPrescription()) {
+            try {
+                log.info("[EXAM-CREATE] hasPrescription=false, auto-generating invoice for appointmentId: {}", 
+                    entity.getAppointmentId());
+                BillingClient.InvoiceRequest invoiceRequest = new BillingClient.InvoiceRequest(
+                    entity.getAppointmentId(),
+                    "Auto-generated after exam (no prescription)"
+                );
+                FeignHelper.safeCall(() -> billingClient.createInvoice(invoiceRequest));
+                log.info("[EXAM-CREATE] Invoice generated successfully for exam: {}", entity.getId());
+            } catch (Exception e) {
+                log.error("[EXAM-CREATE] Failed to generate invoice for exam {}: {}", 
+                    entity.getId(), e.getMessage());
+                // Don't fail exam creation if invoice fails - log for manual follow-up
+            }
+        } else {
+            log.info("[EXAM-CREATE] hasPrescription=true, invoice will be generated on dispense");
+        }
     }
 
     // ============================ UPDATE ============================

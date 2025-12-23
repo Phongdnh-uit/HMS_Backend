@@ -10,5 +10,9 @@ include(
     "patient-service",
     "hr-service",
     "appointment-service",
-    "medical-exam-service"
+    "medical-exam-service",
+    "billing-service",
+    "report-service",
+    "notification-service"
 )
+

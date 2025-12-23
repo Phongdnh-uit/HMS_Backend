@@ -13,7 +13,9 @@ import com.hms.medical_exam_service.entities.PrescriptionItem;
 import com.hms.medical_exam_service.mappers.PrescriptionItemMapper;
 import com.hms.medical_exam_service.repositories.MedicalExamRepository;
 import com.hms.medical_exam_service.repositories.PrescriptionRepository;
+import com.hms.medical_exam_service.clients.BillingClient;
 import com.hms.common.securities.UserContext;
+import com.hms.common.helpers.FeignHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +58,7 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
     private final MedicalExamRepository medicalExamRepository;
     private final PrescriptionItemMapper prescriptionItemMapper;
     private final WebClient.Builder webClientBuilder;
+    private final BillingClient billingClient;
     
     @Value("${app.services.medicine-service.url:http://medicine-service}")
     private String medicineServiceUrl;
@@ -168,7 +171,15 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
         log.info("Prescription created successfully: id={}, examId={}, itemCount={}", 
             entity.getId(), entity.getMedicalExamId(), entity.getItems().size());
         
-        // Decrement stock for each medicine
+        // 1. Set hasPrescription = true on the medical exam
+        MedicalExam exam = (MedicalExam) context.get(CONTEXT_EXAM);
+        if (exam != null) {
+            exam.setHasPrescription(true);
+            medicalExamRepository.save(exam);
+            log.info("Updated exam hasPrescription=true for examId={}", exam.getId());
+        }
+        
+        // 2. Decrement stock for each medicine
         decrementMedicineStock(entity.getItems());
         // Response already populated by mapper from entity snapshots
     }
@@ -219,6 +230,56 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
         
         // 4. Save is handled by caller (service layer with @Transactional)
         log.info("[CANCEL] Prescription cancelled successfully: id={}", prescription.getId());
+    }
+    
+    /**
+     * Dispenses a prescription (pharmacy has given medicines to patient).
+     * This is the terminal state - prescription cannot be cancelled after dispense.
+     * 
+     * @param prescription The prescription to dispense
+     * @param dispensedBy User ID who dispensed (pharmacist from security context)
+     * @throws ApiException if prescription is not in ACTIVE status
+     */
+    public void dispensePrescription(Prescription prescription, String dispensedBy) {
+        log.info("[DISPENSE] Dispensing prescription: id={}, by={}", prescription.getId(), dispensedBy);
+        
+        // 1. Validate current status
+        if (prescription.getStatus() != Prescription.Status.ACTIVE) {
+            log.warn("Cannot dispense prescription {} - status is {}", 
+                prescription.getId(), prescription.getStatus());
+            throw new ApiException(ErrorCode.OPERATION_NOT_ALLOWED, 
+                String.format("Cannot dispense prescription with status %s. Only ACTIVE prescriptions can be dispensed.",
+                    prescription.getStatus()));
+        }
+        
+        // 2. Update prescription status
+        prescription.setStatus(Prescription.Status.DISPENSED);
+        prescription.setDispensedAt(Instant.now());
+        prescription.setDispensedBy(dispensedBy);
+        
+        // 3. Get medical exam to find appointmentId for invoice
+        MedicalExam exam = medicalExamRepository.findById(prescription.getMedicalExamId())
+            .orElse(null);
+        
+        // 4. Generate invoice via billing-service
+        if (exam != null) {
+            try {
+                log.info("[DISPENSE] Generating invoice for appointmentId: {}", exam.getAppointmentId());
+                BillingClient.InvoiceRequest invoiceRequest = new BillingClient.InvoiceRequest(
+                    exam.getAppointmentId(),
+                    "Auto-generated after prescription dispense"
+                );
+                FeignHelper.safeCall(() -> billingClient.createInvoice(invoiceRequest));
+                log.info("[DISPENSE] Invoice generated successfully for prescription: {}", prescription.getId());
+            } catch (Exception e) {
+                log.error("[DISPENSE] Failed to generate invoice for prescription {}: {}", 
+                    prescription.getId(), e.getMessage());
+                // Don't fail dispense if invoice creation fails - log for manual follow-up
+            }
+        }
+        
+        // 5. Save is handled by caller (controller with @Transactional)
+        log.info("[DISPENSE] Prescription dispensed successfully: id={}", prescription.getId());
     }
     
     /**

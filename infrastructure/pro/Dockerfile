@@ -20,6 +20,9 @@ COPY patient-service ./patient-service
 COPY hr-service ./hr-service
 COPY appointment-service ./appointment-service
 COPY medical-exam-service ./medical-exam-service
+COPY billing-service ./billing-service
+COPY report-service ./report-service
+COPY notification-service ./notification-service
 
 # Build tất cả modules
 RUN ./gradlew clean bootJar --no-daemon
@@ -45,5 +48,8 @@ COPY --from=builder /build/patient-service/build/libs/patient-service-*.jar ./pa
 COPY --from=builder /build/hr-service/build/libs/hr-service-*.jar ./hr-service.jar
 COPY --from=builder /build/appointment-service/build/libs/appointment-service-*.jar ./appointment-service.jar
 COPY --from=builder /build/medical-exam-service/build/libs/medical-exam-service-*.jar ./medical-exam-service.jar
+COPY --from=builder /build/billing-service/build/libs/billing-service-*.jar ./billing-service.jar
+COPY --from=builder /build/report-service/build/libs/report-service-*.jar ./report-service.jar
+COPY --from=builder /build/notification-service/build/libs/notification-service-*.jar ./notification-service.jar
 
 ENTRYPOINT ["sh","-c","java -jar /app/${SERVICE}.jar"]
