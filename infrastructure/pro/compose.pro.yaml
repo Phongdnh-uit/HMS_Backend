@@ -72,6 +72,44 @@ services:
     networks:
       - app-network
     restart: always
+  mysql-appointment-service:
+    image: mysql:8.0
+    container_name: mysql-appointment-service
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${APPOINTMENT_DB_PASSWORD}
+      MYSQL_DATABASE: ${APPOINTMENT_DB_NAME}
+      MYSQL_USER: ${APPOINTMENT_DB_USERNAME}
+      MYSQL_PASSWORD: ${APPOINTMENT_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - app-network
+    restart: always
+  mysql-medical-exam-service:
+    image: mysql:8.0
+    container_name: mysql-medical-exam-service
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MEDICAL_EXAM_DB_PASSWORD}
+      MYSQL_DATABASE: ${MEDICAL_EXAM_DB_NAME}
+      MYSQL_USER: ${MEDICAL_EXAM_DB_USERNAME}
+      MYSQL_PASSWORD: ${MEDICAL_EXAM_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - app-network
+    restart: always
 
   # Application Services
   config-server-pro:
@@ -185,6 +223,42 @@ services:
     networks:
       - app-network
     restart: always
+  appointment-service-pro:
+    image: dnhphong2005/appointment-service:latest
+    container_name: appointment-service-pro
+    environment:
+      - SERVICE=appointment-service
+    ports:
+      - "${APPOINTMENT_SERVICE_PORT}:${APPOINTMENT_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-appointment-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+
+  medical-exam-service-pro:
+    image: dnhphong2005/medical-exam-service:latest
+    container_name: medical-exam-service-pro
+    environment:
+      - SERVICE=medical-exam-service
+    ports:
+      - "${MEDICAL_EXAM_SERVICE_PORT}:${MEDICAL_EXAM_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-medical-exam-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+
 networks:
   app-network:
     driver: bridge
