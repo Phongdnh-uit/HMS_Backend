@@ -1,5 +1,6 @@
+ARG JAVA_VERSION=23
 # -------- Stage 1: Build --------
-FROM eclipse-temurin:23-jdk AS builder
+FROM eclipse-temurin:${JAVA_VERSION}-jdk AS builder
 WORKDIR /build
 
 # Copy root build files first (tối ưu cache)
@@ -27,7 +28,11 @@ COPY notification-service ./notification-service
 RUN ./gradlew clean bootJar --no-daemon
 
 # -------- Stage 2: Run --------
-FROM eclipse-temurin:23-jre-alpine
+FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
+
+RUN apk add --no-cache curl
+
+ARG SERVICE
 WORKDIR /app
 
 # curl cho healthcheck
