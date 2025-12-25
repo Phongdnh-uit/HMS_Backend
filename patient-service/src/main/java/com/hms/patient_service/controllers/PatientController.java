@@ -14,13 +14,16 @@ import com.hms.patient_service.dtos.patient.PatientSelfUpdateRequest;
 import com.hms.patient_service.entities.Patient;
 import com.hms.patient_service.mappers.PatientMapper;
 import com.hms.patient_service.repositories.PatientRepository;
+import com.hms.patient_service.services.FileStorageService;
 import io.github.perplexhub.rsql.RSQLJPASupport;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -37,14 +40,17 @@ public class PatientController extends GenericController<Patient, String, Patien
     
     private final PatientRepository patientRepository;
     private final PatientMapper patientMapper;
+    private final FileStorageService fileStorageService;
 
     public PatientController(
             CrudService<Patient, String, PatientRequest, PatientResponse> service,
             PatientRepository patientRepository,
-            PatientMapper patientMapper) {
+            PatientMapper patientMapper,
+            FileStorageService fileStorageService) {
         super(service);
         this.patientRepository = patientRepository;
         this.patientMapper = patientMapper;
+        this.fileStorageService = fileStorageService;
     }
 
     /**
@@ -189,5 +195,49 @@ public class PatientController extends GenericController<Patient, String, Patien
             .build();
         
         return ResponseEntity.ok(ApiResponse.ok(stats));
+    }
+
+    /**
+     * Upload profile image for a patient.
+     * Max file size: 2MB. Allowed types: JPEG, PNG, WebP.
+     */
+    @PostMapping(value = "/{id}/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<PatientResponse>> uploadProfileImage(
+            @PathVariable String id,
+            @RequestParam("file") MultipartFile file) {
+        
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Patient not found"));
+        
+        // Delete old image if exists
+        if (patient.getProfileImageUrl() != null) {
+            fileStorageService.deleteFile(patient.getProfileImageUrl());
+        }
+        
+        // Upload new image
+        String imageUrl = fileStorageService.uploadProfileImage(file, id);
+        patient.setProfileImageUrl(imageUrl);
+        Patient saved = patientRepository.save(patient);
+        
+        return ResponseEntity.ok(ApiResponse.ok("Profile image uploaded successfully", 
+                patientMapper.entityToResponse(saved)));
+    }
+
+    /**
+     * Delete profile image for a patient.
+     */
+    @DeleteMapping("/{id}/profile-image")
+    public ResponseEntity<ApiResponse<PatientResponse>> deleteProfileImage(@PathVariable String id) {
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Patient not found"));
+        
+        if (patient.getProfileImageUrl() != null) {
+            fileStorageService.deleteFile(patient.getProfileImageUrl());
+            patient.setProfileImageUrl(null);
+            patientRepository.save(patient);
+        }
+        
+        return ResponseEntity.ok(ApiResponse.ok("Profile image deleted successfully", 
+                patientMapper.entityToResponse(patient)));
     }
 }

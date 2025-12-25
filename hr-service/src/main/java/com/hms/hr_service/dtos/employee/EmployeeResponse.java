@@ -22,6 +22,7 @@ public class EmployeeResponse {
     private String address;
     private EmployeeStatus status;
     private Instant hiredAt;
+    private String profileImageUrl;
     private Instant deletedAt;
     private String deletedBy;
     private Instant createdAt;

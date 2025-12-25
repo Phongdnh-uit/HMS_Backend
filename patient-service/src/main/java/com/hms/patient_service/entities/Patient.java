@@ -52,6 +52,8 @@ public class Patient {
     
     private String allergies;
 
+    private String profileImageUrl;
+
     @CreatedDate
     private Instant createdAt;
 
