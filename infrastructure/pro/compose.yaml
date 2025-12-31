@@ -375,6 +375,28 @@ services:
       - app-network
     restart: always
 
+  # MinIO Object Storage (for lab test images)
+  minio:
+    image: minio/minio:latest
+    container_name: minio-storage
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin123}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: always
+
   # Report Service (Analytics & Caching)
   report-service-pro:
     build:
@@ -431,4 +453,4 @@ networks:
 
 volumes:
   redis-data:
-
+  minio-data:

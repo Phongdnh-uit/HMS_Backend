@@ -196,28 +196,13 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
         log.info("Medical exam created successfully: id={}, appointmentId={}", 
             entity.getId(), entity.getAppointmentId());
         
-        // Auto-generate invoice if hasPrescription=false
-        // Logic: 
-        // - hasPrescription=false → Invoice created immediately (consultation only)
-        // - hasPrescription=true → Invoice created when prescription is dispensed (PrescriptionHook)
-        if (entity.getHasPrescription() == null || !entity.getHasPrescription()) {
-            try {
-                log.info("[EXAM-CREATE] hasPrescription=false, auto-generating invoice for appointmentId: {}", 
-                    entity.getAppointmentId());
-                BillingClient.InvoiceRequest invoiceRequest = new BillingClient.InvoiceRequest(
-                    entity.getAppointmentId(),
-                    "Auto-generated after exam (no prescription)"
-                );
-                FeignHelper.safeCall(() -> billingClient.createInvoice(invoiceRequest));
-                log.info("[EXAM-CREATE] Invoice generated successfully for exam: {}", entity.getId());
-            } catch (Exception e) {
-                log.error("[EXAM-CREATE] Failed to generate invoice for exam {}: {}", 
-                    entity.getId(), e.getMessage());
-                // Don't fail exam creation if invoice fails - log for manual follow-up
-            }
-        } else {
-            log.info("[EXAM-CREATE] hasPrescription=true, invoice will be generated on dispense");
-        }
+        // NOTE: Invoice is NOT created here anymore.
+        // Invoice creation happens via:
+        // 1. Prescription dispense (PrescriptionHook.generateInvoiceAfterDispense) - includes Medicine items
+        // 2. Lab test completion (if needed)
+        // 3. Manual creation by receptionist
+        // This ensures invoice includes ALL items (Consultation + Medicine + Lab Tests)
+        log.info("[EXAM-CREATE] Invoice will be generated later (on dispense or manual trigger)");
     }
 
     // ============================ UPDATE ============================

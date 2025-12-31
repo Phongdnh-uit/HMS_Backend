@@ -190,5 +190,59 @@ public class AppointmentController extends GenericController<Appointment, String
         var stats = appointmentService.getStats(startDate, endDate);
         return ResponseEntity.ok(ApiResponse.ok(stats));
     }
+    
+    // ========== Walk-in Queue Endpoints ==========
+    
+    /**
+     * Register a walk-in patient.
+     * Creates an immediate appointment with queue number.
+     * Access: RECEPTIONIST, ADMIN
+     */
+    @PostMapping("/walk-in")
+    public ResponseEntity<ApiResponse<AppointmentResponse>> registerWalkIn(
+            @Valid @RequestBody com.hms.appointment_service.dtos.WalkInRequest request) {
+        AppointmentResponse response = appointmentService.registerWalkIn(request);
+        return ResponseEntity.ok(ApiResponse.ok("Walk-in registered successfully. Queue number: " + response.getQueueNumber(), response));
+    }
+    
+    /**
+     * Get today's queue for a specific doctor.
+     * Returns appointments ordered by priority and queue number.
+     * Access: DOCTOR, NURSE, RECEPTIONIST, ADMIN
+     */
+    @GetMapping("/queue/doctor/{doctorId}")
+    public ResponseEntity<ApiResponse<java.util.List<AppointmentResponse>>> getDoctorQueue(
+            @PathVariable String doctorId) {
+        java.util.List<AppointmentResponse> queue = appointmentService.getDoctorQueueToday(doctorId);
+        return ResponseEntity.ok(ApiResponse.ok(queue));
+    }
+    
+    /**
+     * Get next patient in queue for a doctor.
+     * Returns the patient with highest priority (lowest priority number) who is still waiting.
+     * Access: DOCTOR, NURSE
+     */
+    @GetMapping("/queue/next/{doctorId}")
+    public ResponseEntity<ApiResponse<AppointmentResponse>> getNextInQueue(
+            @PathVariable String doctorId) {
+        AppointmentResponse next = appointmentService.getNextInQueue(doctorId);
+        if (next == null) {
+            return ResponseEntity.ok(ApiResponse.ok("No patients in queue", null));
+        }
+        return ResponseEntity.ok(ApiResponse.ok(next));
+    }
+    
+    /**
+     * Call next patient (mark as IN_PROGRESS).
+     * Access: DOCTOR
+     */
+    @PatchMapping("/queue/call-next/{doctorId}")
+    public ResponseEntity<ApiResponse<AppointmentResponse>> callNextPatient(
+            @PathVariable String doctorId) {
+        AppointmentResponse called = appointmentService.callNextPatient(doctorId);
+        if (called == null) {
+            return ResponseEntity.ok(ApiResponse.ok("No patients in queue", null));
+        }
+        return ResponseEntity.ok(ApiResponse.ok("Patient called", called));
+    }
 }
-

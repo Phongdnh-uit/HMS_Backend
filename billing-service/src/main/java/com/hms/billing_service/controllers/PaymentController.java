@@ -289,6 +289,83 @@ public class PaymentController {
 
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
+    
+    /**
+     * Get payment summary cards for dashboard.
+     * Returns today's, this week's, cash and card payment statistics.
+     */
+    @GetMapping("/summary-cards")
+    public ResponseEntity<ApiResponse<PaymentSummaryCardsResponse>> getPaymentSummaryCards() {
+        // Calculate date ranges
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDate startOfWeek = today.with(java.time.DayOfWeek.MONDAY);
+        
+        Instant todayStart = today.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant();
+        Instant todayEnd = today.plusDays(1).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant();
+        Instant weekStart = startOfWeek.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant();
+        
+        // Get all completed payments
+        List<Payment> allCompletedPayments = paymentRepository.findByStatus(Payment.PaymentStatus.COMPLETED);
+        
+        // Calculate today's payments
+        BigDecimal todayAmount = BigDecimal.ZERO;
+        long todayCount = 0;
+        
+        // Calculate this week's payments
+        BigDecimal thisWeekAmount = BigDecimal.ZERO;
+        long thisWeekCount = 0;
+        
+        // Calculate by gateway
+        BigDecimal cashAmount = BigDecimal.ZERO;
+        BigDecimal cardAmount = BigDecimal.ZERO;
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        
+        for (Payment payment : allCompletedPayments) {
+            Instant paymentDate = payment.getPaymentDate();
+            if (paymentDate == null) paymentDate = payment.getCreatedAt();
+            
+            totalAmount = totalAmount.add(payment.getAmount());
+            
+            // Check if today
+            if (paymentDate != null && !paymentDate.isBefore(todayStart) && paymentDate.isBefore(todayEnd)) {
+                todayAmount = todayAmount.add(payment.getAmount());
+                todayCount++;
+            }
+            
+            // Check if this week
+            if (paymentDate != null && !paymentDate.isBefore(weekStart)) {
+                thisWeekAmount = thisWeekAmount.add(payment.getAmount());
+                thisWeekCount++;
+            }
+            
+            // Sum by gateway
+            if (payment.getGateway() == Payment.PaymentGateway.CASH) {
+                cashAmount = cashAmount.add(payment.getAmount());
+            } else {
+                cardAmount = cardAmount.add(payment.getAmount());
+            }
+        }
+        
+        // Calculate percentages
+        double cashPercentage = totalAmount.compareTo(BigDecimal.ZERO) > 0 
+            ? cashAmount.divide(totalAmount, 4, java.math.RoundingMode.HALF_UP).doubleValue() * 100 
+            : 0;
+        double cardPercentage = totalAmount.compareTo(BigDecimal.ZERO) > 0 
+            ? cardAmount.divide(totalAmount, 4, java.math.RoundingMode.HALF_UP).doubleValue() * 100 
+            : 0;
+        
+        PaymentSummaryCardsResponse response = new PaymentSummaryCardsResponse();
+        response.setTodayAmount(todayAmount);
+        response.setTodayCount(todayCount);
+        response.setThisWeekAmount(thisWeekAmount);
+        response.setThisWeekCount(thisWeekCount);
+        response.setCashAmount(cashAmount);
+        response.setCashPercentage(cashPercentage);
+        response.setCardAmount(cardAmount);
+        response.setCardPercentage(cardPercentage);
+        
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
 
     // ==================== Helper Methods ====================
 
@@ -370,5 +447,18 @@ public class PaymentController {
         private BigDecimal totalPaid;
         private BigDecimal invoiceTotal;
         private BigDecimal remainingBalance;
+    }
+    
+    @lombok.Getter
+    @lombok.Setter
+    public static class PaymentSummaryCardsResponse {
+        private BigDecimal todayAmount;
+        private long todayCount;
+        private BigDecimal thisWeekAmount;
+        private long thisWeekCount;
+        private BigDecimal cashAmount;
+        private double cashPercentage;
+        private BigDecimal cardAmount;
+        private double cardPercentage;
     }
 }

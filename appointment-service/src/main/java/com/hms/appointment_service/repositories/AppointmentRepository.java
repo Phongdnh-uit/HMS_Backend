@@ -67,6 +67,21 @@ public interface AppointmentRepository extends SimpleRepository<Appointment, Str
      */
     @Query("SELECT FUNCTION('DATE', a.appointmentTime), COUNT(a) FROM Appointment a WHERE a.appointmentTime >= :startTime AND a.appointmentTime < :endTime GROUP BY FUNCTION('DATE', a.appointmentTime) ORDER BY FUNCTION('DATE', a.appointmentTime)")
     List<Object[]> countByDateInDateRange(@Param("startTime") Instant startTime, @Param("endTime") Instant endTime);
+    
+    // ========== Queue-related queries ==========
+    
+    /**
+     * Find max queue number for a specific date range (used to generate next queue number).
+     */
+    @Query("SELECT MAX(a.queueNumber) FROM Appointment a WHERE a.createdAt >= :startTime AND a.createdAt < :endTime AND a.queueNumber IS NOT NULL")
+    Integer findMaxQueueNumberForDate(@Param("startTime") Instant startTime, @Param("endTime") Instant endTime);
+    
+    /**
+     * Find doctor's queue for a specific date, ordered by priority and queue number.
+     * Returns appointments with queue numbers (walk-in and emergency patients).
+     */
+    @Query("SELECT a FROM Appointment a WHERE a.doctorId = :doctorId AND a.createdAt >= :startTime AND a.createdAt < :endTime AND a.queueNumber IS NOT NULL ORDER BY a.priority ASC, a.queueNumber ASC")
+    List<Appointment> findDoctorQueueForDate(@Param("doctorId") String doctorId, @Param("startTime") Instant startTime, @Param("endTime") Instant endTime);
 }
 
 

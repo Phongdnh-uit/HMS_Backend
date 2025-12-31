@@ -78,4 +78,83 @@ public class EmployeeController extends GenericController<Employee, String, Empl
         return ResponseEntity.ok(ApiResponse.ok("Profile image deleted successfully", 
                 employeeMapper.entityToResponse(employee)));
     }
+
+    // ============================================
+    // SELF-SERVICE ENDPOINTS (/me)
+    // ============================================
+
+    /**
+     * Get current employee's profile using accountId from JWT.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<EmployeeResponse>> getMyProfile(
+            @RequestHeader("X-User-ID") String accountId) {
+        Employee employee = employeeRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Employee profile not found for this account"));
+        return ResponseEntity.ok(ApiResponse.ok("My profile retrieved successfully", 
+                employeeMapper.entityToResponse(employee)));
+    }
+
+    /**
+     * Update current employee's profile.
+     */
+    @PutMapping("/me")
+    public ResponseEntity<ApiResponse<EmployeeResponse>> updateMyProfile(
+            @RequestHeader("X-User-ID") String accountId,
+            @RequestBody EmployeeRequest request) {
+        Employee employee = employeeRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Employee profile not found for this account"));
+        
+        // Update allowed fields only (email not in EmployeeRequest DTO)
+        if (request.getFullName() != null) employee.setFullName(request.getFullName());
+        if (request.getPhoneNumber() != null) employee.setPhoneNumber(request.getPhoneNumber());
+        if (request.getAddress() != null) employee.setAddress(request.getAddress());
+        if (request.getSpecialization() != null) employee.setSpecialization(request.getSpecialization());
+        if (request.getLicenseNumber() != null) employee.setLicenseNumber(request.getLicenseNumber());
+        
+        Employee saved = employeeRepository.save(employee);
+        return ResponseEntity.ok(ApiResponse.ok("Profile updated successfully", 
+                employeeMapper.entityToResponse(saved)));
+    }
+
+    /**
+     * Upload profile image for current employee.
+     */
+    @PostMapping(value = "/me/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<EmployeeResponse>> uploadMyProfileImage(
+            @RequestHeader("X-User-ID") String accountId,
+            @RequestParam("file") MultipartFile file) {
+        Employee employee = employeeRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Employee profile not found for this account"));
+        
+        if (employee.getProfileImageUrl() != null) {
+            fileStorageService.deleteFile(employee.getProfileImageUrl());
+        }
+        
+        String imageUrl = fileStorageService.uploadProfileImage(file, employee.getId());
+        employee.setProfileImageUrl(imageUrl);
+        Employee saved = employeeRepository.save(employee);
+        
+        return ResponseEntity.ok(ApiResponse.ok("Profile image uploaded successfully", 
+                employeeMapper.entityToResponse(saved)));
+    }
+
+    /**
+     * Delete profile image for current employee.
+     */
+    @DeleteMapping("/me/profile-image")
+    public ResponseEntity<ApiResponse<EmployeeResponse>> deleteMyProfileImage(
+            @RequestHeader("X-User-ID") String accountId) {
+        Employee employee = employeeRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Employee profile not found for this account"));
+        
+        if (employee.getProfileImageUrl() != null) {
+            fileStorageService.deleteFile(employee.getProfileImageUrl());
+            employee.setProfileImageUrl(null);
+            employeeRepository.save(employee);
+        }
+        
+        return ResponseEntity.ok(ApiResponse.ok("Profile image deleted successfully", 
+                employeeMapper.entityToResponse(employee)));
+    }
 }

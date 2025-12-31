@@ -18,9 +18,14 @@ public class AppointmentResponse {
     private AppointmentType type;
     private String reason;
     private String notes;
+    
+    // Queue fields for walk-in patients
+    private Integer queueNumber;
+    private Integer priority;
+    private String priorityReason;
+    
     private Instant createdAt;
     private Instant updatedAt;
     private String createdBy;
     private String updatedBy;
 }
-

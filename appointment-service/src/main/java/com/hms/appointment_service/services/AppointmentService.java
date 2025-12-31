@@ -40,6 +40,7 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final HrClient hrClient;
     private final AppointmentMapper appointmentMapper;
+    private final QueueService queueService;
 
     /**
      * Get available time slots for a doctor on a specific date.
@@ -404,6 +405,105 @@ public class AppointmentService {
                 .averagePerDay(averagePerDay)
                 .generatedAt(Instant.now())
                 .build();
+    }
+    
+    // ========== Walk-in Queue Methods ==========
+    
+    /**
+     * Register a walk-in patient.
+     * Creates an immediate appointment with queue number.
+     *
+     * @param request Walk-in registration request
+     * @return The created appointment with queue number
+     */
+    @Transactional
+    public AppointmentResponse registerWalkIn(com.hms.appointment_service.dtos.WalkInRequest request) {
+        log.info("Registering walk-in patient: patientId={}, doctorId={}", 
+                request.getPatientId(), request.getDoctorId());
+        
+        // Get next queue number
+        int queueNumber = queueService.getNextQueueNumber();
+        
+        // Calculate priority
+        int priority = queueService.calculatePriority(request, 
+                com.hms.appointment_service.constants.AppointmentType.WALK_IN);
+        
+        // Create appointment
+        Appointment appointment = new Appointment();
+        appointment.setPatientId(request.getPatientId());
+        appointment.setDoctorId(request.getDoctorId());
+        appointment.setReason(request.getReason());
+        appointment.setAppointmentTime(Instant.now());
+        appointment.setStatus(AppointmentStatus.SCHEDULED);
+        appointment.setType(com.hms.appointment_service.constants.AppointmentType.WALK_IN);
+        
+        // Set queue fields
+        appointment.setQueueNumber(queueNumber);
+        appointment.setPriority(priority);
+        appointment.setPriorityReason(request.getPriorityReason());
+        
+        // Try to fetch patient and doctor names
+        try {
+            // Note: Patient and doctor name fetching would require client calls
+            // For now, we'll leave them as null and they can be populated later
+            appointment.setPatientName("Walk-in Patient");
+            appointment.setDoctorName("Doctor");
+        } catch (Exception e) {
+            log.warn("Could not fetch patient/doctor names: {}", e.getMessage());
+        }
+        
+        appointment = appointmentRepository.save(appointment);
+        log.info("Walk-in registered: id={}, queueNumber={}, priority={}", 
+                appointment.getId(), queueNumber, priority);
+        
+        return appointmentMapper.entityToResponse(appointment);
+    }
+    
+    /**
+     * Get today's queue for a specific doctor.
+     *
+     * @param doctorId The doctor's ID
+     * @return List of appointments in queue order
+     */
+    public List<AppointmentResponse> getDoctorQueueToday(String doctorId) {
+        List<Appointment> queue = queueService.getDoctorQueueToday(doctorId);
+        return queue.stream()
+                .map(appointmentMapper::entityToResponse)
+                .toList();
+    }
+    
+    /**
+     * Get next patient in queue for a doctor.
+     *
+     * @param doctorId The doctor's ID
+     * @return Next appointment in queue, or null if empty
+     */
+    public AppointmentResponse getNextInQueue(String doctorId) {
+        Appointment next = queueService.getNextInQueue(doctorId);
+        return next != null ? appointmentMapper.entityToResponse(next) : null;
+    }
+    
+    /**
+     * Call next patient in queue (mark as IN_PROGRESS).
+     *
+     * @param doctorId The doctor's ID
+     * @return The called appointment, or null if no one in queue
+     */
+    @Transactional
+    public AppointmentResponse callNextPatient(String doctorId) {
+        Appointment next = queueService.getNextInQueue(doctorId);
+        if (next == null) {
+            return null;
+        }
+        
+        // Mark as IN_PROGRESS (being seen by doctor)
+        next.setStatus(AppointmentStatus.IN_PROGRESS);
+        next = appointmentRepository.save(next);
+        
+        log.info("Called patient: appointmentId={}, queueNumber={}", 
+                next.getId(), next.getQueueNumber());
+        
+        return appointmentMapper.entityToResponse(next);
     }
 }
 

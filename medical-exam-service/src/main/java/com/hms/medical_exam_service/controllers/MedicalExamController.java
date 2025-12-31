@@ -5,6 +5,7 @@ import com.hms.common.dtos.ApiResponse;
 import com.hms.common.dtos.PageResponse;
 import com.hms.common.exceptions.errors.ApiException;
 import com.hms.common.exceptions.errors.ErrorCode;
+import com.hms.common.helpers.FeignHelper;
 import com.hms.common.securities.UserContext;
 import com.hms.common.services.CrudService;
 import com.hms.medical_exam_service.clients.PatientClient;
@@ -127,6 +128,41 @@ public class MedicalExamController extends GenericController<MedicalExam, String
         MedicalExamResponse response = medicalExamMapper.entityToResponse(exam);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
+
+    /**
+     * Get medical exams for the currently logged-in patient.
+     * Patient self-service endpoint - uses accountId from JWT to lookup patientId.
+     */
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<List<MedicalExamResponse>>> getMyExams() {
+        // Get current user from security context
+        UserContext.User currentUser = UserContext.getUser();
+        if (currentUser == null || currentUser.getId() == null) {
+            throw new ApiException(ErrorCode.AUTHENTICATION_REQUIRED, "User not authenticated");
+        }
+        
+        // Lookup patient by accountId
+        String patientId;
+        try {
+            var patientResponse = FeignHelper.safeCall(
+                () -> patientClient.getPatientByAccountId(currentUser.getId())
+            );
+            patientId = patientResponse.getData().id();
+            log.info("Found patient {} for accountId {}", patientId, currentUser.getId());
+        } catch (Exception e) {
+            log.error("Failed to lookup patient for accountId {}: {}", currentUser.getId(), e.getMessage());
+            throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND, 
+                "Patient profile not found. Please contact support.");
+        }
+        
+        // Get exams for this patient
+        List<MedicalExam> exams = medicalExamRepository.findByPatientId(patientId);
+        List<MedicalExamResponse> responses = exams.stream()
+            .map(medicalExamMapper::entityToResponse)
+            .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(ApiResponse.ok(responses));
+    }
     
     /**
      * Get diagnosis statistics for reporting.
@@ -206,5 +242,72 @@ public class MedicalExamController extends GenericController<MedicalExam, String
         medicalExamRepository.save(exam);
         
         return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+    
+    /**
+     * Custom update endpoint that allows updating exam without required appointmentId.
+     * This is needed because the appointment cannot be changed after exam creation.
+     * Uses a different path (/update/{id}) to avoid conflict with GenericController's PUT /{id}
+     * 
+     * @param id The exam ID
+     * @param request Update request without appointmentId
+     * @return Updated exam
+     */
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ApiResponse<MedicalExamResponse>> updateExam(
+            @PathVariable String id,
+            @RequestBody @jakarta.validation.Valid com.hms.medical_exam_service.dtos.exam.MedicalExamUpdateRequest request) {
+        
+        MedicalExam exam = medicalExamRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.EXAM_NOT_FOUND, "Exam not found: " + id));
+        
+        // Update only the fields that are provided
+        if (request.getDiagnosis() != null) {
+            exam.setDiagnosis(request.getDiagnosis());
+        }
+        if (request.getSymptoms() != null) {
+            exam.setSymptoms(request.getSymptoms());
+        }
+        if (request.getTreatment() != null) {
+            exam.setTreatment(request.getTreatment());
+        }
+        if (request.getNotes() != null) {
+            exam.setNotes(request.getNotes());
+        }
+        // Note: MedicalExam entity doesn't have status field, status is derived from workflow
+        if (request.getFollowUpDate() != null) {
+            exam.setFollowUpDate(request.getFollowUpDate());
+        }
+        
+        // Update vitals
+        if (request.getTemperature() != null) {
+            exam.setTemperature(request.getTemperature());
+        }
+        if (request.getBloodPressureSystolic() != null) {
+            exam.setBloodPressureSystolic(request.getBloodPressureSystolic());
+        }
+        if (request.getBloodPressureDiastolic() != null) {
+            exam.setBloodPressureDiastolic(request.getBloodPressureDiastolic());
+        }
+        if (request.getHeartRate() != null) {
+            exam.setHeartRate(request.getHeartRate());
+        }
+        if (request.getWeight() != null) {
+            exam.setWeight(request.getWeight());
+        }
+        if (request.getHeight() != null) {
+            exam.setHeight(request.getHeight());
+        }
+        
+        // Set updated by - use User.getId() which contains the account ID
+        UserContext.User currentUser = UserContext.getUser();
+        if (currentUser != null) {
+            exam.setUpdatedBy(currentUser.getId());
+        }
+        
+        MedicalExam savedExam = medicalExamRepository.save(exam);
+        MedicalExamResponse response = medicalExamMapper.entityToResponse(savedExam);
+        
+        return ResponseEntity.ok(ApiResponse.ok(response));
     }
 }

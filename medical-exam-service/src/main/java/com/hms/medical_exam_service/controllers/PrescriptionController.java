@@ -93,6 +93,55 @@ public class PrescriptionController {
     }
 
     /**
+     * Update an existing prescription for a medical exam.
+     * Only ACTIVE prescriptions can be updated.
+     * This clears existing items and replaces with new ones.
+     * 
+     * @param examId The medical exam ID (from URL path)
+     * @param request The updated prescription data with items
+     * @return Updated prescription
+     */
+    @PutMapping("/{examId}/prescription")
+    @Transactional
+    public ResponseEntity<ApiResponse<PrescriptionResponse>> update(
+            @PathVariable String examId,
+            @Valid @RequestBody PrescriptionRequest request) {
+        
+        log.info("Updating prescription for examId: {}", examId);
+        
+        // 1. Find existing prescription
+        Prescription existing = prescriptionRepository.findByMedicalExamId(examId)
+            .orElseThrow(() -> new ApiException(ErrorCode.PRESCRIPTION_NOT_FOUND, 
+                "No prescription found for exam: " + examId));
+        
+        // 2. Validate can update (only ACTIVE prescriptions)
+        if (existing.getStatus() != Prescription.Status.ACTIVE) {
+            throw new ApiException(ErrorCode.OPERATION_NOT_ALLOWED, 
+                "Can only update ACTIVE prescriptions. Current status: " + existing.getStatus());
+        }
+        
+        // 3. Build context
+        Map<String, Object> context = new HashMap<>();
+        context.put(PrescriptionHook.CONTEXT_EXAM_ID, examId);
+        context.put("EXISTING_PRESCRIPTION", existing);
+        
+        // 4. Validate new items (check medicine stock, etc.)
+        prescriptionHook.validateUpdate(request, existing, context);
+        
+        // 5. Update prescription items via hook
+        prescriptionHook.updatePrescriptionItems(existing, request, context);
+        
+        // 6. Save
+        Prescription saved = prescriptionRepository.save(existing);
+        
+        // 7. Map to response
+        PrescriptionResponse response = prescriptionMapper.entityToResponse(saved);
+        
+        log.info("Prescription updated: id={}, items={}", saved.getId(), saved.getItems().size());
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    /**
      * Get prescription by ID.
      * 
      * @param id The prescription ID
@@ -230,6 +279,17 @@ public class PrescriptionController {
         
         // 4. Map to response
         PrescriptionResponse response = prescriptionMapper.entityToResponse(saved);
+        
+        // 5. Schedule invoice generation AFTER transaction commits
+        final String prescriptionId = saved.getId();
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    log.info("Transaction committed, generating invoice for prescription: {}", prescriptionId);
+                    prescriptionHook.generateInvoiceAfterDispense(prescriptionId);
+                }
+            });
         
         log.info("Prescription dispensed: id={}", saved.getId());
         return ResponseEntity.ok(ApiResponse.ok(response));
