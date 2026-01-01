@@ -38,6 +38,7 @@ public class Appointment {
 
     private Instant appointmentTime;
 
+    @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
     
     @Enumerated(EnumType.STRING)

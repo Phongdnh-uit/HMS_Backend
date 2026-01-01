@@ -381,7 +381,14 @@ public class AppointmentService {
                 } else if (row[0] instanceof LocalDate) {
                     date = (LocalDate) row[0];
                 } else {
-                    date = LocalDate.parse(row[0].toString().substring(0, 10));
+                    String dateStr = row[0].toString();
+                    // Safely parse date - handle both "2026-01-01" and "2026-01-01T..." formats
+                    if (dateStr.length() >= 10) {
+                        date = LocalDate.parse(dateStr.substring(0, 10));
+                    } else {
+                        // Try parsing the whole string if it's shorter than 10 chars
+                        date = LocalDate.parse(dateStr);
+                    }
                 }
             }
             int count = ((Number) row[1]).intValue();
