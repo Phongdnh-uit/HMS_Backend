@@ -206,6 +206,17 @@ public class AppointmentController extends GenericController<Appointment, String
     }
     
     /**
+     * Get today's queue for all doctors.
+     * Returns all appointments with queue numbers ordered by priority and queue number.
+     * Access: RECEPTIONIST, ADMIN
+     */
+    @GetMapping("/queue/all")
+    public ResponseEntity<ApiResponse<java.util.List<AppointmentResponse>>> getAllQueues() {
+        java.util.List<AppointmentResponse> queue = appointmentService.getAllQueuesForToday();
+        return ResponseEntity.ok(ApiResponse.ok(queue));
+    }
+    
+    /**
      * Get today's queue for a specific doctor.
      * Returns appointments ordered by priority and queue number.
      * Access: DOCTOR, NURSE, RECEPTIONIST, ADMIN

@@ -1,6 +1,7 @@
 package com.hms.appointment_service.services;
 
 import com.hms.appointment_service.clients.HrClient;
+import com.hms.appointment_service.clients.PatientClient;
 import com.hms.appointment_service.constants.AppointmentStatus;
 import com.hms.appointment_service.dtos.appointment.AppointmentStatsResponse;
 import com.hms.appointment_service.dtos.appointment.AppointmentResponse;
@@ -39,6 +40,7 @@ public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final HrClient hrClient;
+    private final PatientClient patientClient;
     private final AppointmentMapper appointmentMapper;
     private final QueueService queueService;
 
@@ -449,14 +451,35 @@ public class AppointmentService {
         appointment.setPriority(priority);
         appointment.setPriorityReason(request.getPriorityReason());
         
-        // Try to fetch patient and doctor names
+        // Fetch patient name from patient-service
         try {
-            // Note: Patient and doctor name fetching would require client calls
-            // For now, we'll leave them as null and they can be populated later
-            appointment.setPatientName("Walk-in Patient");
-            appointment.setDoctorName("Doctor");
+            var patientResponse = FeignHelper.safeCall(() -> patientClient.getPatientById(request.getPatientId()));
+            if (patientResponse != null && patientResponse.getData() != null) {
+                appointment.setPatientName(patientResponse.getData().fullName());
+                log.debug("Fetched patient name: {}", patientResponse.getData().fullName());
+            } else {
+                appointment.setPatientName("Walk-in Patient");
+                log.warn("Could not fetch patient name for patientId: {}", request.getPatientId());
+            }
         } catch (Exception e) {
-            log.warn("Could not fetch patient/doctor names: {}", e.getMessage());
+            appointment.setPatientName("Walk-in Patient");
+            log.warn("Failed to fetch patient name: {}", e.getMessage());
+        }
+        
+        // Fetch doctor name and department from hr-service
+        try {
+            var doctorResponse = FeignHelper.safeCall(() -> hrClient.getEmployeeById(request.getDoctorId()));
+            if (doctorResponse != null && doctorResponse.getData() != null) {
+                appointment.setDoctorName(doctorResponse.getData().fullName());
+                appointment.setDoctorDepartment(doctorResponse.getData().departmentName());
+                log.debug("Fetched doctor: {} ({})", doctorResponse.getData().fullName(), doctorResponse.getData().departmentName());
+            } else {
+                appointment.setDoctorName("Doctor");
+                log.warn("Could not fetch doctor name for doctorId: {}", request.getDoctorId());
+            }
+        } catch (Exception e) {
+            appointment.setDoctorName("Doctor");
+            log.warn("Failed to fetch doctor name: {}", e.getMessage());
         }
         
         appointment = appointmentRepository.save(appointment);
@@ -511,6 +534,19 @@ public class AppointmentService {
                 next.getId(), next.getQueueNumber());
         
         return appointmentMapper.entityToResponse(next);
+    }
+    
+    /**
+     * Get all queues for today across all doctors.
+     * Used by receptionist to see entire waiting room.
+     *
+     * @return List of all appointments with queue numbers, ordered by priority and queue number
+     */
+    public List<AppointmentResponse> getAllQueuesForToday() {
+        List<Appointment> allQueues = queueService.getAllQueuesForToday();
+        return allQueues.stream()
+                .map(appointmentMapper::entityToResponse)
+                .toList();
     }
 }
 

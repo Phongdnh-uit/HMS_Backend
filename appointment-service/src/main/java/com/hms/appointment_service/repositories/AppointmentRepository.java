@@ -82,6 +82,13 @@ public interface AppointmentRepository extends SimpleRepository<Appointment, Str
      */
     @Query("SELECT a FROM Appointment a WHERE a.doctorId = :doctorId AND a.createdAt >= :startTime AND a.createdAt < :endTime AND a.queueNumber IS NOT NULL ORDER BY a.priority ASC, a.queueNumber ASC")
     List<Appointment> findDoctorQueueForDate(@Param("doctorId") String doctorId, @Param("startTime") Instant startTime, @Param("endTime") Instant endTime);
+    
+    /**
+     * Find all queues for a specific date across all doctors.
+     * Returns appointments with queue numbers, ordered by priority and queue number.
+     */
+    @Query("SELECT a FROM Appointment a WHERE a.createdAt >= :startTime AND a.createdAt < :endTime AND a.queueNumber IS NOT NULL ORDER BY a.priority ASC, a.queueNumber ASC")
+    List<Appointment> findAllQueuesForDate(@Param("startTime") Instant startTime, @Param("endTime") Instant endTime);
 }
 
 

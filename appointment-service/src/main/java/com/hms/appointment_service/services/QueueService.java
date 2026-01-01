@@ -96,4 +96,16 @@ public class QueueService {
                 .findFirst()
                 .orElse(null);
     }
+    
+    /**
+     * Get all queues for today across all doctors.
+     * Returns all appointments with queue numbers, ordered by priority and queue number.
+     */
+    public List<Appointment> getAllQueuesForToday() {
+        LocalDate today = LocalDate.now(VIETNAM_ZONE);
+        Instant startOfDay = today.atStartOfDay(VIETNAM_ZONE).toInstant();
+        Instant endOfDay = today.plusDays(1).atStartOfDay(VIETNAM_ZONE).toInstant();
+        
+        return appointmentRepository.findAllQueuesForDate(startOfDay, endOfDay);
+    }
 }
