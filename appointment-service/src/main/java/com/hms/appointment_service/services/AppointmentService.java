@@ -283,7 +283,8 @@ public class AppointmentService {
                     "Appointment is already completed");
         }
 
-        if (appointment.getStatus() != AppointmentStatus.SCHEDULED) {
+        if (appointment.getStatus() != AppointmentStatus.SCHEDULED &&
+            appointment.getStatus() != AppointmentStatus.IN_PROGRESS) {
             throw new ApiException(
                     ErrorCode.OPERATION_NOT_ALLOWED,
                     "Cannot complete appointment with status: " + appointment.getStatus());
@@ -388,7 +389,7 @@ public class AppointmentService {
                     if (dateStr.length() >= 10) {
                         date = LocalDate.parse(dateStr.substring(0, 10));
                     } else {
-                        // Try parsing the whole string if it's shorter than 10 chars
+                        // Try parsing the whole string if it's shorter
                         date = LocalDate.parse(dateStr);
                     }
                 }

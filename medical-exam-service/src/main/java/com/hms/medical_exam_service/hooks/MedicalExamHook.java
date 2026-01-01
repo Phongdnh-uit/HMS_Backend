@@ -97,17 +97,21 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
                 "Appointment not found: " + input.getAppointmentId());
         }
         
-        // 4. Validate appointment status is COMPLETED
-        if (!"COMPLETED".equals(appointment.status())) {
-            log.warn("Appointment {} is not COMPLETED, status: {}", input.getAppointmentId(), appointment.status());
+        // 4. Validate appointment status
+        // Allow SCHEDULED/IN_PROGRESS (nurse vital signs) or COMPLETED (doctor exam)
+        // Workflow: Nurse enters vital signs (SCHEDULED) → Doctor examines (IN_PROGRESS) → Complete exam (COMPLETED)
+        String status = appointment.status();
+        if (!"SCHEDULED".equals(status) && !"IN_PROGRESS".equals(status) && !"COMPLETED".equals(status)) {
+            log.warn("Appointment {} has invalid status: {} (expected SCHEDULED, IN_PROGRESS, or COMPLETED)", 
+                input.getAppointmentId(), status);
             throw new ApiException(ErrorCode.APPOINTMENT_NOT_COMPLETED, 
-                "Appointment must be COMPLETED to create medical exam. Current status: " + appointment.status());
+                "Appointment must be SCHEDULED, IN_PROGRESS, or COMPLETED to create medical exam. Current status: " + status);
         }
         
         // Store appointment in context for enrichCreate (avoid duplicate call)
         context.put("appointment", appointment);
         
-        log.debug("Validation passed for appointmentId: {}", input.getAppointmentId());
+        log.debug("Validation passed for appointmentId: {} (status: {})", input.getAppointmentId(), status);
     }
 
     @Override

@@ -90,8 +90,8 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.PUT, "/api/exams/lab-results/**").hasAnyAuthority("ADMIN", "DOCTOR", "NURSE")
                         .pathMatchers(HttpMethod.DELETE, "/api/exams/lab-results/images/**").hasAnyAuthority("ADMIN", "DOCTOR")
                         
-                        // Exams - DOCTOR creates/updates
-                        .pathMatchers(HttpMethod.POST, "/api/exams/**").hasAnyAuthority("ADMIN", "DOCTOR")
+                        // Exams - DOCTOR and NURSE can create (NURSE for vital signs), DOCTOR can update
+                        .pathMatchers(HttpMethod.POST, "/api/exams/**").hasAnyAuthority("ADMIN", "DOCTOR", "NURSE")
                         .pathMatchers(HttpMethod.PUT, "/api/exams/**").hasAnyAuthority("ADMIN", "DOCTOR")
                         .pathMatchers(HttpMethod.DELETE, "/api/exams/**").hasAnyAuthority("ADMIN")
                         .pathMatchers(HttpMethod.GET, "/api/exams/**").hasAnyAuthority("ADMIN", "DOCTOR", "NURSE", "PATIENT")
