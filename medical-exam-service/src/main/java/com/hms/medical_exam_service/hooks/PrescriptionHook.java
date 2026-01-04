@@ -185,19 +185,83 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
     }
 
     // ============================ UPDATE ============================
-    // Prescriptions are IMMUTABLE - no update methods implemented.
-    // Service layer should not expose PUT/PATCH endpoints.
-    // To "change" a prescription: Cancel original → Create new prescription.
-
-    // ============================ DELETE ============================
-    // Hard delete is NOT allowed - no delete methods implemented.
-    // Service layer should not expose DELETE endpoint.
-    // Use cancelPrescription() method instead.
     
-    // ============================ CANCEL OPERATION ============================
-    // This is the proper way to "undo" a prescription in healthcare systems.
-    // Called by PrescriptionService.cancel() method.
+    /**
+     * Validates update request for an existing prescription.
+     * Checks new medicine stock availability.
+     */
+    public void validateUpdate(PrescriptionRequest request, Prescription existing, Map<String, Object> context) {
+        log.info("Validating prescription update: id={}", existing.getId());
+        
+        // Validate new items have sufficient stock
+        if (request.getItems() != null && !request.getItems().isEmpty()) {
+            validateMedicines(request.getItems(), context);
+        }
+    }
     
+    /**
+     * Updates prescription items by:
+     * 1. Restoring stock for old items (cancelled)
+     * 2. Clearing old items
+     * 3. Adding new items with stock decrement
+     * 
+     * This effectively replaces the prescription content while maintaining its identity.
+     */
+    public void updatePrescriptionItems(Prescription prescription, PrescriptionRequest request, Map<String, Object> context) {
+        log.info("Updating prescription items: id={}, oldItems={}, newItems={}", 
+            prescription.getId(), 
+            prescription.getItems().size(), 
+            request.getItems() != null ? request.getItems().size() : 0);
+        
+        // 1. Restore stock for old items (as if cancelled)
+        List<PrescriptionItem> oldItems = new ArrayList<>(prescription.getItems());
+        if (!oldItems.isEmpty()) {
+            restoreStockWithRetry(oldItems);
+            log.info("Restored stock for {} old items", oldItems.size());
+        }
+        
+        // 2. Clear old items
+        prescription.getItems().clear();
+        
+        // 3. Update notes if provided
+        if (request.getNotes() != null) {
+            prescription.setNotes(request.getNotes());
+        }
+        
+        // 4. Add new items using cached medicine info from validateUpdate
+        if (request.getItems() != null) {
+            for (PrescriptionItemRequest itemReq : request.getItems()) {
+                // Get medicine info from context (cached during validateUpdate)
+                MedicineInfo medicineInfo = (MedicineInfo) context.get(CONTEXT_MEDICINE_PREFIX + itemReq.getMedicineId());
+                if (medicineInfo == null) {
+                    log.warn("Medicine not found in cache: {}", itemReq.getMedicineId());
+                    continue;
+                }
+                
+                PrescriptionItem item = new PrescriptionItem();
+                item.setMedicineId(itemReq.getMedicineId());
+                item.setQuantity(itemReq.getQuantity());
+                item.setDosage(itemReq.getDosage());
+                item.setDurationDays(itemReq.getDurationDays());
+                item.setInstructions(itemReq.getInstructions());
+                
+                // Snapshot medicine data for historical accuracy
+                item.setMedicineName(medicineInfo.name());
+                item.setUnitPrice(medicineInfo.sellingPrice());
+                
+                prescription.addItem(item);
+            }
+            
+            // 5. Decrement stock for new items
+            if (!prescription.getItems().isEmpty()) {
+                decrementMedicineStock(prescription.getItems());
+                log.info("Decremented stock for {} new items", prescription.getItems().size());
+            }
+        }
+        
+        log.info("Prescription items updated: id={}, newItemCount={}", 
+            prescription.getId(), prescription.getItems().size());
+    }
     /**
      * Cancels a prescription and restores stock for all items.
      * This is a business operation, not a CRUD delete.
@@ -252,34 +316,51 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
                     prescription.getStatus()));
         }
         
-        // 2. Update prescription status
+        // 2. Update prescription status (NO invoice generation here - will be done after commit)
         prescription.setStatus(Prescription.Status.DISPENSED);
         prescription.setDispensedAt(Instant.now());
         prescription.setDispensedBy(dispensedBy);
         
-        // 3. Get medical exam to find appointmentId for invoice
+        // 3. Get medical exam to find appointmentId for invoice - capture for later
         MedicalExam exam = medicalExamRepository.findById(prescription.getMedicalExamId())
             .orElse(null);
         
-        // 4. Generate invoice via billing-service
-        if (exam != null) {
-            try {
-                log.info("[DISPENSE] Generating invoice for appointmentId: {}", exam.getAppointmentId());
-                BillingClient.InvoiceRequest invoiceRequest = new BillingClient.InvoiceRequest(
-                    exam.getAppointmentId(),
-                    "Auto-generated after prescription dispense"
-                );
-                FeignHelper.safeCall(() -> billingClient.createInvoice(invoiceRequest));
-                log.info("[DISPENSE] Invoice generated successfully for prescription: {}", prescription.getId());
-            } catch (Exception e) {
-                log.error("[DISPENSE] Failed to generate invoice for prescription {}: {}", 
-                    prescription.getId(), e.getMessage());
-                // Don't fail dispense if invoice creation fails - log for manual follow-up
-            }
+        // NOTE: Invoice generation moved to controller AFTER transaction commits
+        // to avoid timing issue where billing-service can't fetch prescription
+        
+        // 4. Save is handled by caller (controller with @Transactional)
+        log.info("[DISPENSE] Prescription dispensed successfully: id={}", prescription.getId());
+    }
+    
+    /**
+     * Generate invoice for a dispensed prescription.
+     * This should be called AFTER the dispense transaction commits.
+     * 
+     * @param prescriptionId The prescription ID
+     */
+    public void generateInvoiceAfterDispense(String prescriptionId) {
+        Prescription prescription = prescriptionRepository.findById(prescriptionId).orElse(null);
+        if (prescription == null || prescription.getStatus() != Prescription.Status.DISPENSED) {
+            log.warn("[INVOICE] Skipping invoice generation - prescription {} not found or not dispensed", prescriptionId);
+            return;
         }
         
-        // 5. Save is handled by caller (controller with @Transactional)
-        log.info("[DISPENSE] Prescription dispensed successfully: id={}", prescription.getId());
+        MedicalExam exam = medicalExamRepository.findById(prescription.getMedicalExamId()).orElse(null);
+        if (exam != null) {
+            try {
+                log.info("[INVOICE] Generating invoice for appointmentId: {}, examId: {}", exam.getAppointmentId(), exam.getId());
+                BillingClient.InvoiceRequest invoiceRequest = new BillingClient.InvoiceRequest(
+                    exam.getAppointmentId(),
+                    exam.getId(), // Pass examId for direct prescription lookup
+                    "Auto-generated after prescription dispense"
+                );
+                FeignHelper.safeCall(() -> billingClient.upsertInvoice(invoiceRequest));
+                log.info("[INVOICE] Invoice created/updated successfully for prescription: {}", prescription.getId());
+            } catch (Exception e) {
+                log.error("[INVOICE] Failed to generate invoice for prescription {}: {}", 
+                    prescription.getId(), e.getMessage());
+            }
+        }
     }
     
     /**

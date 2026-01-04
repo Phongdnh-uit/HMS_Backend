@@ -75,4 +75,25 @@ public interface MedicalExamClient {
     ) {
         public record MedicineInfo(String id, String name) {}
     }
+    
+    /**
+     * Get lab test results for an exam.
+     * Endpoint is at /exams/lab-results/exam/{examId} in medical-exam-service
+     */
+    @GetMapping("/lab-results/exam/{examId}")
+    ApiResponse<List<LabTestResultResponse>> getLabResultsByExam(@PathVariable String examId);
+    
+    /**
+     * Lab test result response for invoice generation.
+     * Uses flat fields to match medical-exam-service response.
+     */
+    record LabTestResultResponse(
+        String id,
+        String labTestId,
+        String labTestCode,
+        String labTestName,
+        BigDecimal labTestPrice,
+        String status,
+        Instant createdAt
+    ) {}
 }

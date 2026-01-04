@@ -21,6 +21,7 @@ public record PatientResponse(
         String relativeRelationship,
         String bloodType,
         String allergies,
+        String profileImageUrl,
         Instant createdAt,
         Instant updatedAt,
         String createdBy,

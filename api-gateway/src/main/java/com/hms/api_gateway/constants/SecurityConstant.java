@@ -15,6 +15,9 @@ public interface SecurityConstant {
             // Actuator health endpoints for monitoring
             "/actuator/health",
             "/actuator/health/**",
+            // Lab test image downloads - public so browser can access without JWT
+            "/api/exams/lab-results/images/*/download",
     };
 }
+
 

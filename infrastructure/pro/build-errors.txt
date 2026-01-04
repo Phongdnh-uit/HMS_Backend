@@ -1,0 +1,278 @@
+﻿#1 [internal] load local bake definitions
+#1 reading from stdin 1.45kB done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 2.45kB 0.0s done
+#2 DONE 0.0s
+
+#3 [auth] library/eclipse-temurin:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#4 [internal] load metadata for docker.io/library/eclipse-temurin:23-jre-alpine
+#4 ...
+
+#5 [internal] load metadata for docker.io/library/eclipse-temurin:23-jdk
+#5 DONE 2.4s
+
+#4 [internal] load metadata for docker.io/library/eclipse-temurin:23-jre-alpine
+#4 DONE 2.7s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 2B done
+#6 DONE 0.0s
+
+#7 [builder  1/20] FROM docker.io/library/eclipse-temurin:23-jdk@sha256:83177670e43c17769a5402a60601545318e45e63adf634fb5022340e516cded4
+#7 resolve docker.io/library/eclipse-temurin:23-jdk@sha256:83177670e43c17769a5402a60601545318e45e63adf634fb5022340e516cded4 0.0s done
+#7 DONE 0.0s
+
+#8 [stage-1  1/16] FROM docker.io/library/eclipse-temurin:23-jre-alpine@sha256:88593498863c64b43be16e8357a3c70ea475fc20a93bf1e07f4609213a357c87
+#8 resolve docker.io/library/eclipse-temurin:23-jre-alpine@sha256:88593498863c64b43be16e8357a3c70ea475fc20a93bf1e07f4609213a357c87 0.0s done
+#8 DONE 0.0s
+
+#9 [internal] load build context
+#9 transferring context: 50.83kB 0.1s done
+#9 DONE 0.1s
+
+#10 [builder  4/20] COPY gradle gradle
+#10 CACHED
+
+#11 [builder  7/20] COPY common ./common
+#11 CACHED
+
+#12 [builder 18/20] COPY report-service ./report-service
+#12 CACHED
+
+#13 [builder 17/20] COPY billing-service ./billing-service
+#13 CACHED
+
+#14 [builder  3/20] COPY settings.gradle.kts build.gradle.kts gradlew ./
+#14 CACHED
+
+#15 [builder 13/20] COPY patient-service ./patient-service
+#15 CACHED
+
+#16 [builder 16/20] COPY medical-exam-service ./medical-exam-service
+#16 CACHED
+
+#17 [builder  2/20] WORKDIR /build
+#17 CACHED
+
+#18 [builder  9/20] COPY discovery-service ./discovery-service
+#18 CACHED
+
+#19 [builder 14/20] COPY hr-service ./hr-service
+#19 CACHED
+
+#20 [builder 12/20] COPY medicine-service ./medicine-service
+#20 CACHED
+
+#21 [builder  6/20] RUN chmod +x gradlew
+#21 CACHED
+
+#22 [builder 10/20] COPY api-gateway ./api-gateway
+#22 CACHED
+
+#23 [builder 11/20] COPY auth-service ./auth-service
+#23 CACHED
+
+#24 [builder  8/20] COPY config-server ./config-server
+#24 CACHED
+
+#25 [builder 15/20] COPY appointment-service ./appointment-service
+#25 CACHED
+
+#26 [builder  5/20] RUN sed -i 's/\r$//' gradlew
+#26 CACHED
+
+#27 [builder 19/20] COPY notification-service ./notification-service
+#27 CACHED
+
+#28 [builder 20/20] RUN ./gradlew clean bootJar --no-daemon
+#28 0.337 Downloading https://services.gradle.org/distributions/gradle-8.14.3-bin.zip
+#28 2.386 .............10%.............20%.............30%.............40%.............50%.............60%.............70%.............80%.............90%..............100%
+#28 9.048 
+#28 9.048 Welcome to Gradle 8.14.3!
+#28 9.048 
+#28 9.048 Here are the highlights of this release:
+#28 9.048  - Java 24 support
+#28 9.049  - GraalVM Native Image toolchain selection
+#28 9.049  - Enhancements to test reporting
+#28 9.049  - Build Authoring improvements
+#28 9.049 
+#28 9.049 For more details see https://docs.gradle.org/8.14.3/release-notes.html
+#28 9.049 
+#28 9.148 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+#28 10.35 Daemon will be stopped at the end of the build 
+#28 112.8 > Task :clean UP-TO-DATE
+#28 112.8 > Task :api-gateway:clean UP-TO-DATE
+#28 112.8 > Task :appointment-service:clean UP-TO-DATE
+#28 112.8 > Task :auth-service:clean UP-TO-DATE
+#28 112.8 > Task :billing-service:clean UP-TO-DATE
+#28 112.8 > Task :common:clean UP-TO-DATE
+#28 112.8 > Task :config-server:clean UP-TO-DATE
+#28 112.8 > Task :discovery-service:clean UP-TO-DATE
+#28 112.8 > Task :hr-service:clean UP-TO-DATE
+#28 112.9 > Task :medical-exam-service:clean UP-TO-DATE
+#28 112.9 > Task :medicine-service:clean UP-TO-DATE
+#28 112.9 > Task :notification-service:clean UP-TO-DATE
+#28 112.9 > Task :patient-service:clean UP-TO-DATE
+#28 112.9 > Task :report-service:clean UP-TO-DATE
+#28 123.5 > Task :api-gateway:compileJava
+#28 123.6 > Task :api-gateway:processResources
+#28 123.6 > Task :api-gateway:classes
+#28 123.6 > Task :api-gateway:resolveMainClassName
+#28 126.1 > Task :api-gateway:bootJar
+#28 129.5 
+#28 129.5 > Task :common:compileJava
+#28 129.5 Note: /build/common/src/main/java/com/hms/common/exceptions/FeignCustomErrorDecoder.java uses or overrides a deprecated API.
+#28 129.5 Note: Recompile with -Xlint:deprecation for details.
+#28 129.5 Note: /build/common/src/main/java/com/hms/common/helpers/FeignHelper.java uses unchecked or unsafe operations.
+#28 129.5 Note: Recompile with -Xlint:unchecked for details.
+#28 133.6 
+#28 133.6 > Task :appointment-service:compileJava
+#28 133.6 > Task :appointment-service:processResources
+#28 133.6 > Task :appointment-service:classes
+#28 133.6 > Task :appointment-service:resolveMainClassName
+#28 133.6 > Task :common:processResources
+#28 133.6 > Task :common:classes
+#28 133.7 > Task :common:jar
+#28 136.2 > Task :appointment-service:bootJar
+#28 137.3 > Task :auth-service:compileJava
+#28 137.3 > Task :auth-service:processResources
+#28 137.3 > Task :auth-service:classes
+#28 137.3 > Task :auth-service:resolveMainClassName
+#28 138.3 > Task :auth-service:bootJar
+#28 139.7 > Task :billing-service:compileJava
+#28 139.8 > Task :billing-service:processResources
+#28 139.8 > Task :billing-service:classes
+#28 139.8 > Task :billing-service:resolveMainClassName
+#28 140.4 > Task :billing-service:bootJar
+#28 140.4 > Task :common:resolveMainClassName
+#28 141.1 > Task :common:bootJar
+#28 142.7 > Task :config-server:compileJava
+#28 142.7 > Task :config-server:processResources
+#28 142.7 > Task :config-server:classes
+#28 142.7 > Task :config-server:resolveMainClassName
+#28 143.3 > Task :config-server:bootJar
+#28 145.0 > Task :discovery-service:compileJava
+#28 145.0 > Task :discovery-service:processResources
+#28 145.0 > Task :discovery-service:classes
+#28 145.0 > Task :discovery-service:resolveMainClassName
+#28 146.3 > Task :discovery-service:bootJar
+#28 147.4 > Task :hr-service:compileJava
+#28 147.4 > Task :hr-service:processResources
+#28 147.4 > Task :hr-service:classes
+#28 147.4 > Task :hr-service:resolveMainClassName
+#28 148.0 > Task :hr-service:bootJar
+#28 150.6 
+#28 150.6 > Task :medical-exam-service:compileJava
+#28 150.6 /build/medical-exam-service/src/main/java/com/hms/medical_exam_service/controllers/LabTestController.java:65: error: cannot find symbol
+#28 150.6         return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(responsePage)));
+#28 150.6                                                             ^
+#28 150.6   symbol:   method from(Page<LabTestResponse>)
+#28 150.6   location: class PageResponse
+#28 150.6 /build/medical-exam-service/src/main/java/com/hms/medical_exam_service/controllers/LabTestResultController.java:48: error: cannot find symbol
+#28 150.6         return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(page)));
+#28 150.6                                                             ^
+#28 150.6   symbol:   method from(Page<LabTestResultResponse>)
+#28 150.6   location: class PageResponse
+#28 150.6 /build/medical-exam-service/src/main/java/com/hms/medical_exam_service/services/LabTestService.java:22: error: constructor GenericService in class GenericService<E,ID,I,O> cannot be applied to given types;
+#28 150.6         super(repository, mapper);
+#28 150.6         ^
+#28 150.6   required: SimpleRepository<LabTest,String>,GenericMapper<LabTest,LabTestRequest,LabTestResponse>,GenericHook<LabTest,String,LabTestRequest,LabTestResponse>
+#28 150.6   found:    LabTestRepository,LabTestMapper
+#28 150.6   reason: actual and formal argument lists differ in length
+#28 150.6   where E,ID,I,O are type-variables:
+#28 150.6     E extends Object declared in class GenericService
+#28 150.6     ID extends Object declared in class GenericService
+#28 150.6     I extends Object declared in class GenericService
+#28 150.6     O extends Object declared in class GenericService
+#28 150.7 
+#28 150.7 > Task :medical-exam-service:compileJava3 errors
+#28 150.7  FAILED
+#28 150.8 
+#28 150.8 FAILURE: Build failed with an exception.
+#28 150.8 
+#28 150.8 * What went wrong:
+#28 150.8 Execution failed for task ':medical-exam-service:compileJava'.
+#28 150.8 > Compilation failed; see the compiler output below.
+#28 150.8   /build/medical-exam-service/src/main/java/com/hms/medical_exam_service/services/LabTestService.java:22: error: constructor GenericService in class GenericService<E,ID,I,O> cannot be applied to given types;
+#28 150.8           super(repository, mapper);
+#28 150.8           ^
+#28 150.8 
+#28 150.8 [Incubating] Problems report is available at: file:///build/build/reports/problems/problems-report.html
+#28 150.8     required: SimpleRepository<LabTest,String>,GenericMapper<LabTest,LabTestRequest,LabTestResponse>,GenericHook<LabTest,String,LabTestRequest,LabTestResponse>
+#28 150.8     found:    LabTestRepository,LabTestMapper
+#28 150.8     reason: actual and formal argument lists differ in length
+#28 150.8     where E,ID,I,O are type-variables:
+#28 150.8       E extends Object declared in class GenericService
+#28 150.8       ID extends Object declared in class GenericService
+#28 150.8       I extends Object declared in class GenericService
+#28 150.8       O extends Object declared in class GenericService
+#28 150.8   /build/medical-exam-service/src/main/java/com/hms/medical_exam_service/controllers/LabTestController.java:65: error: cannot find symbol
+#28 150.8           return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(responsePage)));
+#28 150.8                                                               ^
+#28 150.8     symbol:   method from(Page<LabTestResponse>)
+#28 150.8     location: class PageResponse
+#28 150.8   /build/medical-exam-service/src/main/java/com/hms/medical_exam_service/controllers/LabTestResultController.java:48: error: cannot find symbol
+#28 150.8           return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(page)));
+#28 150.8                                                               ^
+#28 150.8     symbol:   method from(Page<LabTestResultResponse>)
+#28 150.8     location: class PageResponse
+#28 150.8   3 errors
+#28 150.8 
+#28 150.8 * Try:
+#28 150.8 > Check your code and dependencies to fix the compilation error(s)
+#28 150.8 > Run with --scan to get full insights.
+#28 150.8 
+#28 150.8 BUILD FAILED in 2m 30s
+#28 150.8 48 actionable tasks: 34 executed, 14 up-to-date
+#28 ERROR: process "/bin/sh -c ./gradlew clean bootJar --no-daemon" did not complete successfully: exit code: 1
+------
+ > [builder 20/20] RUN ./gradlew clean bootJar --no-daemon:
+150.8     symbol:   method from(Page<LabTestResultResponse>)
+150.8     location: class PageResponse
+150.8   3 errors
+150.8 
+150.8 * Try:
+150.8 > Check your code and dependencies to fix the compilation error(s)
+150.8 > Run with --scan to get full insights.
+150.8 
+150.8 BUILD FAILED in 2m 30s
+150.8 48 actionable tasks: 34 executed, 14 up-to-date
+------
+docker-compose : Dockerfile:28
+At line:1 char:1
++ docker-compose build 
+medical-exam-service-pro 2>&1 | Out-File 
+-FilePa ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo          : 
+NotSpecified: (Dockerfile:28:String) [], 
+RemoteException
+    + FullyQualifiedErrorId : 
+NativeCommandError
+ 
+
+--------------------
+
+  26 |     
+
+  27 |     # Build táº¥t cáº£ modules
+
+  28 | >>> RUN ./gradlew clean bootJar 
+--no-daemon
+
+  29 |     
+
+  30 |     # -------- Stage 2: Run 
+--------
+
+--------------------
+
+failed to solve: process "/bin/sh -c 
+./gradlew clean bootJar --no-daemon" did 
+not complete successfully: exit code: 1
+

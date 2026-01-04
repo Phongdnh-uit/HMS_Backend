@@ -1,17 +1,160 @@
 package com.hms.hr_service.controllers;
 
 import com.hms.common.controllers.GenericController;
+import com.hms.common.dtos.ApiResponse;
+import com.hms.common.exceptions.errors.ApiException;
+import com.hms.common.exceptions.errors.ErrorCode;
 import com.hms.common.services.CrudService;
 import com.hms.hr_service.dtos.employee.EmployeeRequest;
 import com.hms.hr_service.dtos.employee.EmployeeResponse;
 import com.hms.hr_service.entities.Employee;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.hms.hr_service.mappers.EmployeeMapper;
+import com.hms.hr_service.repositories.EmployeeRepository;
+import com.hms.hr_service.services.FileStorageService;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequestMapping("/hr/employees")
 @RestController
 public class EmployeeController extends GenericController<Employee, String, EmployeeRequest, EmployeeResponse> {
-    public EmployeeController(CrudService<Employee, String, EmployeeRequest, EmployeeResponse> service) {
+    
+    private final EmployeeRepository employeeRepository;
+    private final EmployeeMapper employeeMapper;
+    private final FileStorageService fileStorageService;
+
+    public EmployeeController(
+            CrudService<Employee, String, EmployeeRequest, EmployeeResponse> service,
+            EmployeeRepository employeeRepository,
+            EmployeeMapper employeeMapper,
+            FileStorageService fileStorageService) {
         super(service);
+        this.employeeRepository = employeeRepository;
+        this.employeeMapper = employeeMapper;
+        this.fileStorageService = fileStorageService;
+    }
+
+    /**
+     * Upload profile image for an employee.
+     * Max file size: 2MB. Allowed types: JPEG, PNG, WebP.
+     */
+    @PostMapping(value = "/{id}/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<EmployeeResponse>> uploadProfileImage(
+            @PathVariable String id,
+            @RequestParam("file") MultipartFile file) {
+        
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Employee not found"));
+        
+        // Delete old image if exists
+        if (employee.getProfileImageUrl() != null) {
+            fileStorageService.deleteFile(employee.getProfileImageUrl());
+        }
+        
+        // Upload new image
+        String imageUrl = fileStorageService.uploadProfileImage(file, id);
+        employee.setProfileImageUrl(imageUrl);
+        Employee saved = employeeRepository.save(employee);
+        
+        return ResponseEntity.ok(ApiResponse.ok("Profile image uploaded successfully", 
+                employeeMapper.entityToResponse(saved)));
+    }
+
+    /**
+     * Delete profile image for an employee.
+     */
+    @DeleteMapping("/{id}/profile-image")
+    public ResponseEntity<ApiResponse<EmployeeResponse>> deleteProfileImage(@PathVariable String id) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Employee not found"));
+        
+        if (employee.getProfileImageUrl() != null) {
+            fileStorageService.deleteFile(employee.getProfileImageUrl());
+            employee.setProfileImageUrl(null);
+            employeeRepository.save(employee);
+        }
+        
+        return ResponseEntity.ok(ApiResponse.ok("Profile image deleted successfully", 
+                employeeMapper.entityToResponse(employee)));
+    }
+
+    // ============================================
+    // SELF-SERVICE ENDPOINTS (/me)
+    // ============================================
+
+    /**
+     * Get current employee's profile using accountId from JWT.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<EmployeeResponse>> getMyProfile(
+            @RequestHeader("X-User-ID") String accountId) {
+        Employee employee = employeeRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Employee profile not found for this account"));
+        return ResponseEntity.ok(ApiResponse.ok("My profile retrieved successfully", 
+                employeeMapper.entityToResponse(employee)));
+    }
+
+    /**
+     * Update current employee's profile.
+     */
+    @PutMapping("/me")
+    public ResponseEntity<ApiResponse<EmployeeResponse>> updateMyProfile(
+            @RequestHeader("X-User-ID") String accountId,
+            @RequestBody EmployeeRequest request) {
+        Employee employee = employeeRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Employee profile not found for this account"));
+        
+        // Update allowed fields only (email not in EmployeeRequest DTO)
+        if (request.getFullName() != null) employee.setFullName(request.getFullName());
+        if (request.getPhoneNumber() != null) employee.setPhoneNumber(request.getPhoneNumber());
+        if (request.getAddress() != null) employee.setAddress(request.getAddress());
+        if (request.getSpecialization() != null) employee.setSpecialization(request.getSpecialization());
+        if (request.getLicenseNumber() != null) employee.setLicenseNumber(request.getLicenseNumber());
+        
+        Employee saved = employeeRepository.save(employee);
+        return ResponseEntity.ok(ApiResponse.ok("Profile updated successfully", 
+                employeeMapper.entityToResponse(saved)));
+    }
+
+    /**
+     * Upload profile image for current employee.
+     */
+    @PostMapping(value = "/me/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<EmployeeResponse>> uploadMyProfileImage(
+            @RequestHeader("X-User-ID") String accountId,
+            @RequestParam("file") MultipartFile file) {
+        Employee employee = employeeRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Employee profile not found for this account"));
+        
+        if (employee.getProfileImageUrl() != null) {
+            fileStorageService.deleteFile(employee.getProfileImageUrl());
+        }
+        
+        String imageUrl = fileStorageService.uploadProfileImage(file, employee.getId());
+        employee.setProfileImageUrl(imageUrl);
+        Employee saved = employeeRepository.save(employee);
+        
+        return ResponseEntity.ok(ApiResponse.ok("Profile image uploaded successfully", 
+                employeeMapper.entityToResponse(saved)));
+    }
+
+    /**
+     * Delete profile image for current employee.
+     */
+    @DeleteMapping("/me/profile-image")
+    public ResponseEntity<ApiResponse<EmployeeResponse>> deleteMyProfileImage(
+            @RequestHeader("X-User-ID") String accountId) {
+        Employee employee = employeeRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Employee profile not found for this account"));
+        
+        if (employee.getProfileImageUrl() != null) {
+            fileStorageService.deleteFile(employee.getProfileImageUrl());
+            employee.setProfileImageUrl(null);
+            employeeRepository.save(employee);
+        }
+        
+        return ResponseEntity.ok(ApiResponse.ok("Profile image deleted successfully", 
+                employeeMapper.entityToResponse(employee)));
     }
 }

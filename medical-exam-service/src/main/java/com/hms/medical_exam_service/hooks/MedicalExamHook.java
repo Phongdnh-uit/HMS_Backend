@@ -97,17 +97,21 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
                 "Appointment not found: " + input.getAppointmentId());
         }
         
-        // 4. Validate appointment status is COMPLETED
-        if (!"COMPLETED".equals(appointment.status())) {
-            log.warn("Appointment {} is not COMPLETED, status: {}", input.getAppointmentId(), appointment.status());
+        // 4. Validate appointment status
+        // Allow SCHEDULED/IN_PROGRESS (nurse vital signs) or COMPLETED (doctor exam)
+        // Workflow: Nurse enters vital signs (SCHEDULED) → Doctor examines (IN_PROGRESS) → Complete exam (COMPLETED)
+        String status = appointment.status();
+        if (!"SCHEDULED".equals(status) && !"IN_PROGRESS".equals(status) && !"COMPLETED".equals(status)) {
+            log.warn("Appointment {} has invalid status: {} (expected SCHEDULED, IN_PROGRESS, or COMPLETED)", 
+                input.getAppointmentId(), status);
             throw new ApiException(ErrorCode.APPOINTMENT_NOT_COMPLETED, 
-                "Appointment must be COMPLETED to create medical exam. Current status: " + appointment.status());
+                "Appointment must be SCHEDULED, IN_PROGRESS, or COMPLETED to create medical exam. Current status: " + status);
         }
         
         // Store appointment in context for enrichCreate (avoid duplicate call)
         context.put("appointment", appointment);
         
-        log.debug("Validation passed for appointmentId: {}", input.getAppointmentId());
+        log.debug("Validation passed for appointmentId: {} (status: {})", input.getAppointmentId(), status);
     }
 
     @Override
@@ -196,28 +200,13 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
         log.info("Medical exam created successfully: id={}, appointmentId={}", 
             entity.getId(), entity.getAppointmentId());
         
-        // Auto-generate invoice if hasPrescription=false
-        // Logic: 
-        // - hasPrescription=false → Invoice created immediately (consultation only)
-        // - hasPrescription=true → Invoice created when prescription is dispensed (PrescriptionHook)
-        if (entity.getHasPrescription() == null || !entity.getHasPrescription()) {
-            try {
-                log.info("[EXAM-CREATE] hasPrescription=false, auto-generating invoice for appointmentId: {}", 
-                    entity.getAppointmentId());
-                BillingClient.InvoiceRequest invoiceRequest = new BillingClient.InvoiceRequest(
-                    entity.getAppointmentId(),
-                    "Auto-generated after exam (no prescription)"
-                );
-                FeignHelper.safeCall(() -> billingClient.createInvoice(invoiceRequest));
-                log.info("[EXAM-CREATE] Invoice generated successfully for exam: {}", entity.getId());
-            } catch (Exception e) {
-                log.error("[EXAM-CREATE] Failed to generate invoice for exam {}: {}", 
-                    entity.getId(), e.getMessage());
-                // Don't fail exam creation if invoice fails - log for manual follow-up
-            }
-        } else {
-            log.info("[EXAM-CREATE] hasPrescription=true, invoice will be generated on dispense");
-        }
+        // NOTE: Invoice is NOT created here anymore.
+        // Invoice creation happens via:
+        // 1. Prescription dispense (PrescriptionHook.generateInvoiceAfterDispense) - includes Medicine items
+        // 2. Lab test completion (if needed)
+        // 3. Manual creation by receptionist
+        // This ensures invoice includes ALL items (Consultation + Medicine + Lab Tests)
+        log.info("[EXAM-CREATE] Invoice will be generated later (on dispense or manual trigger)");
     }
 
     // ============================ UPDATE ============================

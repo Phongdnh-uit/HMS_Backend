@@ -13,18 +13,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface BillingClient {
 
     /**
-     * Create an invoice for an appointment.
-     * Billing-service will fetch exam/prescription details automatically.
+     * Create or update an invoice for an appointment.
+     * If invoice exists, it will be UPDATED with fresh items.
+     * If not, a new invoice will be created.
      * 
-     * @param request Contains appointmentId and optional notes
-     * @return Created invoice response
+     * @param request Contains appointmentId, examId and optional notes
+     * @return Created or updated invoice response
      */
-    @PostMapping
-    ApiResponse<InvoiceResponse> createInvoice(@RequestBody InvoiceRequest request);
+    @PostMapping("/upsert")
+    ApiResponse<InvoiceResponse> upsertInvoice(@RequestBody InvoiceRequest request);
 
     // Request DTO matching billing-service InvoiceRequest
     record InvoiceRequest(
         String appointmentId,
+        String examId,
         String notes
     ) {}
 
