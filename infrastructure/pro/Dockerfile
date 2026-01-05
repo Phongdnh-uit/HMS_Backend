@@ -1,15 +1,15 @@
 ARG JAVA_VERSION=23
-# -------- Stage 1: Build --------
+
+# -------- Stage 1: Build ALL services ONCE --------
 FROM eclipse-temurin:${JAVA_VERSION}-jdk AS builder
 WORKDIR /build
 
-# Copy root build files first (tối ưu cache)
+# Copy root build files first (optimize cache)
 COPY settings.gradle.kts build.gradle.kts gradlew ./
 COPY gradle gradle
-RUN sed -i 's/\r$//' gradlew
-RUN chmod +x gradlew
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
 
-# Copy source code tất cả module
+# Copy source code for all modules
 COPY common ./common
 COPY config-server ./config-server
 COPY discovery-service ./discovery-service
@@ -24,32 +24,21 @@ COPY billing-service ./billing-service
 COPY report-service ./report-service
 COPY notification-service ./notification-service
 
-# Build tất cả modules
+# Build ALL modules at once (only 1 Gradle download!)
 RUN ./gradlew clean bootJar --no-daemon
 
-# -------- Stage 2: Run --------
+# -------- Stage 2: Runtime (OPTIMIZED - only 1 JAR per image) --------
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
 
 RUN apk add --no-cache curl
 
 ARG SERVICE
+ENV SERVICE=${SERVICE}
 WORKDIR /app
 
-# curl cho healthcheck
-RUN apk add --no-cache curl
+# Copy ONLY the specific service JAR (reduces image from 2.14GB to ~300MB)
+COPY --from=builder /build/${SERVICE}/build/libs/${SERVICE}-*.jar ./app.jar
 
-# Copy chỉ jar của từng service
-COPY --from=builder /build/api-gateway/build/libs/api-gateway-*.jar ./api-gateway.jar
-COPY --from=builder /build/auth-service/build/libs/auth-service-*.jar ./auth-service.jar
-COPY --from=builder /build/config-server/build/libs/config-server-*.jar ./config-server.jar
-COPY --from=builder /build/discovery-service/build/libs/discovery-service-*.jar ./discovery-service.jar
-COPY --from=builder /build/medicine-service/build/libs/medicine-service-*.jar ./medicine-service.jar
-COPY --from=builder /build/patient-service/build/libs/patient-service-*.jar ./patient-service.jar
-COPY --from=builder /build/hr-service/build/libs/hr-service-*.jar ./hr-service.jar
-COPY --from=builder /build/appointment-service/build/libs/appointment-service-*.jar ./appointment-service.jar
-COPY --from=builder /build/medical-exam-service/build/libs/medical-exam-service-*.jar ./medical-exam-service.jar
-COPY --from=builder /build/billing-service/build/libs/billing-service-*.jar ./billing-service.jar
-COPY --from=builder /build/report-service/build/libs/report-service-*.jar ./report-service.jar
-COPY --from=builder /build/notification-service/build/libs/notification-service-*.jar ./notification-service.jar
+# Note: HEALTHCHECK is defined in compose.yaml with correct port per service
 
-ENTRYPOINT ["sh","-c","java -jar /app/${SERVICE}.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
