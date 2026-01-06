@@ -4,6 +4,8 @@ import com.hms.common.dtos.PageResponse;
 import com.hms.common.exceptions.errors.ApiException;
 import com.hms.common.exceptions.errors.ErrorCode;
 import com.hms.common.hooks.GenericHook;
+import com.hms.common.helpers.FeignHelper;
+import com.hms.medical_exam_service.clients.BillingClient;
 import com.hms.medical_exam_service.dtos.exam.MedicalExamRequest;
 import com.hms.medical_exam_service.dtos.exam.MedicalExamResponse;
 import com.hms.medical_exam_service.dtos.external.AppointmentResponse;
@@ -40,6 +42,7 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
     private final MedicalExamRepository medicalExamRepository;
     private final PrescriptionRepository prescriptionRepository;
     private final WebClient.Builder webClientBuilder;
+    private final BillingClient billingClient;
     
     // Injected from config: appointment-service.base-url
     @org.springframework.beans.factory.annotation.Value("${appointment-service.base-url:http://appointment-service-pro:8085}")
@@ -94,17 +97,21 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
                 "Appointment not found: " + input.getAppointmentId());
         }
         
-        // 4. Validate appointment status is COMPLETED
-        if (!"COMPLETED".equals(appointment.status())) {
-            log.warn("Appointment {} is not COMPLETED, status: {}", input.getAppointmentId(), appointment.status());
+        // 4. Validate appointment status
+        // Allow SCHEDULED/IN_PROGRESS (nurse vital signs) or COMPLETED (doctor exam)
+        // Workflow: Nurse enters vital signs (SCHEDULED) → Doctor examines (IN_PROGRESS) → Complete exam (COMPLETED)
+        String status = appointment.status();
+        if (!"SCHEDULED".equals(status) && !"IN_PROGRESS".equals(status) && !"COMPLETED".equals(status)) {
+            log.warn("Appointment {} has invalid status: {} (expected SCHEDULED, IN_PROGRESS, or COMPLETED)", 
+                input.getAppointmentId(), status);
             throw new ApiException(ErrorCode.APPOINTMENT_NOT_COMPLETED, 
-                "Appointment must be COMPLETED to create medical exam. Current status: " + appointment.status());
+                "Appointment must be SCHEDULED, IN_PROGRESS, or COMPLETED to create medical exam. Current status: " + status);
         }
         
         // Store appointment in context for enrichCreate (avoid duplicate call)
         context.put("appointment", appointment);
         
-        log.debug("Validation passed for appointmentId: {}", input.getAppointmentId());
+        log.debug("Validation passed for appointmentId: {} (status: {})", input.getAppointmentId(), status);
     }
 
     @Override
@@ -141,9 +148,13 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
         entity.setDoctorId(appointment.doctorId());
         entity.setDoctorName(appointment.doctorName());
         
-        log.debug("✅ [enrichCreate] Enriched exam with examDate: {}, patient: {} ({}), doctor: {} ({})", 
+        // 4. Set hasPrescription flag from input (defaults to false if not specified)
+        Boolean hasPrescription = input.getHasPrescription();
+        entity.setHasPrescription(hasPrescription != null ? hasPrescription : false);
+        
+        log.debug("✅ [enrichCreate] Enriched exam with examDate: {}, patient: {} ({}), doctor: {} ({}), hasPrescription: {}", 
             entity.getExamDate(), entity.getPatientId(), entity.getPatientName(),
-            entity.getDoctorId(), entity.getDoctorName());
+            entity.getDoctorId(), entity.getDoctorName(), entity.getHasPrescription());
     }
 
     /**
@@ -188,7 +199,14 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
     public void afterCreate(MedicalExam entity, MedicalExamResponse response, Map<String, Object> context) {
         log.info("Medical exam created successfully: id={}, appointmentId={}", 
             entity.getId(), entity.getAppointmentId());
-        // Response already populated by mapper from entity snapshots
+        
+        // NOTE: Invoice is NOT created here anymore.
+        // Invoice creation happens via:
+        // 1. Prescription dispense (PrescriptionHook.generateInvoiceAfterDispense) - includes Medicine items
+        // 2. Lab test completion (if needed)
+        // 3. Manual creation by receptionist
+        // This ensures invoice includes ALL items (Consultation + Medicine + Lab Tests)
+        log.info("[EXAM-CREATE] Invoice will be generated later (on dispense or manual trigger)");
     }
 
     // ============================ UPDATE ============================

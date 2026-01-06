@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: report-service
+  config:
+    import: optional:configserver:http://localhost:9001
+  
+  # Jackson configuration for Java 8 time types
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    date-format: com.fasterxml.jackson.databind.util.StdDateFormat
+  
+  # Redis Cache Configuration
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      timeout: 60000
+  
+  cache:
+    type: redis
+    redis:
+      time-to-live: 900000  # 15 minutes in milliseconds
+      cache-null-values: false
+
+server:
+  port: ${REPORT_SERVICE_PORT:8088}
+
+eureka:
+  instance:
+    hostname: ${HOSTNAME:localhost}
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8763/eureka/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Logging
+logging:
+  level:
+    com.hms.report_service: DEBUG

@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -57,6 +58,12 @@ public class MedicalExam {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    // Denormalized flag for invoice generation workflow
+    // true = has prescription, invoice generated after DISPENSED
+    // false = no prescription, invoice can be generated immediately on exam finalization
+    @Column(nullable = false)
+    private Boolean hasPrescription = false;
+
     private Instant examDate;
 
     @CreatedDate
@@ -70,4 +77,12 @@ public class MedicalExam {
 
     @LastModifiedBy
     private String updatedBy;
+
+    // Follow-up notification fields
+    // Doctor sets this when completing exam to schedule a follow-up reminder
+    private LocalDate followUpDate;
+    
+    // Flag to track if notification has been sent (prevents duplicate emails)
+    @Column(nullable = false)
+    private Boolean followUpNotificationSent = false;
 }

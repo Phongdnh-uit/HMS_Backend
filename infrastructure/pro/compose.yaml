@@ -95,21 +95,23 @@ services:
     networks:
       - app-network
     restart: always
-  mysql-hr-service:
+
+  mysql-billing-service:
     image: mysql:8.0
-    container_name: mysql-hr-service
+    container_name: mysql-billing-service
     env_file:
       - .env
     environment:
-      MYSQL_ROOT_PASSWORD: ${HR_DB_PASSWORD}
-      MYSQL_DATABASE: ${HR_DB_NAME}
-      MYSQL_USER: ${HR_DB_USERNAME}
-      MYSQL_PASSWORD: ${HR_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${BILLING_DB_PASSWORD}
+      MYSQL_DATABASE: ${BILLING_DB_NAME}
+      MYSQL_USER: ${BILLING_DB_USERNAME}
+      MYSQL_PASSWORD: ${BILLING_DB_PASSWORD}
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 60s
     networks:
       - app-network
     restart: always
@@ -332,6 +334,123 @@ services:
       - app-network
     restart: always
 
+  billing-service-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+      args:
+        SERVICE: billing-service
+    container_name: billing-service-pro
+    environment:
+      - 'SERVICE=billing-service'
+      - 'EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/'
+    ports:
+      - "${BILLING_SERVICE_PORT}:${BILLING_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-billing-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+
+  # Redis Cache (for report-service caching)
+  redis:
+    image: redis:7-alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: always
+
+  # MinIO Object Storage (for lab test images)
+  minio:
+    image: minio/minio:latest
+    container_name: minio-storage
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin123}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: always
+
+  # Report Service (Analytics & Caching)
+  report-service-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+      args:
+        SERVICE: report-service
+    container_name: report-service-pro
+    environment:
+      - 'SERVICE=report-service'
+      - 'EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/'
+      - 'SPRING_DATA_REDIS_HOST=redis-cache'
+      - 'SPRING_DATA_REDIS_PORT=6379'
+    ports:
+      - "${REPORT_SERVICE_PORT}:${REPORT_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+
+  # Notification Service (Email reminders)
+  notification-service-pro:
+    build:
+      context: ../../
+      dockerfile: infrastructure/pro/Dockerfile
+      args:
+        SERVICE: notification-service
+    container_name: notification-service-pro
+    environment:
+      - 'SERVICE=notification-service'
+      - 'EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/'
+      - 'APPOINTMENT_SERVICE_URL=http://appointment-service-pro:8085'
+      - 'PATIENT_SERVICE_URL=http://patient-service-pro:8082'
+    ports:
+      - "${NOTIFICATION_SERVICE_PORT}:${NOTIFICATION_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  redis-data:
+  minio-data:

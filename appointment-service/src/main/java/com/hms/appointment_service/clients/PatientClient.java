@@ -25,11 +25,19 @@ public interface PatientClient {
     ApiResponse<PatientInfo> getPatientById(@PathVariable("id") String patientId);
 
     /**
+     * Get current user's patient profile (for PATIENT role).
+     * Requires X-User-ID header to be passed through.
+     */
+    @GetMapping("/patients/me")
+    ApiResponse<PatientInfo> getMyPatientProfile();
+
+    /**
      * DTO for patient info from patient-service.
      */
     record PatientInfo(
             String id,
             String fullName,
-            String phoneNumber
+            String phoneNumber,
+            String accountId
     ) {}
 }

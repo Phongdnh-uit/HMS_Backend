@@ -108,7 +108,10 @@ public class AccountHook implements GenericHook<Account, String, AccountRequest,
     }
 
     void enrich(AccountRequest request, Account account) {
-        account.setPassword(passwordEncoder.encode(request.getPassword()));
+        // Only encode password if it's provided (not null and not empty)
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            account.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
         // Set emailVerified to true for admin-created accounts (no email verification flow)
         account.setEmailVerified(true);
     }

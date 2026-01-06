@@ -57,7 +57,15 @@ public enum ErrorCode {
 
     // === Employee Service Errors (3400-3499) ===
     EMPLOYEE_NOT_FOUND(3400, HttpStatus.NOT_FOUND, "Employee Not Found"),
-    DOCTOR_NOT_FOUND(3401, HttpStatus.NOT_FOUND, "Doctor Not Found");
+    DOCTOR_NOT_FOUND(3401, HttpStatus.NOT_FOUND, "Doctor Not Found"),
+
+    // === Billing Service Errors (3500-3599) ===
+    INVOICE_NOT_FOUND(3500, HttpStatus.NOT_FOUND, "Invoice Not Found"),
+    INVOICE_EXISTS(3501, HttpStatus.CONFLICT, "Invoice Already Exists"),
+    INVOICE_CANCELLED(3502, HttpStatus.BAD_REQUEST, "Invoice Is Cancelled"),
+    INVOICE_ALREADY_PAID(3503, HttpStatus.CONFLICT, "Invoice Already Paid"),
+    PAYMENT_NOT_FOUND(3504, HttpStatus.NOT_FOUND, "Payment Not Found"),
+    DUPLICATE_PAYMENT(3505, HttpStatus.CONFLICT, "Duplicate Payment - Idempotency Key Already Used");
 
     private final int code;
     private final HttpStatus httpCode;

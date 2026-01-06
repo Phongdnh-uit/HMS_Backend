@@ -27,6 +27,8 @@ public interface PrescriptionMapper extends GenericMapper<Prescription, Prescrip
     @Mapping(target = "status", expression = "java(entity.getStatus().name())")
     // Cancellation info - only mapped when status is CANCELLED
     @Mapping(target = "cancellation", expression = "java(mapCancellation(entity))")
+    // Dispense info - only mapped when status is DISPENSED
+    @Mapping(target = "dispense", expression = "java(mapDispense(entity))")
     PrescriptionResponse entityToResponse(Prescription entity);
 
     // No partialUpdate - prescriptions are immutable
@@ -42,6 +44,19 @@ public interface PrescriptionMapper extends GenericMapper<Prescription, Prescrip
         info.setCancelledAt(entity.getCancelledAt());
         info.setCancelledBy(entity.getCancelledBy());
         info.setReason(entity.getCancelReason());
+        return info;
+    }
+
+    /**
+     * Maps dispense info - returns null if prescription is not dispensed
+     */
+    default PrescriptionResponse.DispenseInfo mapDispense(Prescription entity) {
+        if (entity.getStatus() != Prescription.Status.DISPENSED) {
+            return null;
+        }
+        PrescriptionResponse.DispenseInfo info = new PrescriptionResponse.DispenseInfo();
+        info.setDispensedAt(entity.getDispensedAt());
+        info.setDispensedBy(entity.getDispensedBy());
         return info;
     }
 }

@@ -16,8 +16,8 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
         
-        // Allow specific frontend origins (must use setAllowedOrigins when allowCredentials is true)
-        corsConfig.setAllowedOrigins(Arrays.asList(
+        // Allow specific frontend origins
+        corsConfig.setAllowedOriginPatterns(Arrays.asList(
             "http://localhost:3000",
             "http://127.0.0.1:3000",
             "http://172.17.96.1:3000"

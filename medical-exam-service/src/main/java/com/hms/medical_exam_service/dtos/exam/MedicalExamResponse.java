@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -38,6 +39,9 @@ public class MedicalExamResponse {
     
     // Whether this exam has a prescription (populated by hook)
     private Boolean hasPrescription;
+    
+    // Follow-up date for scheduling reminder notification
+    private LocalDate followUpDate;
     
     // Nested DTOs
     @Getter

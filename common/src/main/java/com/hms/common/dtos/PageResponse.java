@@ -26,4 +26,18 @@ public class PageResponse<T> {
         response.setContent(page.getContent());
         return response;
     }
+
+    /**
+     * Create an empty PageResponse.
+     */
+    public static <T> PageResponse<T> empty() {
+        PageResponse<T> response = new PageResponse<>();
+        response.setPage(0);
+        response.setSize(0);
+        response.setTotalElements(0L);
+        response.setTotalPages(0);
+        response.setNumberOfElements(0);
+        response.setContent(List.of());
+        return response;
+    }
 }

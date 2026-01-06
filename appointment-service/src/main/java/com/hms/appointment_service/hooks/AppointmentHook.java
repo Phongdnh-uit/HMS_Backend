@@ -83,6 +83,7 @@ public class AppointmentHook implements GenericHook<Appointment, String, Appoint
         if (patient == null) {
             throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Patient not found");
         }
+        
         context.put(PATIENT_KEY, patient);
 
         // 3. Validate doctor exists and has DOCTOR role

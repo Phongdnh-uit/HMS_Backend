@@ -10,6 +10,10 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
 
     @Override
     public Optional<String> getCurrentAuditor() {
-        return Optional.ofNullable(UserContext.getUser().getId());
+        UserContext.User user = UserContext.getUser();
+        if (user == null) {
+            return Optional.of("system"); // Default auditor for inter-service calls
+        }
+        return Optional.ofNullable(user.getId());
     }
 }

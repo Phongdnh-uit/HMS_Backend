@@ -1,0 +1,1245 @@
+{
+	"info": {
+		"_postman_id": "hms-backend-collection",
+		"name": "HMS Backend API Collection",
+		"description": "Complete API collection for Hospital Management System Backend.\n\nSetup:\n1. Import this collection\n2. Set environment variable `baseUrl` to `http://localhost:8080`\n3. Login first to get access token (auto-saved)\n4. All authenticated requests will use saved token",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-refresh token if needed (placeholder for future implementation)"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "🔐 Auth Service",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.accessToken) {",
+									"        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+									"        pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
+									"        console.log('Token saved successfully');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@hms.com\",\n  \"password\": \"Admin123!@\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Register (Patient)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"patient_new@gmail.com\",\n  \"password\": \"Patient123!@\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Create Account (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"doctor_new@hms.com\",\n  \"password\": \"Doctor123!@\",\n  \"role\": \"DOCTOR\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/accounts",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "accounts"]
+						}
+					}
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "me"]
+						}
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.accessToken) {",
+									"        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/refresh",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "refresh"]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "logout"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "👤 Patient Service",
+			"item": [
+				{
+					"name": "Create Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"email\": \"patient1@gmail.com\",\n  \"dateOfBirth\": \"1990-01-15\",\n  \"gender\": \"MALE\",\n  \"phoneNumber\": \"0901234567\",\n  \"address\": \"123 Main St, Ho Chi Minh City\",\n  \"identificationNumber\": \"079090001234\",\n  \"healthInsuranceNumber\": \"VN123456789\",\n  \"bloodType\": \"O+\",\n  \"allergies\": \"Penicillin, Peanuts\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/patients",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "patients"]
+						}
+					}
+				},
+				{
+					"name": "Get Patient by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/patients/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "patients", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "patient-id-here"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List All Patients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/patients/all?page=0&size=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "patients", "all"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Patient",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Nguyen Van A Updated\",\n  \"allergies\": \"Penicillin, Peanuts, Latex\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/patients/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "patients", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "patient-id-here"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Patient",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/patients/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "patients", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "patient-id-here"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🏢 HR Service",
+			"item": [
+				{
+					"name": "Departments",
+					"item": [
+						{
+							"name": "Create Department",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Cardiology\",\n  \"description\": \"Heart and cardiovascular care\",\n  \"consultationFee\": 200000\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/hr/departments",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "hr", "departments"]
+								}
+							}
+						},
+						{
+							"name": "List All Departments",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/hr/departments/all",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "hr", "departments", "all"]
+								}
+							}
+						},
+						{
+							"name": "Get Department by ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/hr/departments/:id",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "hr", "departments", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "dept-id-here"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Employees",
+					"item": [
+						{
+							"name": "Create Employee",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"accountId\": \"account-uuid-here\",\n  \"fullName\": \"Dr. Nguyen Van Hung\",\n  \"email\": \"doctor1@hms.com\",\n  \"phoneNumber\": \"0901234567\",\n  \"role\": \"DOCTOR\",\n  \"departmentId\": \"dept-id-here\",\n  \"specialization\": \"Cardiology\",\n  \"qualification\": \"MD, PhD\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/hr/employees",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "hr", "employees"]
+								}
+							}
+						},
+						{
+							"name": "List All Employees",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/hr/employees/all?page=0&size=20",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "hr", "employees", "all"],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "20"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Employee by ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/hr/employees/:id",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "hr", "employees", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "emp-id-here"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Doctors by Department",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/hr/employees/doctors/department/:departmentId",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "hr", "employees", "doctors", "department", ":departmentId"],
+									"variable": [
+										{
+											"key": "departmentId",
+											"value": "dept-id-here"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Schedules",
+					"item": [
+						{
+							"name": "Create Schedule",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"employeeId\": \"emp-id-here\",\n  \"workDate\": \"2025-12-20\",\n  \"startTime\": \"08:00\",\n  \"endTime\": \"17:00\",\n  \"slotDuration\": 30\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/hr/schedules",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "hr", "schedules"]
+								}
+							}
+						},
+						{
+							"name": "Get Time Slots for Doctor",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/hr/schedules/time-slots?doctorId=emp-id-here&date=2025-12-20",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "hr", "schedules", "time-slots"],
+									"query": [
+										{
+											"key": "doctorId",
+											"value": "emp-id-here"
+										},
+										{
+											"key": "date",
+											"value": "2025-12-20"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Schedules by Employee",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/hr/schedules/employee/:employeeId?startDate=2025-12-01&endDate=2025-12-31",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "hr", "schedules", "employee", ":employeeId"],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2025-12-01"
+										},
+										{
+											"key": "endDate",
+											"value": "2025-12-31"
+										}
+									],
+									"variable": [
+										{
+											"key": "employeeId",
+											"value": "emp-id-here"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Delete Schedule",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/hr/schedules/:id",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "hr", "schedules", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "schedule-id-here"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "💊 Medicine Service",
+			"item": [
+				{
+					"name": "Medicines",
+					"item": [
+						{
+							"name": "Create Medicine",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Amoxicillin 500mg\",\n  \"activeIngredient\": \"Amoxicillin\",\n  \"unit\": \"capsule\",\n  \"description\": \"Antibiotic for bacterial infections\",\n  \"quantity\": 1000,\n  \"concentration\": \"500mg\",\n  \"purchasePrice\": 5000,\n  \"sellingPrice\": 8000,\n  \"expiresAt\": \"2026-12-31\",\n  \"manufacturer\": \"GSK\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/medicines",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "medicines"]
+								}
+							}
+						},
+						{
+							"name": "List All Medicines",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/medicines/all?page=0&size=20",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "medicines", "all"],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "20"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Medicine by ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/medicines/:id",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "medicines", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "med-id-here"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Update Medicine Stock",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"quantity\": 500\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/medicines/:id/stock",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "medicines", ":id", "stock"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "med-id-here"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Categories",
+					"item": [
+						{
+							"name": "Create Category",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Antibiotics\",\n  \"description\": \"Medications for treating bacterial infections\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/medicines/categories",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "medicines", "categories"]
+								}
+							}
+						},
+						{
+							"name": "List All Categories",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/medicines/categories/all",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "medicines", "categories", "all"]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "📅 Appointment Service",
+			"item": [
+				{
+					"name": "Create Appointment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": \"patient-id-here\",\n  \"doctorId\": \"doctor-id-here\",\n  \"appointmentTime\": \"2025-12-20T09:00:00\",\n  \"type\": \"CONSULTATION\",\n  \"reason\": \"Regular checkup\",\n  \"notes\": \"Patient requested morning appointment\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments"]
+						}
+					}
+				},
+				{
+					"name": "List All Appointments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/all?page=0&size=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments", "all"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Appointment by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "appt-id-here"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Appointments by Patient",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/patient/:patientId",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments", "patient", ":patientId"],
+							"variable": [
+								{
+									"key": "patientId",
+									"value": "patient-id-here"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Appointments by Doctor",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/doctor/:doctorId?date=2025-12-20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments", "doctor", ":doctorId"],
+							"query": [
+								{
+									"key": "date",
+									"value": "2025-12-20"
+								}
+							],
+							"variable": [
+								{
+									"key": "doctorId",
+									"value": "doctor-id-here"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Appointment Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"COMPLETED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/:id/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments", ":id", "status"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "appt-id-here"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Cancel Appointment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Patient requested cancellation\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/:id/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments", ":id", "cancel"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "appt-id-here"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🩺 Medical Exam Service",
+			"item": [
+				{
+					"name": "Exams",
+					"item": [
+						{
+							"name": "Create Medical Exam",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"appointmentId\": \"appt-id-here\",\n  \"diagnosis\": \"Hypertension Stage 1\",\n  \"symptoms\": \"Headache, dizziness\",\n  \"treatment\": \"Lifestyle changes, medication\",\n  \"temperature\": 36.8,\n  \"bloodPressureSystolic\": 145,\n  \"bloodPressureDiastolic\": 95,\n  \"heartRate\": 78,\n  \"weight\": 75.5,\n  \"height\": 175.0,\n  \"notes\": \"Follow-up in 2 weeks\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/exams",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "exams"]
+								}
+							}
+						},
+						{
+							"name": "List All Exams",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/all?page=0&size=20",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "exams", "all"],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "20"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Exam by ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/:id",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "exams", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "exam-id-here"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Exam by Appointment",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/by-appointment/:appointmentId",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "exams", "by-appointment", ":appointmentId"],
+									"variable": [
+										{
+											"key": "appointmentId",
+											"value": "appt-id-here"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Update Exam",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"diagnosis\": \"Hypertension Stage 2\",\n  \"notes\": \"Increased medication dosage\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/:id",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "exams", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "exam-id-here"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Prescriptions",
+					"item": [
+						{
+							"name": "Create Prescription",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"notes\": \"Take with food, avoid alcohol\",\n  \"items\": [\n    {\n      \"medicineId\": \"med-id-here\",\n      \"quantity\": 20,\n      \"dosage\": \"1 capsule twice daily\",\n      \"durationDays\": 10,\n      \"instructions\": \"Take with food\"\n    }\n  ]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/:examId/prescriptions",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "exams", ":examId", "prescriptions"],
+									"variable": [
+										{
+											"key": "examId",
+											"value": "exam-id-here"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Prescription by ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/prescriptions/:id",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "exams", "prescriptions", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "rx-id-here"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Prescription by Exam",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/:examId/prescription",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "exams", ":examId", "prescription"],
+									"variable": [
+										{
+											"key": "examId",
+											"value": "exam-id-here"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Cancel Prescription",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"reason\": \"Patient requested different medication due to allergy\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/prescriptions/:id/cancel",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "exams", "prescriptions", ":id", "cancel"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "rx-id-here"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "💰 Billing Service (Planned)",
+			"item": [
+				{
+					"name": "Invoices",
+					"item": [
+						{
+							"name": "Generate Invoice",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"appointmentId\": \"appt-id-here\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/billing/invoices/generate",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "billing", "invoices", "generate"]
+								}
+							}
+						},
+						{
+							"name": "Get Invoice by ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/billing/invoices/:id",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "billing", "invoices", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "inv-id-here"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "List All Invoices",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/billing/invoices?page=0&size=20&status=UNPAID",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "billing", "invoices"],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "20"
+										},
+										{
+											"key": "status",
+											"value": "UNPAID"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Invoices by Patient",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/billing/invoices/by-patient/:patientId",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "billing", "invoices", "by-patient", ":patientId"],
+									"variable": [
+										{
+											"key": "patientId",
+											"value": "patient-id-here"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Cancel Invoice",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"cancelReason\": \"Duplicate invoice created\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/billing/invoices/:id/cancel",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "billing", "invoices", ":id", "cancel"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "inv-id-here"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Payments",
+					"item": [
+						{
+							"name": "Create Payment",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"invoiceId\": \"inv-id-here\",\n  \"idempotencyKey\": \"{{$guid}}\",\n  \"amount\": 396000,\n  \"method\": \"CASH\",\n  \"notes\": \"Paid in full\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/billing/payments",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "billing", "payments"]
+								}
+							}
+						},
+						{
+							"name": "Get Payment by ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/billing/payments/:id",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "billing", "payments", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "pay-id-here"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Payments by Invoice",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/billing/payments/by-invoice/:invoiceId",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "billing", "payments", "by-invoice", ":invoiceId"],
+									"variable": [
+										{
+											"key": "invoiceId",
+											"value": "inv-id-here"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

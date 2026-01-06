@@ -105,6 +105,62 @@ spring:
             - Path=/medical-exam-service/**
           filters:
             - StripPrefix=1
+        
+        # Billing Service - /api/invoices/** (strip /api prefix)
+        - id: billing-service-invoices-api
+          uri: lb://billing-service
+          predicates:
+            - Path=/api/invoices/**
+          filters:
+            - StripPrefix=1
+        
+        # Billing Service - /api/payments/** (strip /api prefix)
+        - id: billing-service-payments-api
+          uri: lb://billing-service
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - StripPrefix=1
+        
+        # Billing Service - direct access
+        - id: billing-service-direct
+          uri: lb://billing-service
+          predicates:
+            - Path=/billing-service/**
+          filters:
+            - StripPrefix=1
+        
+        # Report Service - /api/reports/** (strip /api prefix)
+        - id: report-service-api
+          uri: lb://report-service
+          predicates:
+            - Path=/api/reports/**
+          filters:
+            - StripPrefix=1
+        
+        # Report Service - direct access
+        - id: report-service-direct
+          uri: lb://report-service
+          predicates:
+            - Path=/report-service/**
+          filters:
+            - StripPrefix=1
+        
+        # Notification Service - /api/notifications/** (strip /api prefix)
+        - id: notification-service-api
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=1
+        
+        # Notification Service - direct access
+        - id: notification-service-direct
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification-service/**
+          filters:
+            - StripPrefix=1
 
 jwt:
   public-key: ${JWT_PUBLIC_KEY:-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs/yJcHARVAGn1xzVbndvyuj1spOinx4IXLP+r73zRpd9Aqjq8gKDnJolEPHXM55wdLxkvjXMEv3p665tbcRXUyHUWI6/p/UIeB6pEZyNUqUj6BiiE0lhv3nINmlAXeXibigMaOzUXBAIl7fuw29oG5bCWjjoUBWgVMFRkGAJfOBZDnqG1OgX1ibjCP4qDI5RgBuv32xAP3/n3eUmNel3+kxAj/ETVkmRbJfiJh61qc4n3bUxXXpJkPnAdGyNxcVPXArASLkKDlb1PSQOJ1x83s75yvXgLMxzt1hgThArM4vlFZRx8IjTbWIpJAjAqil0PLRIX6L3FzoRW6xuHRmMGwIDAQAB-----END PUBLIC KEY-----}

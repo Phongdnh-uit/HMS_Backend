@@ -30,4 +30,4 @@ feign:
   client:
     config:
       appointment-service:
-        url: ${APPOINTMENT_SERVICE_URL:}
+        url: ${APPOINTMENT_SERVICE_URL:http://appointment-service-pro:8085}

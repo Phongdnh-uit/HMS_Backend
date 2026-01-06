@@ -49,6 +49,10 @@ public class Prescription {
     private String cancelledBy;
     private String cancelReason;
 
+    // Dispense tracking
+    private Instant dispensedAt;
+    private String dispensedBy;
+
     // Denormalized fields (query performance + snapshot for historical accuracy)
     private String patientId;
     private String patientName;  // Snapshot at prescription creation
