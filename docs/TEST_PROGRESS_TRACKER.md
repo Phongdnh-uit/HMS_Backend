@@ -4,14 +4,14 @@
 
 | Category          | Total   | Completed | Progress |
 | ----------------- | ------- | --------- | -------- |
-| Unit Tests        | 75      | 30        | 40%      |
+| Unit Tests        | 75      | 49        | 65%      |
 | Integration Tests | 30      | 0         | 0%       |
 | API Tests         | 87      | 0         | 0%       |
 | Security Tests    | 22      | 0         | 0%       |
 | E2E Tests         | 21      | 0         | 0%       |
 | Performance Tests | 10      | 0         | 0%       |
 | Contract Tests    | 12      | 0         | 0%       |
-| **TOTAL**         | **257** | **30**    | **12%**  |
+| **TOTAL**         | **257** | **49**    | **19%**  |
 
 ---
 
@@ -88,14 +88,14 @@ Replace `[ ]` with `[x]` when you complete a test. Update the stats dashboard pe
 
 ### Medicine Service (6 tests)
 
-| ID         | Test Case                                          | Status | Notes |
-| ---------- | -------------------------------------------------- | ------ | ----- |
-| UC-MED-001 | `MedicineMapper` - Medicine entity to response     | [ ]    |       |
-| UC-MED-002 | `MedicineMapper` - Request to entity               | [ ]    |       |
-| UC-MED-003 | `CategoryMapper` - Category mapping                | [ ]    |       |
-| UC-MED-004 | `MedicineHook.beforeCreate()` - Validation         | [ ]    |       |
-| UC-MED-005 | `MedicineHook.beforeUpdate()` - Stock validation   | [ ]    |       |
-| UC-MED-006 | `CategoryHook.beforeDelete()` - Cascade prevention | [ ]    |       |
+| ID         | Test Case                                          | Status | Notes                      |
+| ---------- | -------------------------------------------------- | ------ | -------------------------- |
+| UC-MED-001 | `MedicineMapper` - Medicine entity to response     | [x]    | ✅ MedicineMapperTest.java |
+| UC-MED-002 | `MedicineMapper` - Request to entity               | [x]    | ✅ MedicineMapperTest.java |
+| UC-MED-003 | `CategoryMapper` - Category mapping                | [x]    | ✅ CategoryMapperTest.java |
+| UC-MED-004 | `MedicineHook.beforeCreate()` - Validation         | [x]    | ✅ MedicineHookTest.java   |
+| UC-MED-005 | `MedicineHook.beforeUpdate()` - Stock validation   | [x]    | ✅ MedicineHookTest.java   |
+| UC-MED-006 | `CategoryHook.beforeDelete()` - Cascade prevention | [x]    | ✅ CategoryHookTest.java   |
 
 ### HR Service (10 tests)
 
