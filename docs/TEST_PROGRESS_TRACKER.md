@@ -4,14 +4,14 @@
 
 | Category          | Total   | Completed | Progress |
 | ----------------- | ------- | --------- | -------- |
-| Unit Tests        | 75      | 59        | 79%      |
+| Unit Tests        | 75      | 65        | 87%      |
 | Integration Tests | 30      | 0         | 0%       |
 | API Tests         | 87      | 0         | 0%       |
 | Security Tests    | 22      | 0         | 0%       |
 | E2E Tests         | 21      | 0         | 0%       |
 | Performance Tests | 10      | 0         | 0%       |
 | Contract Tests    | 12      | 0         | 0%       |
-| **TOTAL**         | **257** | **59**    | **23%**  |
+| **TOTAL**         | **257** | **65**    | **25%**  |
 
 ---
 
@@ -114,14 +114,14 @@ Replace `[ ]` with `[x]` when you complete a test. Update the stats dashboard pe
 
 ### Billing Service (6 tests)
 
-| ID          | Test Case                                                  | Status | Notes |
-| ----------- | ---------------------------------------------------------- | ------ | ----- |
-| UC-BILL-001 | `InvoiceMapper` - Invoice mapping                          | [ ]    |       |
-| UC-BILL-002 | `PaymentMapper` - Payment mapping                          | [ ]    |       |
-| UC-BILL-003 | `VNPayService.createPaymentUrl()` - Payment URL generation | [ ]    |       |
-| UC-BILL-004 | `VNPayService.verifyPayment()` - Payment verification      | [ ]    |       |
-| UC-BILL-005 | `InvoiceHook.beforeCreate()` - Amount calculation          | [ ]    |       |
-| UC-BILL-006 | `InvoiceHook.afterCreate()` - External service calls       | [ ]    |       |
+| ID          | Test Case                                                  | Status | Notes                     |
+| ----------- | ---------------------------------------------------------- | ------ | ------------------------- |
+| UC-BILL-001 | `InvoiceMapper` - Invoice mapping                          | [x]    | ✅ InvoiceMapperTest.java |
+| UC-BILL-002 | `PaymentMapper` - Payment mapping                          | [x]    | ✅ PaymentMapperTest.java |
+| UC-BILL-003 | `VNPayService.createPaymentUrl()` - Payment URL generation | [x]    | ✅ VNPayServiceTest.java  |
+| UC-BILL-004 | `VNPayService.verifyPayment()` - Payment verification      | [x]    | ✅ VNPayServiceTest.java  |
+| UC-BILL-005 | `InvoiceHook.beforeCreate()` - Amount calculation          | [x]    | ✅ InvoiceHookTest.java   |
+| UC-BILL-006 | `InvoiceHook.afterCreate()` - External service calls       | [x]    | ✅ InvoiceHookTest.java   |
 
 ### Common Module (13 tests)
 
