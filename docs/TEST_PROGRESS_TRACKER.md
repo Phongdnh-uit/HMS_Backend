@@ -4,14 +4,14 @@
 
 | Category          | Total   | Completed | Progress |
 | ----------------- | ------- | --------- | -------- |
-| Unit Tests        | 75      | 0         | 0%       |
+| Unit Tests        | 75      | 7         | 9%       |
 | Integration Tests | 30      | 0         | 0%       |
 | API Tests         | 87      | 0         | 0%       |
 | Security Tests    | 22      | 0         | 0%       |
 | E2E Tests         | 21      | 0         | 0%       |
 | Performance Tests | 10      | 0         | 0%       |
 | Contract Tests    | 12      | 0         | 0%       |
-| **TOTAL**         | **257** | **0**     | **0%**   |
+| **TOTAL**         | **257** | **7**     | **3%**   |
 
 ---
 
@@ -43,15 +43,15 @@ Replace `[ ]` with `[x]` when you complete a test. Update the stats dashboard pe
 
 ### Patient Service (7 tests)
 
-| ID         | Test Case                                                | Status | Notes |
-| ---------- | -------------------------------------------------------- | ------ | ----- |
-| UC-PAT-001 | `PatientMapper` - Patient entity to response mapping     | [ ]    |       |
-| UC-PAT-002 | `PatientMapper` - Request to entity mapping              | [ ]    |       |
-| UC-PAT-003 | `PatientHook.beforeCreate()` - Pre-creation validation   | [ ]    |       |
-| UC-PAT-004 | `PatientHook.afterCreate()` - Post-creation processing   | [ ]    |       |
-| UC-PAT-005 | `PatientHelper` - Helper utility methods                 | [ ]    |       |
-| UC-PAT-006 | `FileStorageService.uploadFile()` - File upload handling | [ ]    |       |
-| UC-PAT-007 | `FileStorageService.deleteFile()` - File deletion        | [ ]    |       |
+| ID         | Test Case                                                | Status | Notes                          |
+| ---------- | -------------------------------------------------------- | ------ | ------------------------------ |
+| UC-PAT-001 | `PatientMapper` - Patient entity to response mapping     | [x]    | ✅ PatientMapperTest.java      |
+| UC-PAT-002 | `PatientMapper` - Request to entity mapping              | [x]    | ✅ PatientMapperTest.java      |
+| UC-PAT-003 | `PatientHook.beforeCreate()` - Pre-creation validation   | [x]    | ✅ PatientHookTest.java        |
+| UC-PAT-004 | `PatientHook.afterCreate()` - Post-creation processing   | [x]    | ✅ PatientHookTest.java        |
+| UC-PAT-005 | `PatientHelper` - Helper utility methods                 | [x]    | ✅ PatientHelperTest.java      |
+| UC-PAT-006 | `FileStorageService.uploadFile()` - File upload handling | [x]    | ✅ FileStorageServiceTest.java |
+| UC-PAT-007 | `FileStorageService.deleteFile()` - File deletion        | [x]    | ✅ FileStorageServiceTest.java |
 
 ### Appointment Service (10 tests)
 
