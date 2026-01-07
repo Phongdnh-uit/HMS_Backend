@@ -14,6 +14,7 @@ Hospital Management System (HMS) - A fullstack microservices healthcare applicat
 - 8GB+ RAM recommended
 - Ports: 3000, 8080-8089, 8763, 8888, 6379, 9000-9001
 
+## Quick Start
 
 ### 1. Deploy Backend (21 containers)
 

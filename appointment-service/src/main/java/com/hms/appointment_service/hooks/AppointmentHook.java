@@ -134,12 +134,15 @@ public class AppointmentHook implements GenericHook<Appointment, String, Appoint
                     "Appointment time is outside doctor's schedule hours (" + scheduleStart + " - " + scheduleEnd + ")");
         }
 
-        // 5. Check for double booking
+        // 5. Check for double booking (excluding CANCELLED appointments)
         Instant start = appointmentInstant;
         Instant end = start.plus(Duration.ofMinutes(APPOINTMENT_DURATION_MINUTES));
         
         List<Appointment> overlapping = appointmentRepository
-                .findByDoctorIdAndAppointmentTimeBetween(input.getDoctorId(), start, end);
+                .findByDoctorIdAndAppointmentTimeBetween(input.getDoctorId(), start, end)
+                .stream()
+                .filter(a -> a.getStatus() != AppointmentStatus.CANCELLED)
+                .toList();
         
         if (!overlapping.isEmpty()) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "This time slot is already booked");

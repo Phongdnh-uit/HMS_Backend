@@ -108,6 +108,14 @@ public class LabOrderService {
     }
 
     /**
+     * Get all lab orders created by a specific doctor
+     */
+    public List<LabOrderResponse> findByOrderingDoctor(String doctorId) {
+        List<LabOrder> orders = labOrderRepository.findByOrderingDoctorIdOrderByOrderDateDesc(doctorId);
+        return labOrderMapper.entitiesToResponses(orders);
+    }
+
+    /**
      * Get all lab orders with pagination
      */
     public Page<LabOrderResponse> findAll(Pageable pageable) {

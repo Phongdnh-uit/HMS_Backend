@@ -72,6 +72,15 @@ public class LabOrderController {
     }
 
     /**
+     * Get all orders created by a specific doctor
+     */
+    @GetMapping("/doctor/{doctorId}")
+    public ResponseEntity<ApiResponse<List<LabOrderResponse>>> findByDoctor(@PathVariable String doctorId) {
+        List<LabOrderResponse> results = service.findByOrderingDoctor(doctorId);
+        return ResponseEntity.ok(ApiResponse.ok(results));
+    }
+
+    /**
      * Create a new lab order with multiple tests
      */
     @PostMapping
