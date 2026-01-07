@@ -11,4 +11,7 @@ dependencies {
     runtimeOnly("com.mysql:mysql-connector-j")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    
+    // Test utilities from common module
+    testImplementation(testFixtures(project(":common")))
 }

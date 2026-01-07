@@ -4,7 +4,7 @@
 
 param(
     [string]$BaseUrl = "http://localhost:8080",
-    [int]$MaxWaitSeconds = 120
+    [int]$MaxWaitSeconds = 60
 )
 
 $ErrorActionPreference = "Continue"
@@ -66,7 +66,7 @@ function Invoke-Api {
             Uri = $uri
             Method = $Method
             Headers = $headers
-            TimeoutSec = 30
+            TimeoutSec = 10
         }
         
         if ($Body -and $Method -ne "GET") {
@@ -102,7 +102,7 @@ function Wait-ForServices {
     while ($attempt -lt $maxAttempts) {
         try {
             $body = @{ email = "admin@hms.com"; password = "Admin123!@" }
-            $response = Invoke-RestMethod -Uri "$BaseUrl/api/auth/login" -Method POST -Body ($body | ConvertTo-Json) -ContentType "application/json" -TimeoutSec 5 -ErrorAction Stop
+            $response = Invoke-RestMethod -Uri "$BaseUrl/api/auth/login" -Method POST -Body ($body | ConvertTo-Json) -ContentType "application/json" -TimeoutSec 3 -ErrorAction Stop
             Write-Ok "Services ready!"
             return $response
         }
