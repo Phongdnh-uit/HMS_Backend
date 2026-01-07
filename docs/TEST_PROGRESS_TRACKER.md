@@ -4,14 +4,14 @@
 
 | Category          | Total   | Completed | Progress |
 | ----------------- | ------- | --------- | -------- |
-| Unit Tests        | 75      | 17        | 23%      |
+| Unit Tests        | 75      | 30        | 40%      |
 | Integration Tests | 30      | 0         | 0%       |
 | API Tests         | 87      | 0         | 0%       |
 | Security Tests    | 22      | 0         | 0%       |
 | E2E Tests         | 21      | 0         | 0%       |
 | Performance Tests | 10      | 0         | 0%       |
 | Contract Tests    | 12      | 0         | 0%       |
-| **TOTAL**         | **257** | **17**    | **7%**   |
+| **TOTAL**         | **257** | **30**    | **12%**  |
 
 ---
 
@@ -70,21 +70,21 @@ Replace `[ ]` with `[x]` when you complete a test. Update the stats dashboard pe
 
 ### Medical Exam Service (13 tests)
 
-| ID          | Test Case                                                 | Status | Notes |
-| ----------- | --------------------------------------------------------- | ------ | ----- |
-| UC-EXAM-001 | `MedicalExamMapper` - Exam entity to response             | [ ]    |       |
-| UC-EXAM-002 | `MedicalExamMapper` - Request to entity                   | [ ]    |       |
-| UC-EXAM-003 | `PrescriptionMapper` - Prescription mapping               | [ ]    |       |
-| UC-EXAM-004 | `PrescriptionItemMapper` - Item mapping                   | [ ]    |       |
-| UC-EXAM-005 | `LabOrderMapper` - Lab order mapping                      | [ ]    |       |
-| UC-EXAM-006 | `LabTestMapper` - Lab test mapping                        | [ ]    |       |
-| UC-EXAM-007 | `LabTestResultMapper` - Result mapping                    | [ ]    |       |
-| UC-EXAM-008 | `MedicalExamHook.beforeCreate()` - Appointment validation | [ ]    |       |
-| UC-EXAM-009 | `MedicalExamHook.beforeDelete()` - Delete prevention      | [ ]    |       |
-| UC-EXAM-010 | `MedicalExamHook.afterRead()` - Data enrichment           | [ ]    |       |
-| UC-EXAM-011 | `PrescriptionHook.beforeCreate()` - Exam validation       | [ ]    |       |
-| UC-EXAM-012 | `LabTestService` - Test CRUD operations                   | [ ]    |       |
-| UC-EXAM-013 | `LabTestResultService` - Result CRUD operations           | [ ]    |       |
+| ID          | Test Case                                                 | Status | Notes                              |
+| ----------- | --------------------------------------------------------- | ------ | ---------------------------------- |
+| UC-EXAM-001 | `MedicalExamMapper` - Exam entity to response             | [x]    | ✅ MedicalExamMapperTest.java      |
+| UC-EXAM-002 | `MedicalExamMapper` - Request to entity                   | [x]    | ✅ MedicalExamMapperTest.java      |
+| UC-EXAM-003 | `PrescriptionMapper` - Prescription mapping               | [x]    | ✅ PrescriptionMapperTest.java     |
+| UC-EXAM-004 | `PrescriptionItemMapper` - Item mapping                   | [x]    | ✅ PrescriptionItemMapperTest.java |
+| UC-EXAM-005 | `LabOrderMapper` - Lab order mapping                      | [x]    | ✅ LabOrderMapperTest.java         |
+| UC-EXAM-006 | `LabTestMapper` - Lab test mapping                        | [x]    | ✅ LabTestMapperTest.java          |
+| UC-EXAM-007 | `LabTestResultMapper` - Result mapping                    | [x]    | ✅ LabTestResultMapperTest.java    |
+| UC-EXAM-008 | `MedicalExamHook.beforeCreate()` - Appointment validation | [x]    | ✅ MedicalExamHookTest.java        |
+| UC-EXAM-009 | `MedicalExamHook.beforeDelete()` - Delete prevention      | [x]    | ✅ MedicalExamHookTest.java        |
+| UC-EXAM-010 | `MedicalExamHook.afterRead()` - Data enrichment           | [x]    | ✅ MedicalExamHookTest.java        |
+| UC-EXAM-011 | `PrescriptionHook.beforeCreate()` - Exam validation       | [x]    | ✅ PrescriptionHookTest.java       |
+| UC-EXAM-012 | `LabTestService` - Test CRUD operations                   | [x]    | ✅ LabTestServiceTest.java         |
+| UC-EXAM-013 | `LabTestResultService` - Result CRUD operations           | [x]    | ✅ LabTestResultServiceTest.java   |
 
 ### Medicine Service (6 tests)
 
