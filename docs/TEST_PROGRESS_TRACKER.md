@@ -4,14 +4,14 @@
 
 | Category          | Total   | Completed | Progress |
 | ----------------- | ------- | --------- | -------- |
-| Unit Tests        | 75      | 7         | 9%       |
+| Unit Tests        | 75      | 17        | 23%      |
 | Integration Tests | 30      | 0         | 0%       |
 | API Tests         | 87      | 0         | 0%       |
 | Security Tests    | 22      | 0         | 0%       |
 | E2E Tests         | 21      | 0         | 0%       |
 | Performance Tests | 10      | 0         | 0%       |
 | Contract Tests    | 12      | 0         | 0%       |
-| **TOTAL**         | **257** | **7**     | **3%**   |
+| **TOTAL**         | **257** | **17**    | **7%**   |
 
 ---
 
@@ -55,18 +55,18 @@ Replace `[ ]` with `[x]` when you complete a test. Update the stats dashboard pe
 
 ### Appointment Service (10 tests)
 
-| ID         | Test Case                                                     | Status | Notes |
-| ---------- | ------------------------------------------------------------- | ------ | ----- |
-| UC-APT-001 | `AppointmentMapper` - Entity to response                      | [ ]    |       |
-| UC-APT-002 | `AppointmentMapper` - Request to entity                       | [ ]    |       |
-| UC-APT-003 | `AppointmentService.createAppointment()` - Valid appointment  | [ ]    |       |
-| UC-APT-004 | `AppointmentService.createAppointment()` - Conflict detection | [ ]    |       |
-| UC-APT-005 | `AppointmentService.cancelAppointment()` - Cancellation logic | [ ]    |       |
-| UC-APT-006 | `AppointmentService.getAvailableSlots()` - Time slot calc     | [ ]    |       |
-| UC-APT-007 | `QueueService.addToQueue()` - Queue management                | [ ]    |       |
-| UC-APT-008 | `QueueService.getNextInQueue()` - Queue ordering              | [ ]    |       |
-| UC-APT-009 | `AppointmentHook.beforeCreate()` - Validation hooks           | [ ]    |       |
-| UC-APT-010 | `AppointmentHook.afterUpdate()` - Status change handling      | [ ]    |       |
+| ID         | Test Case                                                     | Status | Notes                          |
+| ---------- | ------------------------------------------------------------- | ------ | ------------------------------ |
+| UC-APT-001 | `AppointmentMapper` - Entity to response                      | [x]    | ✅ AppointmentMapperTest.java  |
+| UC-APT-002 | `AppointmentMapper` - Request to entity                       | [x]    | ✅ AppointmentMapperTest.java  |
+| UC-APT-003 | `AppointmentService.createAppointment()` - Valid appointment  | [x]    | ✅ AppointmentServiceTest.java |
+| UC-APT-004 | `AppointmentService.createAppointment()` - Conflict detection | [x]    | ✅ AppointmentServiceTest.java |
+| UC-APT-005 | `AppointmentService.cancelAppointment()` - Cancellation logic | [x]    | ✅ AppointmentServiceTest.java |
+| UC-APT-006 | `AppointmentService.getAvailableSlots()` - Time slot calc     | [x]    | ✅ AppointmentServiceTest.java |
+| UC-APT-007 | `QueueService.addToQueue()` - Queue management                | [x]    | ✅ QueueServiceTest.java       |
+| UC-APT-008 | `QueueService.getNextInQueue()` - Queue ordering              | [x]    | ✅ QueueServiceTest.java       |
+| UC-APT-009 | `AppointmentHook.beforeCreate()` - Validation hooks           | [x]    | ✅ AppointmentHookTest.java    |
+| UC-APT-010 | `AppointmentHook.afterUpdate()` - Status change handling      | [x]    | ✅ AppointmentHookTest.java    |
 
 ### Medical Exam Service (13 tests)
 
