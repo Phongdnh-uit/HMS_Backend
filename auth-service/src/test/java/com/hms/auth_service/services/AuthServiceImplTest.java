@@ -77,9 +77,10 @@ class AuthServiceImplTest {
         testAccount.setPassword("encodedPassword");
         testAccount.setRole(RoleEnum.PATIENT);
         
-        testAccountRequest = new AccountRequest();
-        testAccountRequest.setEmail(testEmail);
-        testAccountRequest.setPassword(testPassword);
+        testAccountRequest = AccountRequest.builder()
+                .email(testEmail)
+                .password(testPassword)
+                .build();
         
         testAccountResponse = new AccountResponse();
         testAccountResponse.setId(testAccount.getId());

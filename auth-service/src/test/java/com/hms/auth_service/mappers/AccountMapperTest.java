@@ -50,9 +50,10 @@ class AccountMapperTest {
         testEntity.setEmailVerified(true);
 
         // Setup test request
-        testRequest = new AccountRequest();
-        testRequest.setEmail(TestDataFactory.uniqueEmail());
-        testRequest.setPassword(TestDataFactory.simplePassword());
+        testRequest = AccountRequest.builder()
+                .email(TestDataFactory.uniqueEmail())
+                .password(TestDataFactory.simplePassword())
+                .build();
     }
 
     @Nested
@@ -139,9 +140,10 @@ class AccountMapperTest {
             existingEntity.setPassword("oldPassword");
             existingEntity.setRole(RoleEnum.PATIENT);
 
-            AccountRequest updateRequest = new AccountRequest();
-            updateRequest.setEmail("new@email.com");
-            updateRequest.setPassword("newPassword");
+            AccountRequest updateRequest = AccountRequest.builder()
+                    .email("new@email.com")
+                    .password("newPassword")
+                    .build();
 
             // When
             mapper.partialUpdate(updateRequest, existingEntity);
