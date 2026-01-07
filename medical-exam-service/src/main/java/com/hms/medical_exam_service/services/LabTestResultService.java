@@ -12,6 +12,7 @@ import com.hms.medical_exam_service.repositories.LabTestResultRepository;
 import com.hms.medical_exam_service.repositories.MedicalExamRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class LabTestResultService {
     
@@ -37,6 +37,26 @@ public class LabTestResultService {
     private final LabTestResultMapper resultMapper;
     private final DiagnosticImageMapper imageMapper;
     private final FileStorageService fileStorageService;
+    private final LabOrderService labOrderService;
+    
+    public LabTestResultService(
+            LabTestResultRepository resultRepository,
+            LabTestRepository labTestRepository,
+            MedicalExamRepository medicalExamRepository,
+            DiagnosticImageRepository imageRepository,
+            LabTestResultMapper resultMapper,
+            DiagnosticImageMapper imageMapper,
+            FileStorageService fileStorageService,
+            @Lazy LabOrderService labOrderService) {
+        this.resultRepository = resultRepository;
+        this.labTestRepository = labTestRepository;
+        this.medicalExamRepository = medicalExamRepository;
+        this.imageRepository = imageRepository;
+        this.resultMapper = resultMapper;
+        this.imageMapper = imageMapper;
+        this.fileStorageService = fileStorageService;
+        this.labOrderService = labOrderService;
+    }
     
     /**
      * Create a new lab test result (order a test)
@@ -131,6 +151,14 @@ public class LabTestResultService {
         }
         
         result = resultRepository.save(result);
+        
+        // Auto-update lab order status if this result belongs to an order
+        if (result.getLabOrder() != null) {
+            labOrderService.updateOrderStatusFromResults(result.getLabOrder().getId());
+            log.info("Updated lab order {} status after result {} update", 
+                     result.getLabOrder().getId(), result.getId());
+        }
+        
         return toResponse(result);
     }
     

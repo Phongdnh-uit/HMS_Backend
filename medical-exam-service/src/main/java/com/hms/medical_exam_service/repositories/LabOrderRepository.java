@@ -18,6 +18,8 @@ public interface LabOrderRepository extends JpaRepository<LabOrder, String> {
 
     List<LabOrder> findByPatientIdOrderByOrderDateDesc(String patientId);
 
+    List<LabOrder> findByOrderingDoctorIdOrderByOrderDateDesc(String orderingDoctorId);
+
     Page<LabOrder> findByStatus(LabOrderStatus status, Pageable pageable);
 
     Optional<LabOrder> findByOrderNumber(String orderNumber);
