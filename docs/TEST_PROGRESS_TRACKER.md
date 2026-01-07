@@ -4,14 +4,14 @@
 
 | Category          | Total   | Completed | Progress |
 | ----------------- | ------- | --------- | -------- |
-| Unit Tests        | 75      | 49        | 65%      |
+| Unit Tests        | 75      | 59        | 79%      |
 | Integration Tests | 30      | 0         | 0%       |
 | API Tests         | 87      | 0         | 0%       |
 | Security Tests    | 22      | 0         | 0%       |
 | E2E Tests         | 21      | 0         | 0%       |
 | Performance Tests | 10      | 0         | 0%       |
 | Contract Tests    | 12      | 0         | 0%       |
-| **TOTAL**         | **257** | **49**    | **19%**  |
+| **TOTAL**         | **257** | **59**    | **23%**  |
 
 ---
 
@@ -27,19 +27,19 @@ Replace `[ ]` with `[x]` when you complete a test. Update the stats dashboard pe
 
 | ID          | Test Case                                                 | Status | Notes |
 | ----------- | --------------------------------------------------------- | ------ | ----- |
-| UC-AUTH-001 | `AuthServiceImpl.register()` - Valid registration         | [ ]    |       |
-| UC-AUTH-002 | `AuthServiceImpl.register()` - Duplicate email rejection  | [ ]    |       |
-| UC-AUTH-003 | `AuthServiceImpl.login()` - Valid credentials             | [ ]    |       |
-| UC-AUTH-004 | `AuthServiceImpl.login()` - Invalid credentials           | [ ]    |       |
-| UC-AUTH-005 | `AuthServiceImpl.refreshToken()` - Valid refresh token    | [ ]    |       |
-| UC-AUTH-006 | `AuthServiceImpl.refreshToken()` - Expired token handling | [ ]    |       |
-| UC-AUTH-007 | `TokenProvider.generateToken()` - Token generation        | [ ]    |       |
-| UC-AUTH-008 | `TokenProvider.validateToken()` - Token validation        | [ ]    |       |
-| UC-AUTH-009 | `TokenProvider.validateToken()` - Expired token rejection | [ ]    |       |
-| UC-AUTH-010 | `AccountMapper` - Entity to DTO mapping                   | [ ]    |       |
-| UC-AUTH-011 | `AccountMapper` - DTO to Entity mapping                   | [ ]    |       |
-| UC-AUTH-012 | `AccountHook.beforeCreate()` - Password encoding          | [ ]    |       |
-| UC-AUTH-013 | `CustomUserDetailsService.loadUserByUsername()`           | [ ]    |       |
+| UC-AUTH-001 | `AuthServiceImpl.register()` - Valid registration         | [x]    |       |
+| UC-AUTH-002 | `AuthServiceImpl.register()` - Duplicate email rejection  | [ x]   |       |
+| UC-AUTH-003 | `AuthServiceImpl.login()` - Valid credentials             | [ x]   |       |
+| UC-AUTH-004 | `AuthServiceImpl.login()` - Invalid credentials           | [ x]   |       |
+| UC-AUTH-005 | `AuthServiceImpl.refreshToken()` - Valid refresh token    | [ x]   |       |
+| UC-AUTH-006 | `AuthServiceImpl.refreshToken()` - Expired token handling | [ x]   |       |
+| UC-AUTH-007 | `TokenProvider.generateToken()` - Token generation        | [ x]   |       |
+| UC-AUTH-008 | `TokenProvider.validateToken()` - Token validation        | [x ]   |       |
+| UC-AUTH-009 | `TokenProvider.validateToken()` - Expired token rejection | [x ]   |       |
+| UC-AUTH-010 | `AccountMapper` - Entity to DTO mapping                   | [x ]   |       |
+| UC-AUTH-011 | `AccountMapper` - DTO to Entity mapping                   | [x ]   |       |
+| UC-AUTH-012 | `AccountHook.beforeCreate()` - Password encoding          | [x ]   |       |
+| UC-AUTH-013 | `CustomUserDetailsService.loadUserByUsername()`           | [ x]   |       |
 
 ### Patient Service (7 tests)
 
@@ -99,18 +99,18 @@ Replace `[ ]` with `[x]` when you complete a test. Update the stats dashboard pe
 
 ### HR Service (10 tests)
 
-| ID        | Test Case                                                     | Status | Notes |
-| --------- | ------------------------------------------------------------- | ------ | ----- |
-| UC-HR-001 | `EmployeeMapper` - Employee mapping                           | [ ]    |       |
-| UC-HR-002 | `DepartmentMapper` - Department mapping                       | [ ]    |       |
-| UC-HR-003 | `ScheduleMapper` - Schedule mapping                           | [ ]    |       |
-| UC-HR-004 | `ScheduleService.createSchedule()` - Schedule creation        | [ ]    |       |
-| UC-HR-005 | `ScheduleService.cancelSchedule()` - Cancellation             | [ ]    |       |
-| UC-HR-006 | `ScheduleService.getAvailableDoctors()` - Doctor availability | [ ]    |       |
-| UC-HR-007 | `DepartmentHook.beforeDelete()` - Cascade prevention          | [ ]    |       |
-| UC-HR-008 | `EmployeeHook.beforeCreate()` - Account creation              | [ ]    |       |
-| UC-HR-009 | `ScheduleHook.beforeCreate()` - Conflict detection            | [ ]    |       |
-| UC-HR-010 | `FileStorageService` - Employee photo handling                | [ ]    |       |
+| ID        | Test Case                                                     | Status | Notes                        |
+| --------- | ------------------------------------------------------------- | ------ | ---------------------------- |
+| UC-HR-001 | `EmployeeMapper` - Employee mapping                           | [x]    | ✅ EmployeeMapperTest.java   |
+| UC-HR-002 | `DepartmentMapper` - Department mapping                       | [x]    | ✅ DepartmentMapperTest.java |
+| UC-HR-003 | `ScheduleMapper` - Schedule mapping                           | [x]    | ✅ ScheduleMapperTest.java   |
+| UC-HR-004 | `ScheduleService.createSchedule()` - Schedule creation        | [x]    | ✅ ScheduleServiceTest.java  |
+| UC-HR-005 | `ScheduleService.cancelSchedule()` - Cancellation             | [x]    | ✅ ScheduleServiceTest.java  |
+| UC-HR-006 | `ScheduleService.getAvailableDoctors()` - Doctor availability | [x]    | ✅ ScheduleServiceTest.java  |
+| UC-HR-007 | `DepartmentHook.beforeDelete()` - Cascade prevention          | [x]    | ✅ DepartmentHookTest.java   |
+| UC-HR-008 | `EmployeeHook.beforeCreate()` - Account creation              | [x]    | ✅ EmployeeHookTest.java     |
+| UC-HR-009 | `ScheduleHook.beforeCreate()` - Conflict detection            | [x]    | ✅ ScheduleHookTest.java     |
+| UC-HR-010 | `FileStorageService` - Employee photo handling                | [x]    | ✅ EmployeeHookTest.java     |
 
 ### Billing Service (6 tests)
 
