@@ -52,7 +52,7 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
     private static final Duration MODIFICATION_WINDOW = Duration.ofHours(24);
     
     // MVP flag: set to false to enable real appointment-service calls
-    private static final boolean USE_MOCK_APPOINTMENT = false;
+    private static final boolean USE_MOCK_APPOINTMENT = true;
 
     // ============================ VIEW ============================
     

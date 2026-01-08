@@ -14,7 +14,8 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 60s
     networks:
       - app-network
     restart: always
@@ -32,10 +33,71 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 60s
     networks:
       - app-network
     restart: always
+  mysql-appointment-service:
+    image: mysql:8.0
+    container_name: mysql-appointment-service
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${APPOINTMENT_DB_PASSWORD}
+      MYSQL_DATABASE: ${APPOINTMENT_DB_NAME}
+      MYSQL_USER: ${APPOINTMENT_DB_USERNAME}
+      MYSQL_PASSWORD: ${APPOINTMENT_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - app-network
+    restart: always
+  mysql-billing-service:
+    image: mysql:8.0
+    container_name: mysql-billing-service
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${BILLING_DB_PASSWORD}
+      MYSQL_DATABASE: ${BILLING_DB_NAME}
+      MYSQL_USER: ${BILLING_DB_USERNAME}
+      MYSQL_PASSWORD: ${BILLING_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - app-network
+    restart: always
+
+  # Medical Exam Service (merged from feature/medical-exam-service)
+  mysql-medical-exam-service:
+    image: mysql:8.0
+    container_name: mysql-medical-exam-service
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MEDICAL_EXAM_DB_PASSWORD}
+      MYSQL_DATABASE: ${MEDICAL_EXAM_DB_NAME}
+      MYSQL_USER: ${MEDICAL_EXAM_DB_USERNAME}
+      MYSQL_PASSWORD: ${MEDICAL_EXAM_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - app-network
+    restart: always
+
   mysql-medicine-service:
     image: mysql:8.0
     container_name: mysql-medicine-service
@@ -50,7 +112,8 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 60s
     networks:
       - app-network
     restart: always
@@ -68,19 +131,22 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 60s
     networks:
       - app-network
     restart: always
 
   # Application Services
   config-server-pro:
-    image: dnhphong2005/config-server:latest
+    image: ngoctruonggiang/hms-config-server:latest
     container_name: config-server-pro
     environment:
-      - SERVICE=config-server
+      - "SERVICE=config-server"
     env_file:
       - .env
+    ports:
+      - "${CONFIG_SERVER_PORT}:${CONFIG_SERVER_PORT}"
     networks:
       - app-network
     restart: always
@@ -92,14 +158,15 @@ services:
           "-f",
           "http://localhost:${CONFIG_SERVER_PORT}/actuator/health",
         ]
-      interval: 30s
+      interval: 15s
       timeout: 10s
-      retries: 5
+      retries: 10
+      start_period: 90s
   discovery-service-pro:
-    image: dnhphong2005/discovery-service:latest
+    image: ngoctruonggiang/hms-discovery-service:latest
     container_name: discovery-service-pro
     environment:
-      - SERVICE=discovery-service
+      - "SERVICE=discovery-service"
     env_file:
       - .env
     ports:
@@ -111,10 +178,11 @@ services:
       - app-network
     restart: always
   api-gateway-pro:
-    image: dnhphong2005/api-gateway:latest
+    image: ngoctruonggiang/hms-api-gateway:latest
     container_name: api-gateway-pro
     environment:
-      - SERVICE=api-gateway
+      - "SERVICE=api-gateway"
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/"
     ports:
       - "${API_GATEWAY_PORT}:${API_GATEWAY_PORT}"
     depends_on:
@@ -126,10 +194,13 @@ services:
       - app-network
     restart: always
   auth-service-pro:
-    image: dnhphong2005/auth-service:latest
+    image: ngoctruonggiang/hms-auth-service:latest
     container_name: auth-service-pro
     environment:
-      - SERVICE=auth-service
+      - "SERVICE=auth-service"
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/"
+    ports:
+      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
     depends_on:
       config-server-pro:
         condition: service_healthy
@@ -141,10 +212,13 @@ services:
       - app-network
     restart: always
   medicine-service-pro:
-    image: dnhphong2005/medicine-service:latest
+    image: ngoctruonggiang/hms-medicine-service:latest
     container_name: medicine-service-pro
     environment:
-      - SERVICE=medicine-service
+      - "SERVICE=medicine-service"
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/"
+    ports:
+      - "${MEDICINE_SERVICE_PORT}:${MEDICINE_SERVICE_PORT}"
     depends_on:
       config-server-pro:
         condition: service_healthy
@@ -156,10 +230,13 @@ services:
       - app-network
     restart: always
   patient-service-pro:
-    image: dnhphong2005/patient-service:latest
+    image: ngoctruonggiang/hms-patient-service:latest
     container_name: patient-service-pro
     environment:
-      - SERVICE=patient-service
+      - "SERVICE=patient-service"
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/"
+    ports:
+      - "${PATIENT_SERVICE_PORT}:${PATIENT_SERVICE_PORT}"
     depends_on:
       config-server-pro:
         condition: service_healthy
@@ -171,10 +248,14 @@ services:
       - app-network
     restart: always
   hr-service-pro:
-    image: dnhphong2005/hr-service:latest
+    image: ngoctruonggiang/hms-hr-service:latest
     container_name: hr-service-pro
     environment:
-      - SERVICE=hr-service
+      - "SERVICE=hr-service"
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/"
+      - "APPOINTMENT_SERVICE_URL=http://appointment-service-pro:8085"
+    ports:
+      - "${HR_SERVICE_PORT}:${HR_SERVICE_PORT}"
     depends_on:
       config-server-pro:
         condition: service_healthy
@@ -185,6 +266,148 @@ services:
     networks:
       - app-network
     restart: always
+  appointment-service-pro:
+    image: ngoctruonggiang/hms-appointment-service:latest
+    container_name: appointment-service-pro
+    environment:
+      - "SERVICE=appointment-service"
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/"
+    ports:
+      - "${APPOINTMENT_SERVICE_PORT}:${APPOINTMENT_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-appointment-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+
+  billing-service-pro:
+    image: ngoctruonggiang/hms-billing-service:latest
+    container_name: billing-service-pro
+    environment:
+      - "SERVICE=billing-service"
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/"
+    ports:
+      - "${BILLING_SERVICE_PORT}:${BILLING_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-billing-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+  medical-exam-service-pro:
+    image: ngoctruonggiang/hms-medical-exam-service:latest
+    container_name: medical-exam-service-pro
+    environment:
+      - "SERVICE=medical-exam-service"
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/"
+    ports:
+      - "${MEDICAL_EXAM_SERVICE_PORT}:${MEDICAL_EXAM_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      mysql-medical-exam-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+
+  # Redis Cache (for report-service caching)
+  redis:
+    image: redis:7-alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: always
+
+  # MinIO Object Storage (for lab test images)
+  minio:
+    image: minio/minio:latest
+    container_name: minio-storage
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin123}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: always
+
+  # Report Service (Analytics & Caching)
+  # Notification Service (Email reminders)
+  notification-service-pro:
+    image: ngoctruonggiang/hms-notification-service:latest
+    container_name: notification-service-pro
+    environment:
+      - "SERVICE=notification-service"
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/"
+      - "APPOINTMENT_SERVICE_URL=http://appointment-service-pro:8085"
+      - "PATIENT_SERVICE_URL=http://patient-service-pro:8082"
+    ports:
+      - "${NOTIFICATION_SERVICE_PORT}:${NOTIFICATION_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+
+  report-service-pro:
+    image: ngoctruonggiang/hms-report-service:latest
+    container_name: report-service-pro
+    environment:
+      - "SERVICE=report-service"
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service-pro:8763/eureka/"
+      - "SPRING_DATA_REDIS_HOST=redis-cache"
+      - "SPRING_DATA_REDIS_PORT=6379"
+    ports:
+      - "${REPORT_SERVICE_PORT}:${REPORT_SERVICE_PORT}"
+    depends_on:
+      config-server-pro:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  redis-data:
+  minio-data:
