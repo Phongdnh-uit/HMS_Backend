@@ -8,10 +8,10 @@
 | Integration Tests | 30      | 0         | 0%       |
 | API Tests         | 87      | 0         | 0%       |
 | Security Tests    | 22      | 0         | 0%       |
-| E2E Tests         | 21      | 15        | 71%      |
+| E2E Tests         | 21      | 21        | 100%     |
 | Performance Tests | 10      | 0         | 0%       |
 | Contract Tests    | 12      | 0         | 0%       |
-| **TOTAL**         | **257** | **93**    | **36%**  |
+| **TOTAL**         | **257** | **99**    | **39%**  |
 
 ---
 
@@ -458,14 +458,14 @@ Replace `[ ]` with `[x]` when you complete a test. Update the stats dashboard pe
 
 ### Medical Exam Flow (6 tests)
 
-| ID           | Test Case                   | Status | Notes                                                              |
-| ------------ | --------------------------- | ------ | ------------------------------------------------------------------ |
-| E2E-EXAM-001 | Doctor creates exam         | [x]    | ✅ MedicalExaminationFlowE2ETest.java                              |
-| E2E-EXAM-002 | Doctor adds diagnosis       | [x]    | ✅ MedicalExaminationFlowE2ETest.java                              |
-| E2E-EXAM-003 | Doctor creates prescription | [x]    | ✅ MedicalExaminationFlowE2ETest.java                              |
-| E2E-EXAM-004 | Doctor orders lab tests     | [ ]    | ⚠️ Requires lab test backend - see LAB_TEST_IMPLEMENTATION_NOTE.md |
-| E2E-EXAM-005 | Lab tech enters results     | [ ]    | ⚠️ Requires lab test backend - see LAB_TEST_IMPLEMENTATION_NOTE.md |
-| E2E-EXAM-006 | Complete exam with billing  | [ ]    | ⚠️ Requires lab test backend - see LAB_TEST_IMPLEMENTATION_NOTE.md |
+| ID           | Test Case                   | Status | Notes                                 |
+| ------------ | --------------------------- | ------ | ------------------------------------- |
+| E2E-EXAM-001 | Doctor creates exam         | [x]    | ✅ MedicalExaminationFlowE2ETest.java |
+| E2E-EXAM-002 | Doctor adds diagnosis       | [x]    | ✅ MedicalExaminationFlowE2ETest.java |
+| E2E-EXAM-003 | Doctor creates prescription | [x]    | ✅ MedicalExaminationFlowE2ETest.java |
+| E2E-EXAM-004 | Doctor orders lab tests     | [x]    | ✅ LabTestFlowE2ETest.java            |
+| E2E-EXAM-005 | Lab tech enters results     | [x]    | ✅ LabTestFlowE2ETest.java            |
+| E2E-EXAM-006 | Complete exam with billing  | [x]    | ✅ LabTestFlowE2ETest.java            |
 
 ### Billing Flow (4 tests)
 
@@ -478,12 +478,12 @@ Replace `[ ]` with `[x]` when you complete a test. Update the stats dashboard pe
 
 ### HR Management Flow (4 tests)
 
-| ID         | Test Case                | Status | Notes |
-| ---------- | ------------------------ | ------ | ----- |
-| E2E-HR-001 | Admin creates department | [ ]    |       |
-| E2E-HR-002 | Admin creates employee   | [ ]    |       |
-| E2E-HR-003 | Admin creates schedule   | [ ]    |       |
-| E2E-HR-004 | View doctor availability | [ ]    |       |
+| ID         | Test Case                | Status | Notes                           |
+| ---------- | ------------------------ | ------ | ------------------------------- |
+| E2E-HR-001 | Admin creates department | [x]    | ✅ HRManagementFlowE2ETest.java |
+| E2E-HR-002 | Admin creates employee   | [x]    | ✅ HRManagementFlowE2ETest.java |
+| E2E-HR-003 | Admin creates schedule   | [x]    | ✅ HRManagementFlowE2ETest.java |
+| E2E-HR-004 | View doctor availability | [x]    | ✅ HRManagementFlowE2ETest.java |
 
 ---
 

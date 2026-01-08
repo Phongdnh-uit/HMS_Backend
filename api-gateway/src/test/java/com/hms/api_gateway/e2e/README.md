@@ -144,6 +144,67 @@ Tests the complete medicine and prescription dispensing workflow:
   - Low stock handling
   - Complete medicine management workflow
 
+### 7. HRManagementFlowE2ETest.java
+
+**Test Coverage:** E2E-HR-001 to E2E-HR-004
+
+Tests the complete HR and schedule management workflow:
+
+- ✅ E2E-HR-001: Admin creates department
+  - Department creation with valid data
+  - Required field validation
+  - Duplicate department name prevention
+  - Department listing
+  - Department retrieval by ID
+  - Non-admin authorization rejection
+- ✅ E2E-HR-002: Admin creates employee/doctor
+  - Doctor employee creation with account linking
+  - Nurse employee creation
+  - Invalid license number format rejection
+  - Employee listing
+  - Employee retrieval by ID
+  - Self-service employee profile viewing
+- ✅ E2E-HR-003: Admin creates schedule for doctor
+  - Doctor schedule creation
+  - Multiple schedules for work week
+  - Required field validation
+  - Schedule status updates
+  - Schedule retrieval by ID
+- ✅ E2E-HR-004: View doctor availability
+  - Patient viewing doctor schedules
+  - Schedule filtering by status
+  - Schedule filtering by doctor
+  - Schedule filtering by department
+  - Schedule lookup by doctor and date
+  - Doctor viewing own schedules
+  - Empty result handling for future dates
+
+### 8. LabTestFlowE2ETest.java
+
+**Test Coverage:** E2E-LAB-001 to E2E-LAB-003
+
+Tests the complete laboratory test workflow:
+
+- ✅ E2E-LAB-001: Doctor orders lab tests for examination
+  - Create lab order with multiple tests
+  - Lab order with single test
+  - Required field validation (medical exam ID)
+  - Retrieve lab order by ID
+  - Retrieve lab orders for medical exam
+  - Priority handling (NORMAL, URGENT)
+- ✅ E2E-LAB-002: Lab technician views pending tests
+  - List all lab orders for technician
+  - View lab test results for an exam
+  - View patient's lab test history
+  - Retrieve all available lab tests
+- ✅ E2E-LAB-003: Lab technician enters test results
+  - Update lab test result with values
+  - Flag abnormal test results
+  - Retrieve lab result by ID after entry
+  - Allow partial result updates
+  - Complete full lab test workflow (order → perform → complete → view)
+  - Allow doctor to interpret completed results
+
 ## 🚀 Running E2E Tests
 
 ### Run All E2E Tests
@@ -158,6 +219,8 @@ Tests the complete medicine and prescription dispensing workflow:
 ./gradlew :api-gateway:test --tests "MedicalExaminationFlowE2ETest"
 ./gradlew :api-gateway:test --tests "BillingPaymentFlowE2ETest"
 ./gradlew :api-gateway:test --tests "MedicineManagementFlowE2ETest"
+./gradlew :api-gateway:test --tests "HRManagementFlowE2ETest"
+./gradlew :api-gateway:test --tests "LabTestFlowE2ETest"
 ```
 
 ### Run Specific Test Methods
@@ -184,7 +247,10 @@ Tests the complete medicine and prescription dispensing workflow:
 | Medical Examination  | 14         | ✅     |
 | Billing and Payment  | 18         | ✅     |
 | Medicine Management  | 18         | ✅     |
-| **Total**            | **78**     | ✅     |
+| HR and Schedule      | 24         | ✅     |
+| Lab Test Flow        | 18         | ✅     |
+| **Total**            | **120**    | ✅     |
+| **Total**            | **102**    | ✅     |
 
 ## 🔧 Technical Details
 
@@ -223,30 +289,28 @@ String email = generateUniqueEmail("patient");
 ### Roles Used in Tests
 
 - `PATIENT` - End users booking appointments
-- `DOCTOR` - Medical professionals conducting exams
+- `DOCTOR` - Medical professionals conducting exams and ordering lab tests
 - `PHARMACIST` - Pharmacy staff dispensing medications
-- `ADMIN` - System administrators managing medicines and categories
+- `LAB_TECHNICIAN` - Lab technicians entering test results (or DOCTOR role)
+- `ADMIN` - System administrators managing medicines, categories, departments, employees
 - `RECEPTIONIST` - Administrative staff managing walk-ins
-- `ADMIN` - System administrators (not yet covered in E2E)
 
 ## 🎯 Coverage Status
 
 ### Completed Flows ✅
 
-- 13 tests
+- [x] Patient Registration (E2E-REG-001 to E2E-REG-003) - 13 tests
 - [x] Appointment Booking (E2E-APT-001 to E2E-APT-005) - 15 tests
 - [x] Medical Examination (E2E-EXAM-001 to E2E-EXAM-003) - 14 tests
 - [x] Billing and Payment (E2E-BILL-001 to E2E-BILL-004) - 18 tests
 - [x] Medicine Management (E2E-MED-001 to E2E-MED-003) - 18 tests
+- [x] HR and Schedule Management (E2E-HR-001 to E2E-HR-004) - 24 tests
+- [x] Lab Test Flow (E2E-LAB-001 to E2E-LAB-003) - 18 tests
 
-**Total: 78 E2E tests implemented** ✅
+**Total: 120 E2E tests implemented** ✅
 
 ### Remaining Flows (From TEST_PLAN.md) 📋
 
-- [ ] Lab Test Flow (E2E-LAB-001 to E2E-LAB-003) - ⚠️ Requires backend implementation
-  - See [LAB_TEST_IMPLEMENTATION_NOTE.md](LAB_TEST_IMPLEMENTATION_NOTE.md) for details
-- [ ] HR and Schedule Management (E2E-HR-001 to E2E-HR-004ED-002)
-- [ ] HR and Schedule (E2E-HR-001 to E2E-HR-002)
 - [ ] Report Generation (E2E-REP-001)
 - [ ] Admin Operations (E2E-ADMIN-001 to E2E-ADMIN-003)
 
@@ -330,15 +394,19 @@ response.then()
 - [TEST_INFRASTRUCTURE_GUIDE.md](../../docs/TEST_INFRASTRUCTURE_GUIDE.md) - Test setup guide
 - [TEST_PROGRESS_TRACKER.md](../../docs/TEST_PROGRESS_TRACKER.md) - Test completion tracking
 
----78 tests implemented across 5 major flows ✅
+---
+
+**Summary:** 120 tests implemented across 7 major flows ✅
 
 **Implemented Flows:**
 
-- ✅ Patient Registration Flow
-- ✅ Appointment Booking Flow
-- ✅ Medical Examination Flow
-- ✅ Billing and Payment Flow
-- ✅ Medicine Management Flow
+- ✅ Patient Registration Flow (13 tests)
+- ✅ Appointment Booking Flow (15 tests)
+- ✅ Medical Examination Flow (14 tests)
+- ✅ Billing and Payment Flow (18 tests)
+- ✅ Medicine Management Flow (18 tests)
+- ✅ HR and Schedule Management Flow (24 tests)
+- ✅ Lab Test Flow (18 tests)
 
 **Last Updated:** 2026-01-08  
-**Status:** Phase 5 E2E Tests - Patient Registration, Appointment Booking, and Medical Examination flows completed ✅
+**Status:** Phase 5 E2E Tests - 7 major flows completed ✅
