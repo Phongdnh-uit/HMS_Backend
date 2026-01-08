@@ -36,9 +36,6 @@ trait HmsSimulationBase extends Simulation {
     .shareConnections
     // Connection settings for high concurrency
     .maxConnectionsPerHost(50)
-    // Timeouts
-    .connectionTimeOut(10000)
-    .requestTimeOut(30000)
 
   // ==================== FEEDERS ====================
 

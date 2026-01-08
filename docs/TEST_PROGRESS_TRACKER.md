@@ -9,9 +9,9 @@
 | API Tests         | 87      | 0         | 0%       |
 | Security Tests    | 22      | 0         | 0%       |
 | E2E Tests         | 21      | 21        | 100%     |
-| Performance Tests | 10      | 0         | 0%       |
+| Performance Tests | 10      | 10        | 100%     |
 | Contract Tests    | 12      | 0         | 0%       |
-| **TOTAL**         | **257** | **99**    | **39%**  |
+| **TOTAL**         | **257** | **109**   | **42%**  |
 
 ---
 
@@ -1053,7 +1053,7 @@ setUp(
 | ID            | PERF-LOAD-001                                                                                          |
 | ------------- | ------------------------------------------------------------------------------------------------------ |
 | **Test Case** | 100 concurrent logins                                                                                  |
-| **Status**    | [ ]                                                                                                    |
+| **Status**    | [x] ✅ ConcurrentLoginsSimulation.scala                                                                |
 | **Scenario**  | Simulate morning peak hours when hospital staff (doctors, nurses, receptionists) log in simultaneously |
 
 **Test Steps:**
@@ -1091,7 +1091,7 @@ setUp(
 | ID            | PERF-LOAD-002                                                                                       |
 | ------------- | --------------------------------------------------------------------------------------------------- |
 | **Test Case** | 50 concurrent bookings                                                                              |
-| **Status**    | [ ]                                                                                                 |
+| **Status**    | [x] ✅ ConcurrentBookingsSimulation.scala                                                           |
 | **Scenario**  | Simulate peak booking hours (8-9 AM) when patients book appointments through mobile/web application |
 
 **Test Steps:**
@@ -1141,7 +1141,7 @@ setUp(
 | ID            | PERF-LOAD-003                                                                                    |
 | ------------- | ------------------------------------------------------------------------------------------------ |
 | **Test Case** | 1000 concurrent queries                                                                          |
-| **Status**    | [ ]                                                                                              |
+| **Status**    | [x] ✅ ConcurrentQueriesSimulation.scala                                                         |
 | **Scenario**  | Simulate multiple staff members querying patient records, appointments, and medical exam history |
 
 **Test Steps:**
@@ -1195,7 +1195,7 @@ setUp(
 | ID            | PERF-LOAD-004                                                                          |
 | ------------- | -------------------------------------------------------------------------------------- |
 | **Test Case** | Gateway routing under load                                                             |
-| **Status**    | [ ]                                                                                    |
+| **Status**    | [x] ✅ GatewayRoutingSimulation.scala                                                  |
 | **Scenario**  | Test API Gateway routing, load balancing, and circuit breaker under mixed traffic load |
 
 **Test Steps:**
@@ -1253,7 +1253,7 @@ setUp(
 | ID            | PERF-STRESS-001                                                                    |
 | ------------- | ---------------------------------------------------------------------------------- |
 | **Test Case** | DB connection pool limits                                                          |
-| **Status**    | [ ]                                                                                |
+| **Status**    | [x] ✅ DbConnectionPoolSimulation.scala                                            |
 | **Scenario**  | Push database connection pool to its limits and test graceful degradation/recovery |
 
 **Test Steps:**
@@ -1306,7 +1306,7 @@ setUp(
 | ID            | PERF-STRESS-002                                                                       |
 | ------------- | ------------------------------------------------------------------------------------- |
 | **Test Case** | Memory usage under load                                                               |
-| **Status**    | [ ]                                                                                   |
+| **Status**    | [x] ✅ MemoryUsageSimulation.scala                                                    |
 | **Scenario**  | Test service behavior when approaching JVM heap limits and trigger garbage collection |
 
 **Test Steps:**
@@ -1357,7 +1357,7 @@ setUp(
 | ID            | PERF-STRESS-003                                                                                  |
 | ------------- | ------------------------------------------------------------------------------------------------ |
 | **Test Case** | Service recovery                                                                                 |
-| **Status**    | [ ]                                                                                              |
+| **Status**    | [x] ✅ ServiceRecoverySimulation.scala                                                           |
 | **Scenario**  | Test system resilience and automatic recovery after cascading failures and network interruptions |
 
 **Test Steps:**
@@ -1410,7 +1410,7 @@ setUp(
 | ID            | PERF-END-001                                                                     |
 | ------------- | -------------------------------------------------------------------------------- |
 | **Test Case** | 24-hour operation                                                                |
-| **Status**    | [ ]                                                                              |
+| **Status**    | [x] ✅ ContinuousOperationSimulation.scala                                       |
 | **Scenario**  | Simulate realistic hospital workload over 24 hours with varying traffic patterns |
 
 **Test Steps:**
@@ -1471,7 +1471,7 @@ setUp(
 | ID            | PERF-END-002                                                                |
 | ------------- | --------------------------------------------------------------------------- |
 | **Test Case** | Memory leak detection                                                       |
-| **Status**    | [ ]                                                                         |
+| **Status**    | [x] ✅ MemoryLeakDetectionSimulation.scala                                  |
 | **Scenario**  | Run extended tests specifically designed to expose memory leaks in services |
 
 **Test Steps:**

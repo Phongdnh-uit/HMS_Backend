@@ -4,6 +4,17 @@ plugins {
     id("io.gatling.gradle") version "3.11.5.2"
 }
 
+// Set Java compatibility - Scala 2.13 works best with Java 21 LTS
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+// Configure Scala compiler to target JVM 21
+tasks.withType<ScalaCompile> {
+    scalaCompileOptions.additionalParameters = listOf("-release:21")
+}
+
 repositories {
     mavenCentral()
 }
@@ -19,15 +30,13 @@ dependencies {
 }
 
 gatling {
-    // Simulation configurations
-    logLevel = "WARN"
-    
-    // Simulation results directory
+    // JVM settings for Gatling simulations
     jvmArgs = listOf(
         "-Xms512m",
         "-Xmx1g",
         "-XX:+UseG1GC",
-        "-XX:MaxGCPauseMillis=200"
+        "-XX:MaxGCPauseMillis=200",
+        "-Dgatling.core.outputDirectoryBaseName=gatling"
     )
 }
 
