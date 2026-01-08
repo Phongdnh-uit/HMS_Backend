@@ -169,7 +169,15 @@ public class SecurityConfig {
                         // REPORTS - Admin only for analytics
                         // ============================================
                         .pathMatchers("/api/reports/**").hasAuthority("ADMIN")
-                        
+
+                        // ============================================
+                        // AUTH ENDPOINTS
+                        // ============================================
+                        .pathMatchers("/api/auth/send-password-reset-token").permitAll()
+                        .pathMatchers("/api/auth/reset-password").permitAll()
+                        .pathMatchers("/api/auth/send-verification-email").permitAll()
+                        .pathMatchers("/api/auth/verify-email").permitAll()
+
                         // Default: require authentication
                         .anyExchange().authenticated()
                 )

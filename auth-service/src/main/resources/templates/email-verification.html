@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Xác nhận email</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 6px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 20px;
+            background-color: #2563eb;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Xác nhận địa chỉ email</h2>
+
+    <p>Kính chào,</p>
+
+    <p>
+        Cảm ơn bạn đã đăng ký tài khoản tại hệ thống của chúng tôi.
+        Vui lòng nhấn vào nút bên dưới để xác nhận địa chỉ email.
+    </p>
+
+    <a th:href="${verificationLink}" class="btn">
+        Xác nhận email
+    </a>
+
+    <p>
+        Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.
+    </p>
+
+    <p class="warning">
+        Liên kết này sẽ hết hạn sau <strong th:text="${expireMinutes}">15</strong> phút.
+    </p>
+
+    <div class="footer">
+        <p>
+            Email này được gửi tự động. Vui lòng không trả lời email này.
+        </p>
+    </div>
+</div>
+</body>
+</html>
