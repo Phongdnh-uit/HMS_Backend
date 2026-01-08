@@ -8,10 +8,10 @@
 | Integration Tests | 30      | 0         | 0%       |
 | API Tests         | 87      | 0         | 0%       |
 | Security Tests    | 22      | 0         | 0%       |
-| E2E Tests         | 21      | 0         | 0%       |
+| E2E Tests         | 21      | 15        | 71%      |
 | Performance Tests | 10      | 0         | 0%       |
 | Contract Tests    | 12      | 0         | 0%       |
-| **TOTAL**         | **257** | **78**    | **30%**  |
+| **TOTAL**         | **257** | **93**    | **36%**  |
 
 ---
 
@@ -440,41 +440,41 @@ Replace `[ ]` with `[x]` when you complete a test. Update the stats dashboard pe
 
 ### Patient Registration Flow (3 tests)
 
-| ID          | Test Case                | Status | Notes |
-| ----------- | ------------------------ | ------ | ----- |
-| E2E-REG-001 | Complete registration    | [ ]    |       |
-| E2E-REG-002 | Login after registration | [ ]    |       |
-| E2E-REG-003 | View own profile         | [ ]    |       |
+| ID          | Test Case                | Status | Notes                                  |
+| ----------- | ------------------------ | ------ | -------------------------------------- |
+| E2E-REG-001 | Complete registration    | [x]    | ✅ PatientRegistrationFlowE2ETest.java |
+| E2E-REG-002 | Login after registration | [x]    | ✅ PatientRegistrationFlowE2ETest.java |
+| E2E-REG-003 | View own profile         | [x]    | ✅ PatientRegistrationFlowE2ETest.java |
 
 ### Appointment Flow (5 tests)
 
-| ID          | Test Case                   | Status | Notes |
-| ----------- | --------------------------- | ------ | ----- |
-| E2E-APT-001 | Patient books appointment   | [ ]    |       |
-| E2E-APT-002 | Patient views appointments  | [ ]    |       |
-| E2E-APT-003 | Patient cancels appointment | [ ]    |       |
-| E2E-APT-004 | Receptionist walk-in        | [ ]    |       |
-| E2E-APT-005 | Patient check-in flow       | [ ]    |       |
+| ID          | Test Case                   | Status | Notes                                 |
+| ----------- | --------------------------- | ------ | ------------------------------------- |
+| E2E-APT-001 | Patient books appointment   | [x]    | ✅ AppointmentBookingFlowE2ETest.java |
+| E2E-APT-002 | Patient views appointments  | [x]    | ✅ AppointmentBookingFlowE2ETest.java |
+| E2E-APT-003 | Patient cancels appointment | [x]    | ✅ AppointmentBookingFlowE2ETest.java |
+| E2E-APT-004 | Receptionist walk-in        | [x]    | ✅ AppointmentBookingFlowE2ETest.java |
+| E2E-APT-005 | Patient check-in flow       | [x]    | ✅ AppointmentBookingFlowE2ETest.java |
 
 ### Medical Exam Flow (6 tests)
 
-| ID           | Test Case                   | Status | Notes |
-| ------------ | --------------------------- | ------ | ----- |
-| E2E-EXAM-001 | Doctor creates exam         | [ ]    |       |
-| E2E-EXAM-002 | Doctor adds diagnosis       | [ ]    |       |
-| E2E-EXAM-003 | Doctor creates prescription | [ ]    |       |
-| E2E-EXAM-004 | Doctor orders lab tests     | [ ]    |       |
-| E2E-EXAM-005 | Lab tech enters results     | [ ]    |       |
-| E2E-EXAM-006 | Complete exam with billing  | [ ]    |       |
+| ID           | Test Case                   | Status | Notes                                                              |
+| ------------ | --------------------------- | ------ | ------------------------------------------------------------------ |
+| E2E-EXAM-001 | Doctor creates exam         | [x]    | ✅ MedicalExaminationFlowE2ETest.java                              |
+| E2E-EXAM-002 | Doctor adds diagnosis       | [x]    | ✅ MedicalExaminationFlowE2ETest.java                              |
+| E2E-EXAM-003 | Doctor creates prescription | [x]    | ✅ MedicalExaminationFlowE2ETest.java                              |
+| E2E-EXAM-004 | Doctor orders lab tests     | [ ]    | ⚠️ Requires lab test backend - see LAB_TEST_IMPLEMENTATION_NOTE.md |
+| E2E-EXAM-005 | Lab tech enters results     | [ ]    | ⚠️ Requires lab test backend - see LAB_TEST_IMPLEMENTATION_NOTE.md |
+| E2E-EXAM-006 | Complete exam with billing  | [ ]    | ⚠️ Requires lab test backend - see LAB_TEST_IMPLEMENTATION_NOTE.md |
 
 ### Billing Flow (4 tests)
 
-| ID           | Test Case                  | Status | Notes |
-| ------------ | -------------------------- | ------ | ----- |
-| E2E-BILL-001 | Invoice created after exam | [ ]    |       |
-| E2E-BILL-002 | Patient views invoice      | [ ]    |       |
-| E2E-BILL-003 | VNPay payment flow         | [ ]    |       |
-| E2E-BILL-004 | Payment confirmation       | [ ]    |       |
+| ID           | Test Case                  | Status | Notes                             |
+| ------------ | -------------------------- | ------ | --------------------------------- |
+| E2E-BILL-001 | Invoice created after exam | [x]    | ✅ BillingPaymentFlowE2ETest.java |
+| E2E-BILL-002 | Patient views invoice      | [x]    | ✅ BillingPaymentFlowE2ETest.java |
+| E2E-BILL-003 | VNPay payment flow         | [x]    | ✅ BillingPaymentFlowE2ETest.java |
+| E2E-BILL-004 | Payment confirmation       | [x]    | ✅ BillingPaymentFlowE2ETest.java |
 
 ### HR Management Flow (4 tests)
 

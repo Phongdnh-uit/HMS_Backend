@@ -88,6 +88,62 @@ Tests the complete medical examination and prescription workflow:
   - Patient prescription access
   - Complete examination workflow (exam → diagnosis → prescription)
 
+### 5. BillingPaymentFlowE2ETest.java
+
+**Test Coverage:** E2E-BILL-001 to E2E-BILL-004
+
+Tests the complete billing and payment workflow through VNPay:
+
+- ✅ E2E-BILL-001: Invoice created after exam
+  - Automatic invoice generation after exam
+  - Manual invoice creation for appointment
+  - Invoice retrieval by exam ID
+  - Patient invoice listing
+- ✅ E2E-BILL-002: Patient views invoice
+  - Invoice retrieval by ID
+  - Invoice details with line items
+  - Cross-patient access prevention
+  - Payment status viewing
+- ✅ E2E-BILL-003: VNPay payment flow
+  - VNPay payment initialization
+  - Payment amount validation
+  - Payment retrieval by invoice
+  - Payment retrieval by ID
+  - Complete payment workflow
+- ✅ E2E-BILL-004: Payment confirmation
+  - Payment status verification
+  - VNPay callback handling
+  - Invoice status update after payment
+
+### 6. MedicineManagementFlowE2ETest.java
+
+**Test Coverage:** E2E-MED-001 to E2E-MED-003
+
+Tests the complete medicine and prescription dispensing workflow:
+
+- ✅ E2E-MED-001: Pharmacist views and manages prescriptions
+  - Prescription viewing by ID
+  - Prescription items with medicine details
+  - Prescriptions listing by patient
+  - Prescription filtering by status
+  - Prescription retrieval by exam ID
+- ✅ E2E-MED-002: Prescription dispensing and stock updates
+  - Initial medicine stock retrieval
+  - Prescription dispensing
+  - Stock update verification after dispensing
+  - Double dispensing prevention
+  - Prescription status tracking
+  - Dispensed timestamp tracking
+- ✅ E2E-MED-003: Medicine inventory management
+  - Medicine listing
+  - Medicine filtering by category
+  - Medicine search by name
+  - Medicine details viewing
+  - Stock updates
+  - Category listing
+  - Low stock handling
+  - Complete medicine management workflow
+
 ## 🚀 Running E2E Tests
 
 ### Run All E2E Tests
@@ -100,6 +156,8 @@ Tests the complete medical examination and prescription workflow:
 ./gradlew :api-gateway:test --tests "PatientRegistrationFlowE2ETest"
 ./gradlew :api-gateway:test --tests "AppointmentBookingFlowE2ETest"
 ./gradlew :api-gateway:test --tests "MedicalExaminationFlowE2ETest"
+./gradlew :api-gateway:test --tests "BillingPaymentFlowE2ETest"
+./gradlew :api-gateway:test --tests "MedicineManagementFlowE2ETest"
 ```
 
 ### Run Specific Test Methods
@@ -124,7 +182,9 @@ Tests the complete medical examination and prescription workflow:
 | Patient Registration | 13         | ✅     |
 | Appointment Booking  | 15         | ✅     |
 | Medical Examination  | 14         | ✅     |
-| **Total**            | **42**     | ✅     |
+| Billing and Payment  | 18         | ✅     |
+| Medicine Management  | 18         | ✅     |
+| **Total**            | **78**     | ✅     |
 
 ## 🔧 Technical Details
 
@@ -164,7 +224,8 @@ String email = generateUniqueEmail("patient");
 
 - `PATIENT` - End users booking appointments
 - `DOCTOR` - Medical professionals conducting exams
-- `NURSE` - Supporting medical staff
+- `PHARMACIST` - Pharmacy staff dispensing medications
+- `ADMIN` - System administrators managing medicines and categories
 - `RECEPTIONIST` - Administrative staff managing walk-ins
 - `ADMIN` - System administrators (not yet covered in E2E)
 
@@ -172,16 +233,19 @@ String email = generateUniqueEmail("patient");
 
 ### Completed Flows ✅
 
-- [x] Patient Registration (E2E-REG-001 to E2E-REG-003)
-- [x] Appointment Booking (E2E-APT-001 to E2E-APT-005)
-- [x] Medical Examination (E2E-EXAM-001 to E2E-EXAM-003)
+- 13 tests
+- [x] Appointment Booking (E2E-APT-001 to E2E-APT-005) - 15 tests
+- [x] Medical Examination (E2E-EXAM-001 to E2E-EXAM-003) - 14 tests
+- [x] Billing and Payment (E2E-BILL-001 to E2E-BILL-004) - 18 tests
+- [x] Medicine Management (E2E-MED-001 to E2E-MED-003) - 18 tests
+
+**Total: 78 E2E tests implemented** ✅
 
 ### Remaining Flows (From TEST_PLAN.md) 📋
 
-- [ ] Lab Order Flow (E2E-LAB-001 to E2E-LAB-003)
-- [ ] Lab Test Results (E2E-RESULT-001 to E2E-RESULT-002)
-- [ ] Billing and Payment (E2E-BILL-001 to E2E-BILL-003)
-- [ ] Medicine Management (E2E-MED-001 to E2E-MED-002)
+- [ ] Lab Test Flow (E2E-LAB-001 to E2E-LAB-003) - ⚠️ Requires backend implementation
+  - See [LAB_TEST_IMPLEMENTATION_NOTE.md](LAB_TEST_IMPLEMENTATION_NOTE.md) for details
+- [ ] HR and Schedule Management (E2E-HR-001 to E2E-HR-004ED-002)
 - [ ] HR and Schedule (E2E-HR-001 to E2E-HR-002)
 - [ ] Report Generation (E2E-REP-001)
 - [ ] Admin Operations (E2E-ADMIN-001 to E2E-ADMIN-003)
@@ -266,7 +330,15 @@ response.then()
 - [TEST_INFRASTRUCTURE_GUIDE.md](../../docs/TEST_INFRASTRUCTURE_GUIDE.md) - Test setup guide
 - [TEST_PROGRESS_TRACKER.md](../../docs/TEST_PROGRESS_TRACKER.md) - Test completion tracking
 
----
+---78 tests implemented across 5 major flows ✅
+
+**Implemented Flows:**
+
+- ✅ Patient Registration Flow
+- ✅ Appointment Booking Flow
+- ✅ Medical Examination Flow
+- ✅ Billing and Payment Flow
+- ✅ Medicine Management Flow
 
 **Last Updated:** 2026-01-08  
 **Status:** Phase 5 E2E Tests - Patient Registration, Appointment Booking, and Medical Examination flows completed ✅
