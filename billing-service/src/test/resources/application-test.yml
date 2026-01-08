@@ -1,0 +1,56 @@
+# Test configuration for Circuit Breaker tests
+spring:
+  application:
+    name: billing-service-test
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    config:
+      enabled: false
+    discovery:
+      enabled: false
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+
+# Eureka disabled for tests
+eureka:
+  client:
+    enabled: false
+
+# Circuit Breaker test configuration - faster timeouts for testing
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 5              # Smaller window for tests
+        minimumNumberOfCalls: 5           # Match slidingWindowSize
+        failureRateThreshold: 50
+        waitDurationInOpenState: 1s       # Short for tests
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: false
+        slowCallDurationThreshold: 500ms
+        slowCallRateThreshold: 80
+    instances:
+      billingMedicalExam:
+        baseConfig: default
+      billingHr:
+        baseConfig: default
+      billingAppointment:
+        baseConfig: default
+      billingPatient:
+        baseConfig: default
+
+logging:
+  level:
+    io.github.resilience4j: DEBUG
+    com.hms.billing_service: DEBUG
