@@ -4,14 +4,14 @@
 
 | Category          | Total   | Completed | Progress |
 | ----------------- | ------- | --------- | -------- |
-| Unit Tests        | 75      | 65        | 87%      |
+| Unit Tests        | 75      | 78        | 104%     |
 | Integration Tests | 30      | 0         | 0%       |
 | API Tests         | 87      | 0         | 0%       |
 | Security Tests    | 22      | 0         | 0%       |
 | E2E Tests         | 21      | 0         | 0%       |
 | Performance Tests | 10      | 0         | 0%       |
 | Contract Tests    | 12      | 0         | 0%       |
-| **TOTAL**         | **257** | **65**    | **25%**  |
+| **TOTAL**         | **257** | **78**    | **30%**  |
 
 ---
 
@@ -125,21 +125,21 @@ Replace `[ ]` with `[x]` when you complete a test. Update the stats dashboard pe
 
 ### Common Module (13 tests)
 
-| ID         | Test Case                                  | Status | Notes |
-| ---------- | ------------------------------------------ | ------ | ----- |
-| UC-CMN-001 | `GenericController` - CRUD operations      | [ ]    |       |
-| UC-CMN-002 | `GenericService` - Service layer logic     | [ ]    |       |
-| UC-CMN-003 | `CrudService` - Base CRUD functionality    | [ ]    |       |
-| UC-CMN-004 | `GenericMapper` - Base mapping             | [ ]    |       |
-| UC-CMN-005 | `GenericHook` - Hook interface             | [ ]    |       |
-| UC-CMN-006 | `ApiException` - Exception handling        | [ ]    |       |
-| UC-CMN-007 | `GlobalExceptionHandler` - Error responses | [ ]    |       |
-| UC-CMN-008 | `ApiResponse` - Response wrapping          | [ ]    |       |
-| UC-CMN-009 | `PageResponse` - Pagination handling       | [ ]    |       |
-| UC-CMN-010 | `UserContext` - User context parsing       | [ ]    |       |
-| UC-CMN-011 | `UserContextFilter` - Header extraction    | [ ]    |       |
-| UC-CMN-012 | `FeignHelper` - Feign utilities            | [ ]    |       |
-| UC-CMN-013 | `FeignCustomErrorDecoder` - Error decoding | [ ]    |       |
+| ID         | Test Case                                  | Status | Notes                               |
+| ---------- | ------------------------------------------ | ------ | ----------------------------------- |
+| UC-CMN-001 | `GenericController` - CRUD operations      | [x]    | ✅ GenericControllerTest.java       |
+| UC-CMN-002 | `GenericService` - Service layer logic     | [x]    | ✅ GenericServiceTest.java          |
+| UC-CMN-003 | `CrudService` - Base CRUD functionality    | [x]    | ✅ CrudServiceTest.java             |
+| UC-CMN-004 | `GenericMapper` - Base mapping             | [x]    | ✅ GenericMapperTest.java           |
+| UC-CMN-005 | `GenericHook` - Hook interface             | [x]    | ✅ GenericHookTest.java             |
+| UC-CMN-006 | `ApiException` - Exception handling        | [x]    | ✅ ApiExceptionTest.java            |
+| UC-CMN-007 | `GlobalExceptionHandler` - Error responses | [x]    | ✅ GlobalExceptionHandlerTest.java  |
+| UC-CMN-008 | `ApiResponse` - Response wrapping          | [x]    | ✅ ApiResponseTest.java             |
+| UC-CMN-009 | `PageResponse` - Pagination handling       | [x]    | ✅ PageResponseTest.java            |
+| UC-CMN-010 | `UserContext` - User context parsing       | [x]    | ✅ UserContextTest.java             |
+| UC-CMN-011 | `UserContextFilter` - Header extraction    | [x]    | ✅ UserContextFilterTest.java       |
+| UC-CMN-012 | `FeignHelper` - Feign utilities            | [x]    | ✅ FeignHelperTest.java             |
+| UC-CMN-013 | `FeignCustomErrorDecoder` - Error decoding | [x]    | ✅ FeignCustomErrorDecoderTest.java |
 
 ### API Gateway (5 tests)
 
