@@ -107,10 +107,10 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
     .feed(patientOperationFeeder)
     .exec(
       http("Patient Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
         .check(jsonPath("$.data.user.id").optional.saveAs("patientId"))
     )
     .pause(patientThinkTime)
@@ -119,7 +119,7 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
         // 40% - View appointments
         40.0 -> exec(
           http("GET /appointments/by-patient (Patient)")
-            .get("/appointments/by-patient/${patientId}")
+            .get("/api/appointments/by-patient/${patientId}")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404))
         ).pause(patientThinkTime),
@@ -149,7 +149,7 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
         .pause(mediumThinkTime)
         .exec(
           http("POST /appointments (Patient Booking)")
-            .post("/appointments")
+            .post("/api/appointments")
             .header("Authorization", "Bearer ${authToken}")
             .body(StringBody(
               """{
@@ -201,17 +201,17 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
     .feed(doctorOperationFeeder)
     .exec(
       http("Doctor Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(mediumThinkTime)
     .forever {
       // View patient queue
       exec(
         http("GET /appointments/by-doctor (Queue)")
-          .get("/appointments/by-doctor/emp-doctor-${doctorIndex}")
+          .get("/api/appointments/by-doctor/emp-doctor-${doctorIndex}")
           .queryParam("status", "CHECKED_IN")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.in(200, 404))
@@ -224,7 +224,7 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
       .doIf(session => session.contains("currentPatientId")) {
         exec(
           http("GET /patients/{id} (Doctor View)")
-            .get("/patients/${currentPatientId}")
+            .get("/api/patients/${currentPatientId}")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404))
         )
@@ -315,17 +315,17 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
     .feed(nurseOperationFeeder)
     .exec(
       http("Nurse Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(nurseThinkTime)
     .forever {
       // View waiting patients queue
       exec(
         http("GET /appointments (Nurse Queue)")
-          .get("/appointments")
+          .get("/api/appointments")
           .queryParam("status", "SCHEDULED")
           .queryParam("page", "0")
           .queryParam("size", "20")
@@ -340,7 +340,7 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
       .doIf(session => session.contains("waitingAppointmentId")) {
         exec(
           http("PUT /appointments/{id}/check-in (Nurse)")
-            .put("/appointments/${waitingAppointmentId}/check-in")
+            .put("/api/appointments/${waitingAppointmentId}/check-in")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 400, 404))
         )
@@ -349,7 +349,7 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
         // View patient details
         .exec(
           http("GET /patients/{id} (Nurse)")
-            .get("/patients/${waitingPatientId}")
+            .get("/api/patients/${waitingPatientId}")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404))
         )
@@ -375,10 +375,10 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
     .feed(receptionistOperationFeeder)
     .exec(
       http("Receptionist Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(receptionistThinkTime)
     .forever {
@@ -386,7 +386,7 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
         // 30% - Patient search/registration
         30.0 -> exec(
           http("GET /patients (Search)")
-            .get("/patients")
+            .get("/api/patients")
             .queryParam("page", "0")
             .queryParam("size", "20")
             .header("Authorization", "Bearer ${authToken}")
@@ -404,7 +404,7 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
         .pause(shortThinkTime)
         .exec(
           http("GET /appointments/available-slots")
-            .get("/appointments/available-slots")
+            .get("/api/appointments/available-slots")
             .queryParam("doctorId", "emp-doctor-${receptionistIndex}")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404))
@@ -414,7 +414,7 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
         // 30% - Billing operations
         30.0 -> exec(
           http("GET /appointments (Completed)")
-            .get("/appointments")
+            .get("/api/appointments")
             .queryParam("status", "COMPLETED")
             .queryParam("page", "0")
             .queryParam("size", "10")
@@ -442,10 +442,10 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
     .feed(adminOperationFeeder)
     .exec(
       http("Admin Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(adminThinkTime)
     .forever {
@@ -482,7 +482,7 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
         // Medicine inventory
         25.0 -> exec(
           http("GET /medicines (Admin)")
-            .get("/medicines")
+            .get("/api/medicines")
             .queryParam("page", "0")
             .queryParam("size", "100")
             .header("Authorization", "Bearer ${authToken}")
@@ -500,7 +500,7 @@ class ContinuousOperationSimulation extends HmsSimulationBase {
         // Reports and analytics
         25.0 -> exec(
           http("GET /appointments/stats (Admin)")
-            .get("/appointments/stats")
+            .get("/api/appointments/stats")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404))
         )

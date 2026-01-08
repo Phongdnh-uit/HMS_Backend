@@ -79,10 +79,10 @@ class DbConnectionPoolSimulation extends HmsSimulationBase {
     // Login to get auth token
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(500.milliseconds)
     // Continuous complex operations to exhaust connection pool
@@ -90,7 +90,7 @@ class DbConnectionPoolSimulation extends HmsSimulationBase {
       // Complex Query 1: Patient list with pagination (holds connection)
       exec(
         http("GET /patients (Paginated - Complex Query)")
-          .get("/patients")
+          .get("/api/patients")
           .queryParam("page", "${staffIndex}")
           .queryParam("size", "50")
           .header("Authorization", "Bearer ${authToken}")
@@ -102,7 +102,7 @@ class DbConnectionPoolSimulation extends HmsSimulationBase {
       // Complex Query 2: Appointments with doctor JOIN
       .exec(
         http("GET /appointments (Doctor Schedule - JOIN Query)")
-          .get("/appointments/by-doctor/emp-doctor-${staffIndex}")
+          .get("/api/appointments/by-doctor/emp-doctor-${staffIndex}")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.in(200, 404, 503, 504, 429))
       )
@@ -129,10 +129,10 @@ class DbConnectionPoolSimulation extends HmsSimulationBase {
     // Login as patient
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
         .check(jsonPath("$.data.user.id").optional.saveAs("patientId"))
     )
     .pause(500.milliseconds)
@@ -148,7 +148,7 @@ class DbConnectionPoolSimulation extends HmsSimulationBase {
       })
       .exec(
         http("POST /appointments (Transactional Write)")
-          .post("/appointments")
+          .post("/api/appointments")
           .header("Authorization", "Bearer ${authToken}")
           .body(StringBody(
             """{
@@ -167,7 +167,7 @@ class DbConnectionPoolSimulation extends HmsSimulationBase {
       // Transaction 2: Update patient record (UPDATE with validation)
       .exec(
         http("PUT /patients (Update - Transaction)")
-          .put("/patients/${patientId}")
+          .put("/api/patients/${patientId}")
           .header("Authorization", "Bearer ${authToken}")
           .body(StringBody(
             """{
@@ -187,17 +187,17 @@ class DbConnectionPoolSimulation extends HmsSimulationBase {
     .feed(staffFeeder)
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(1.second)
     .forever {
       // Large dataset query - patients with full details
       exec(
         http("GET /patients (Large Dataset - 200 records)")
-          .get("/patients")
+          .get("/api/patients")
           .queryParam("page", "0")
           .queryParam("size", "200")
           .header("Authorization", "Bearer ${authToken}")
@@ -208,7 +208,7 @@ class DbConnectionPoolSimulation extends HmsSimulationBase {
       // Bulk appointments query
       .exec(
         http("GET /appointments (Bulk Query)")
-          .get("/appointments")
+          .get("/api/appointments")
           .queryParam("page", "0")
           .queryParam("size", "200")
           .header("Authorization", "Bearer ${authToken}")
@@ -233,15 +233,15 @@ class DbConnectionPoolSimulation extends HmsSimulationBase {
     .feed(staffFeeder)
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .repeat(10) {
       exec(
         http("GET /patients (Recovery Check)")
-          .get("/patients")
+          .get("/api/patients")
           .queryParam("page", "0")
           .queryParam("size", "10")
           .header("Authorization", "Bearer ${authToken}")

@@ -75,17 +75,17 @@ class MemoryUsageSimulation extends HmsSimulationBase {
     .feed(staffFeeder)
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(1.second)
     .forever {
       // Fetch large patient list (1000+ records)
       exec(
         http("GET /patients (Large Dataset - 500 records)")
-          .get("/patients")
+          .get("/api/patients")
           .queryParam("page", "0")
           .queryParam("size", "500")
           .header("Authorization", "Bearer ${authToken}")
@@ -97,7 +97,7 @@ class MemoryUsageSimulation extends HmsSimulationBase {
       // Fetch all appointments (large result set with JOINs)
       .exec(
         http("GET /appointments (Large Dataset)")
-          .get("/appointments")
+          .get("/api/appointments")
           .queryParam("page", "0")
           .queryParam("size", "300")
           .header("Authorization", "Bearer ${authToken}")
@@ -109,7 +109,7 @@ class MemoryUsageSimulation extends HmsSimulationBase {
       .repeat(3, "fetchIndex") {
         exec(
           http("GET /patients (Sequential Fetch ${fetchIndex})")
-            .get("/patients")
+            .get("/api/patients")
             .queryParam("page", "${fetchIndex}")
             .queryParam("size", "200")
             .header("Authorization", "Bearer ${authToken}")
@@ -128,10 +128,10 @@ class MemoryUsageSimulation extends HmsSimulationBase {
     .feed(patientLargeDataFeeder)
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
         .check(jsonPath("$.data.user.id").optional.saveAs("patientId"))
     )
     .pause(1.second)
@@ -139,7 +139,7 @@ class MemoryUsageSimulation extends HmsSimulationBase {
       // Fetch patient details
       exec(
         http("GET /patients/{id} (Full Details)")
-          .get("/patients/${patientIndex}")
+          .get("/api/patients/${patientIndex}")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.in(200, 404, 500, 503))
       )
@@ -157,7 +157,7 @@ class MemoryUsageSimulation extends HmsSimulationBase {
       // Fetch all appointments for patient
       .exec(
         http("GET /appointments/by-patient (History)")
-          .get("/appointments/by-patient/${patientId}")
+          .get("/api/appointments/by-patient/${patientId}")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.in(200, 404, 500, 503))
       )
@@ -182,17 +182,17 @@ class MemoryUsageSimulation extends HmsSimulationBase {
     .feed(staffFeeder)
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(1.second)
     .forever {
       // Generate appointment statistics report
       exec(
         http("GET /appointments/stats (Report Data)")
-          .get("/appointments/stats")
+          .get("/api/appointments/stats")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.in(200, 404, 500, 503))
       )
@@ -210,7 +210,7 @@ class MemoryUsageSimulation extends HmsSimulationBase {
       // Bulk patient export (simulated)
       .exec(
         http("GET /patients (Export - Large)")
-          .get("/patients")
+          .get("/api/patients")
           .queryParam("page", "0")
           .queryParam("size", "1000")
           .header("Authorization", "Bearer ${authToken}")
@@ -227,10 +227,10 @@ class MemoryUsageSimulation extends HmsSimulationBase {
     .feed(staffFeeder)
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(1.second)
     .forever {
@@ -246,7 +246,7 @@ class MemoryUsageSimulation extends HmsSimulationBase {
       })
       .exec(
         http("POST /appointments (Object Creation)")
-          .post("/appointments")
+          .post("/api/appointments")
           .header("Authorization", "Bearer ${authToken}")
           .body(StringBody(
             """{
@@ -266,7 +266,7 @@ class MemoryUsageSimulation extends HmsSimulationBase {
       .doIf(session => session.contains("newAppointmentId")) {
         exec(
           http("GET /appointments/{id} (Verify Creation)")
-            .get("/appointments/${newAppointmentId}")
+            .get("/api/appointments/${newAppointmentId}")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404, 500, 503))
         )
@@ -277,7 +277,7 @@ class MemoryUsageSimulation extends HmsSimulationBase {
       .doIf(session => session.contains("newAppointmentId")) {
         exec(
           http("PUT /appointments/{id}/cancel (Allow GC)")
-            .put("/appointments/${newAppointmentId}/cancel")
+            .put("/api/appointments/${newAppointmentId}/cancel")
             .header("Authorization", "Bearer ${authToken}")
             .body(StringBody("""{"reason": "Memory test cleanup"}""")).asJson
             .check(status.in(200, 400, 404, 500, 503))
@@ -293,17 +293,17 @@ class MemoryUsageSimulation extends HmsSimulationBase {
     .feed(staffFeeder)
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(1.second)
     .forever {
       // Fetch all medicines
       exec(
         http("GET /medicines (Full List)")
-          .get("/medicines")
+          .get("/api/medicines")
           .queryParam("page", "0")
           .queryParam("size", "500")
           .header("Authorization", "Bearer ${authToken}")
@@ -323,7 +323,7 @@ class MemoryUsageSimulation extends HmsSimulationBase {
       // Fetch low-stock medicines (filtered query)
       .exec(
         http("GET /medicines/low-stock")
-          .get("/medicines/low-stock")
+          .get("/api/medicines/low-stock")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.in(200, 404, 500, 503))
       )

@@ -77,10 +77,10 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
     .feed(mixedUserFeeder)
     .exec(
       http("Login (Baseline)")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.in(200, 401, 503, 504)) // Accept degraded responses
-        .check(jsonPath("$.data.token").optional.saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").optional.saveAs("authToken"))
     )
     .pause(1.second)
     .doIf(session => session.contains("authToken")) {
@@ -89,7 +89,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
         randomSwitch(
           30.0 -> exec(
             http("GET /patients (Baseline)")
-              .get("/patients")
+              .get("/api/patients")
               .queryParam("page", "0")
               .queryParam("size", "20")
               .header("Authorization", "Bearer ${authToken}")
@@ -97,7 +97,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
           ),
           25.0 -> exec(
             http("GET /appointments (Baseline)")
-              .get("/appointments")
+              .get("/api/appointments")
               .queryParam("page", "0")
               .queryParam("size", "20")
               .header("Authorization", "Bearer ${authToken}")
@@ -111,7 +111,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
           ),
           15.0 -> exec(
             http("GET /medicines (Baseline)")
-              .get("/medicines")
+              .get("/api/medicines")
               .queryParam("page", "0")
               .queryParam("size", "20")
               .header("Authorization", "Bearer ${authToken}")
@@ -138,10 +138,10 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
     .feed(mixedUserFeeder)
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.in(200, 401, 503, 504))
-        .check(jsonPath("$.data.token").optional.saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").optional.saveAs("authToken"))
     )
     .pause(500.milliseconds)
     .doIf(session => session.contains("authToken")) {
@@ -149,7 +149,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
         // Rapid patient queries to trigger circuit breaker
         exec(
           http("GET /patients/{id} (Circuit Breaker Test)")
-            .get("/patients/${userIndex}")
+            .get("/api/patients/${userIndex}")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404, 500, 502, 503, 504))
             .check(responseTimeInMillis.saveAs("patientQueryTime"))
@@ -167,7 +167,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
         // Additional patient operations
         .exec(
           http("GET /patients (List)")
-            .get("/patients")
+            .get("/api/patients")
             .queryParam("page", "0")
             .queryParam("size", "50")
             .header("Authorization", "Bearer ${authToken}")
@@ -185,10 +185,10 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
     .feed(mixedUserFeeder)
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.in(200, 401, 503, 504))
-        .check(jsonPath("$.data.token").optional.saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").optional.saveAs("authToken"))
     )
     .pause(500.milliseconds)
     .doIf(session => session.contains("authToken")) {
@@ -212,7 +212,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
         })
         .exec(
           http("POST /appointments (Cross-Service Write)")
-            .post("/appointments")
+            .post("/api/appointments")
             .header("Authorization", "Bearer ${authToken}")
             .body(StringBody(
               """{
@@ -228,7 +228,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
         // Fetch doctor's appointments (requires HR lookup)
         .exec(
           http("GET /appointments/by-doctor (Cross-Service Read)")
-            .get("/appointments/by-doctor/${selectedDoctorId}")
+            .get("/api/appointments/by-doctor/${selectedDoctorId}")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404, 500, 502, 503, 504))
         )
@@ -243,10 +243,10 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
     .feed(mixedUserFeeder)
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.in(200, 401, 503, 504))
-        .check(jsonPath("$.data.token").optional.saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").optional.saveAs("authToken"))
     )
     .pause(500.milliseconds)
     .doIf(session => session.contains("authToken")) {
@@ -258,7 +258,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
         })
         .exec(
           http("POST /patients (DB Transaction)")
-            .post("/patients")
+            .post("/api/patients")
             .header("Authorization", "Bearer ${authToken}")
             .body(StringBody(
               """{
@@ -277,7 +277,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
         .doIf(session => session.contains("newPatientId")) {
           exec(
             http("GET /patients/{id} (Consistency Check)")
-              .get("/patients/${newPatientId}")
+              .get("/api/patients/${newPatientId}")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404, 500, 502, 503, 504))
           )
@@ -287,7 +287,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
         // Bulk read (connection pool stress)
         .exec(
           http("GET /patients (Bulk Read)")
-            .get("/patients")
+            .get("/api/patients")
             .queryParam("page", "0")
             .queryParam("size", "100")
             .header("Authorization", "Bearer ${authToken}")
@@ -304,10 +304,10 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
     .feed(mixedUserFeeder)
     .exec(
       http("Login (Gateway)")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.in(200, 401, 429, 503, 504)) // 429 = rate limited
-        .check(jsonPath("$.data.token").optional.saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").optional.saveAs("authToken"))
     )
     .pause(200.milliseconds)
     .doIf(session => session.contains("authToken")) {
@@ -316,7 +316,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
         repeat(5) {
           exec(
             http("GET /auth/me (Gateway Pressure)")
-              .get("/auth/me")
+              .get("/api/auth/me")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 429, 500, 502, 503, 504))
           )
@@ -327,7 +327,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
         // Mixed service requests through gateway
         .exec(
           http("GET /patients (Gateway Route)")
-            .get("/patients")
+            .get("/api/patients")
             .queryParam("page", "0")
             .queryParam("size", "10")
             .header("Authorization", "Bearer ${authToken}")
@@ -337,7 +337,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
         
         .exec(
           http("GET /appointments (Gateway Route)")
-            .get("/appointments")
+            .get("/api/appointments")
             .queryParam("page", "0")
             .queryParam("size", "10")
             .header("Authorization", "Bearer ${authToken}")
@@ -354,17 +354,17 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
     .feed(mixedUserFeeder)
     .exec(
       http("Login (Recovery)")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200)) // Expect success during recovery
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(1.second)
     .repeat(20) {
       // Verify all services are responding normally
       exec(
         http("GET /patients (Recovery Verify)")
-          .get("/patients")
+          .get("/api/patients")
           .queryParam("page", "0")
           .queryParam("size", "10")
           .header("Authorization", "Bearer ${authToken}")
@@ -375,7 +375,7 @@ class ServiceRecoverySimulation extends HmsSimulationBase {
       
       .exec(
         http("GET /appointments (Recovery Verify)")
-          .get("/appointments")
+          .get("/api/appointments")
           .queryParam("page", "0")
           .queryParam("size", "10")
           .header("Authorization", "Bearer ${authToken}")

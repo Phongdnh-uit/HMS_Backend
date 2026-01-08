@@ -69,10 +69,10 @@ class ConcurrentBookingsSimulation extends HmsSimulationBase {
     // Step 1: Login
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
         .check(jsonPath("$.data.user.id").optional.saveAs("patientId"))
     )
     .pause(500.milliseconds, 1.second)
@@ -90,7 +90,7 @@ class ConcurrentBookingsSimulation extends HmsSimulationBase {
     // Step 3: Get available slots for the doctor
     .exec(
       http("GET /appointments/available-slots")
-        .get("/appointments/available-slots")
+        .get("/api/appointments/available-slots")
         .queryParam("doctorId", "${doctorId}")
         .header("Authorization", "Bearer ${authToken}")
         .check(status.in(200, 404))
@@ -111,7 +111,7 @@ class ConcurrentBookingsSimulation extends HmsSimulationBase {
     })
     .exec(
       http("POST /appointments (Book)")
-        .post("/appointments")
+        .post("/api/appointments")
         .header("Authorization", "Bearer ${authToken}")
         .body(StringBody(
           """{
@@ -133,7 +133,7 @@ class ConcurrentBookingsSimulation extends HmsSimulationBase {
     .doIf(session => session.contains("appointmentId")) {
       exec(
         http("GET /appointments/by-patient/{id} (Verify)")
-          .get("/appointments/by-patient/${patientId}")
+          .get("/api/appointments/by-patient/${patientId}")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.is(200))
           .check(jsonPath("$.data[*].id").findAll.optional.saveAs("patientAppointments"))
@@ -145,10 +145,10 @@ class ConcurrentBookingsSimulation extends HmsSimulationBase {
     .feed(bookingFeeder)
     .exec(
       http("Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(mediumThinkTime)
     .repeat(3) { // Each user attempts 3 bookings
@@ -171,7 +171,7 @@ class ConcurrentBookingsSimulation extends HmsSimulationBase {
       .pause(shortThinkTime)
       .exec(
         http("POST /appointments")
-          .post("/appointments")
+          .post("/api/appointments")
           .header("Authorization", "Bearer ${authToken}")
           .body(StringBody(
             """{

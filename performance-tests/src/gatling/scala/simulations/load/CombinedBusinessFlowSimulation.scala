@@ -38,10 +38,10 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
     // Login
     .exec(
       http("Patient Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(patientThinkTime)
     // Get available doctors
@@ -64,7 +64,7 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
     // Get available slots
     .exec(
       http("Get Available Slots")
-        .get("/appointments/available-slots?doctorId=${selectedDoctorId}")
+        .get("/api/appointments/available-slots?doctorId=${selectedDoctorId}")
         .header("Authorization", "Bearer ${authToken}")
         .check(status.in(200, 404))
     )
@@ -76,7 +76,7 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
     })
     .exec(
       http("View My Appointments")
-        .get("/appointments/by-patient/${patientId}")
+        .get("/api/appointments/by-patient/${patientId}")
         .header("Authorization", "Bearer ${authToken}")
         .check(status.in(200, 404))
     )
@@ -85,7 +85,7 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
     .repeat(5) {
       exec(
         http("View Patient Profile")
-          .get("/patients/me")
+          .get("/api/patients/me")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.in(200, 404))
       )
@@ -97,10 +97,10 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
     .feed(patientFeeder)
     .exec(
       http("Patient Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(patientThinkTime)
     .repeat(10) {
@@ -127,10 +127,10 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
     // Login
     .exec(
       http("Doctor Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
         .check(jsonPath("$.data.user.id").optional.saveAs("doctorUserId"))
     )
     .pause(doctorThinkTime)
@@ -139,7 +139,7 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
       exec(
         // Get appointment queue
         http("Get Appointment Queue")
-          .get("/appointments/by-doctor/${doctorIndex}?status=CHECKED_IN")
+          .get("/api/appointments/by-doctor/${doctorIndex}?status=CHECKED_IN")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.in(200, 404))
           .check(jsonPath("$.data[0].id").optional.saveAs("currentAppointmentId"))
@@ -150,7 +150,7 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
       .doIf(session => session.contains("currentPatientId")) {
         exec(
           http("Get Patient Details")
-            .get("/patients/${currentPatientId}")
+            .get("/api/patients/${currentPatientId}")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404))
         )
@@ -181,10 +181,10 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
     // Login
     .exec(
       http("Nurse Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(nurseThinkTime)
     // Main nurse workflow loop
@@ -192,7 +192,7 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
       exec(
         // Get waiting queue
         http("Get Waiting Queue")
-          .get("/appointments/queue")
+          .get("/api/appointments/queue")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.in(200, 404))
           .check(jsonPath("$.data[0].id").optional.saveAs("queueAppointmentId"))
@@ -201,7 +201,7 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
       // Get patient list
       .exec(
         http("Get Patient List")
-          .get("/patients?page=0&size=10")
+          .get("/api/patients?page=0&size=10")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.in(200, 404))
           .check(jsonPath("$.data.content[0].id").optional.saveAs("nursePatientId"))
@@ -211,7 +211,7 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
       .doIf(session => session.contains("nursePatientId")) {
         exec(
           http("View Patient for Vitals")
-            .get("/patients/${nursePatientId}")
+            .get("/api/patients/${nursePatientId}")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404))
         )
@@ -234,10 +234,10 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
     // Login
     .exec(
       http("Receptionist Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(receptionistThinkTime)
     // Main receptionist workflow
@@ -246,7 +246,7 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
         30.0 -> // Walk-in lookup
           exec(
             http("Search Patient by Phone")
-              .get("/patients?search=090")
+              .get("/api/patients?search=090")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           )
@@ -254,7 +254,7 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
         40.0 -> // Appointment management
           exec(
             http("Get Today's Appointments")
-              .get("/appointments?page=0&size=20")
+              .get("/api/appointments?page=0&size=20")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           )
@@ -269,7 +269,7 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
         30.0 -> // Billing lookup
           exec(
             http("Get Completed Appointments")
-              .get("/appointments?status=COMPLETED")
+              .get("/api/appointments?status=COMPLETED")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           )
@@ -291,10 +291,10 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
     // Login
     .exec(
       http("Admin Login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(adminThinkTime)
     // Admin workflow with various management tasks
@@ -333,7 +333,7 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
         25.0 -> // Medicine inventory
           exec(
             http("Get Low Stock Medicines")
-              .get("/medicines/low-stock")
+              .get("/api/medicines/low-stock")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           )
@@ -348,14 +348,14 @@ class CombinedBusinessFlowSimulation extends HmsSimulationBase {
         25.0 -> // Reports & Analytics
           exec(
             http("Get Appointment Stats")
-              .get("/appointments/stats")
+              .get("/api/appointments/stats")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           )
           .pause(adminThinkTime)
           .exec(
             http("Get Patient List Report")
-              .get("/patients?page=0&size=100")
+              .get("/api/patients?page=0&size=100")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           )

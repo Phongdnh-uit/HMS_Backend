@@ -43,23 +43,23 @@ class GatewayRoutingSimulation extends HmsSimulationBase {
     .forever {
       exec(
         http("POST /auth/login")
-          .post("/auth/login")
+          .post("/api/auth/login")
           .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
           .check(status.is(200))
-          .check(jsonPath("$.data.token").saveAs("authToken"))
+          .check(jsonPath("$.data.accessToken").saveAs("authToken"))
           .check(responseTimeInMillis.saveAs("loginTime"))
       )
       .pause(mediumThinkTime)
       .exec(
         http("GET /auth/me")
-          .get("/auth/me")
+          .get("/api/auth/me")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.is(200))
       )
       .pause(mediumThinkTime)
       .exec(
         http("POST /auth/refresh")
-          .post("/auth/refresh")
+          .post("/api/auth/refresh")
           .header("Authorization", "Bearer ${authToken}")
           .body(StringBody("""{"refreshToken": "test-refresh-token"}""")).asJson
           .check(status.in(200, 400, 401))
@@ -72,10 +72,10 @@ class GatewayRoutingSimulation extends HmsSimulationBase {
     .feed(mixedUserFeeder)
     .exec(
       http("Login for Patient Ops")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(shortThinkTime)
     .forever {
@@ -83,7 +83,7 @@ class GatewayRoutingSimulation extends HmsSimulationBase {
         40.0 ->
           exec(
             http("GET /patients (List)")
-              .get("/patients")
+              .get("/api/patients")
               .queryParam("page", "0")
               .queryParam("size", "20")
               .header("Authorization", "Bearer ${authToken}")
@@ -95,14 +95,14 @@ class GatewayRoutingSimulation extends HmsSimulationBase {
           })
           .exec(
             http("GET /patients/{id}")
-              .get("/patients/patient-${patientIdx}")
+              .get("/api/patients/patient-${patientIdx}")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           ),
         30.0 ->
           exec(
             http("GET /patients/me")
-              .get("/patients/me")
+              .get("/api/patients/me")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           )
@@ -115,10 +115,10 @@ class GatewayRoutingSimulation extends HmsSimulationBase {
     .feed(mixedUserFeeder)
     .exec(
       http("Login for Appointment Ops")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(shortThinkTime)
     .forever {
@@ -126,7 +126,7 @@ class GatewayRoutingSimulation extends HmsSimulationBase {
         35.0 ->
           exec(
             http("GET /appointments (List)")
-              .get("/appointments")
+              .get("/api/appointments")
               .queryParam("page", "0")
               .queryParam("size", "20")
               .header("Authorization", "Bearer ${authToken}")
@@ -135,21 +135,21 @@ class GatewayRoutingSimulation extends HmsSimulationBase {
         25.0 ->
           exec(
             http("GET /appointments/queue")
-              .get("/appointments/queue")
+              .get("/api/appointments/queue")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           ),
         25.0 ->
           exec(
             http("GET /appointments/available-slots")
-              .get("/appointments/available-slots")
+              .get("/api/appointments/available-slots")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           ),
         15.0 ->
           exec(
             http("GET /appointments/stats")
-              .get("/appointments/stats")
+              .get("/api/appointments/stats")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           )
@@ -162,10 +162,10 @@ class GatewayRoutingSimulation extends HmsSimulationBase {
     .feed(mixedUserFeeder)
     .exec(
       http("Login for Exam Ops")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(shortThinkTime)
     .forever {
@@ -206,10 +206,10 @@ class GatewayRoutingSimulation extends HmsSimulationBase {
     .feed(mixedUserFeeder)
     .exec(
       http("Login for HR Ops")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(shortThinkTime)
     .forever {
@@ -246,10 +246,10 @@ class GatewayRoutingSimulation extends HmsSimulationBase {
     .feed(mixedUserFeeder)
     .exec(
       http("Login for Medicine Ops")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(shortThinkTime)
     .forever {
@@ -257,7 +257,7 @@ class GatewayRoutingSimulation extends HmsSimulationBase {
         40.0 ->
           exec(
             http("GET /medicines (List)")
-              .get("/medicines")
+              .get("/api/medicines")
               .queryParam("page", "0")
               .queryParam("size", "20")
               .header("Authorization", "Bearer ${authToken}")
@@ -266,7 +266,7 @@ class GatewayRoutingSimulation extends HmsSimulationBase {
         30.0 ->
           exec(
             http("GET /medicines/low-stock")
-              .get("/medicines/low-stock")
+              .get("/api/medicines/low-stock")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           ),

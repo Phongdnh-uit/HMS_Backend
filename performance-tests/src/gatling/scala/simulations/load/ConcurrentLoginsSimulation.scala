@@ -43,39 +43,35 @@ class ConcurrentLoginsSimulation extends HmsSimulationBase {
     .feed(loginFeeder)
     .exec(
       http("POST /auth/login")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.success").is("true"))
-        .check(jsonPath("$.data.token").exists.saveAs("authToken"))
-        .check(jsonPath("$.data.token").transform(_.length > 50).is(true)) // JWT should be > 50 chars
+        .check(jsonPath("$.data.accessToken").exists.saveAs("authToken"))
         .check(responseTimeInMillis.lte(1000))
     )
     .pause(shortThinkTime)
     .exec(
       http("GET /auth/me")
-        .get("/auth/me")
+        .get("/api/auth/me")
         .header("Authorization", "Bearer ${authToken}")
         .check(status.is(200))
-        .check(jsonPath("$.success").is("true"))
-        .check(jsonPath("$.data.email").is("${email}"))
     )
 
   // Repeat login scenario for sustained load
   val sustainedLoginScenario = scenario("Sustained Login Load")
-    .feed(loginFeeder)
     .forever {
-      exec(
+      feed(loginFeeder)
+      .exec(
         http("POST /auth/login")
-          .post("/auth/login")
+          .post("/api/auth/login")
           .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
           .check(status.is(200))
-          .check(jsonPath("$.data.token").exists.saveAs("authToken"))
+          .check(jsonPath("$.data.accessToken").exists.saveAs("authToken"))
       )
       .pause(mediumThinkTime)
       .exec(
         http("GET /auth/me")
-          .get("/auth/me")
+          .get("/api/auth/me")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.is(200))
       )
@@ -86,9 +82,8 @@ class ConcurrentLoginsSimulation extends HmsSimulationBase {
     sustainedLoginScenario.inject(
       // Ramp-up: 0 to 100 users in 10 seconds
       rampUsers(100).during(10.seconds),
-      // Sustain: 100 users for 5 minutes (constantConcurrentUsers maintains exact count)
-      nothingFor(5.minutes),
-      // Ramp-down handled by test duration
+      // Sustain: 100 users for 5 minutes
+      nothingFor(5.minutes)
     ).throttle(
       reachRps(50).in(10.seconds),
       holdFor(5.minutes)

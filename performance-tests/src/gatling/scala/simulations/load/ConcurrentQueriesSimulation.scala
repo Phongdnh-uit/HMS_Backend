@@ -55,10 +55,10 @@ class ConcurrentQueriesSimulation extends HmsSimulationBase {
   // Login once scenario - shared across all queries
   val loginOnce = exec(
     http("Staff Login")
-      .post("/auth/login")
+      .post("/api/auth/login")
       .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
       .check(status.is(200))
-      .check(jsonPath("$.data.token").saveAs("authToken"))
+      .check(jsonPath("$.data.accessToken").saveAs("authToken"))
   )
 
   // 30% - Paginated Patient List Queries
@@ -71,7 +71,7 @@ class ConcurrentQueriesSimulation extends HmsSimulationBase {
       feed(pageFeeder)
       .exec(
         http("GET /patients (Paginated)")
-          .get("/patients")
+          .get("/api/patients")
           .queryParam("page", "${pageNum}")
           .queryParam("size", "20")
           .header("Authorization", "Bearer ${authToken}")
@@ -92,7 +92,7 @@ class ConcurrentQueriesSimulation extends HmsSimulationBase {
       feed(statusFeeder)
       .exec(
         http("GET /appointments (Filtered)")
-          .get("/appointments")
+          .get("/api/appointments")
           .queryParam("status", "${appointmentStatus}")
           .queryParam("page", "0")
           .queryParam("size", "20")
@@ -129,7 +129,7 @@ class ConcurrentQueriesSimulation extends HmsSimulationBase {
       feed(patientIdFeeder)
       .exec(
         http("GET /patients/{id}")
-          .get("/patients/patient-${randomPatientIndex}")
+          .get("/api/patients/patient-${randomPatientIndex}")
           .header("Authorization", "Bearer ${authToken}")
           .check(status.in(200, 404))
           .check(responseTimeInMillis.lte(300))
@@ -166,7 +166,7 @@ class ConcurrentQueriesSimulation extends HmsSimulationBase {
           feed(pageFeeder)
           .exec(
             http("GET /patients (List)")
-              .get("/patients")
+              .get("/api/patients")
               .queryParam("page", "${pageNum}")
               .queryParam("size", "20")
               .header("Authorization", "Bearer ${authToken}")
@@ -176,7 +176,7 @@ class ConcurrentQueriesSimulation extends HmsSimulationBase {
           feed(statusFeeder)
           .exec(
             http("GET /appointments (Filtered)")
-              .get("/appointments")
+              .get("/api/appointments")
               .queryParam("status", "${appointmentStatus}")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
@@ -193,7 +193,7 @@ class ConcurrentQueriesSimulation extends HmsSimulationBase {
           feed(patientIdFeeder)
           .exec(
             http("GET /patients/{id}")
-              .get("/patients/patient-${randomPatientIndex}")
+              .get("/api/patients/patient-${randomPatientIndex}")
               .header("Authorization", "Bearer ${authToken}")
               .check(status.in(200, 404))
           ),

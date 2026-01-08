@@ -92,10 +92,10 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
     .feed(patientLeakTestFeeder)
     .exec(
       http("Login (Appointment Cycle)")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
         .check(jsonPath("$.data.user.id").optional.saveAs("patientId"))
     )
     .pause(1.second)
@@ -111,7 +111,7 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
       // Create appointment (allocates objects)
       .exec(
         http("POST /appointments (Leak Test Create)")
-          .post("/appointments")
+          .post("/api/appointments")
           .header("Authorization", "Bearer ${authToken}")
           .body(StringBody(
             """{
@@ -131,7 +131,7 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
       .doIf(session => session.contains("createdAppointmentId")) {
         exec(
           http("GET /appointments/{id} (Leak Test Read)")
-            .get("/appointments/${createdAppointmentId}")
+            .get("/api/appointments/${createdAppointmentId}")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404))
         )
@@ -142,7 +142,7 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
       .doIf(session => session.contains("createdAppointmentId")) {
         exec(
           http("PUT /appointments/{id}/cancel (Leak Test Delete)")
-            .put("/appointments/${createdAppointmentId}/cancel")
+            .put("/api/appointments/${createdAppointmentId}/cancel")
             .header("Authorization", "Bearer ${authToken}")
             .body(StringBody("""{"reason": "Memory leak test cleanup"}""")).asJson
             .check(status.in(200, 400, 404))
@@ -159,10 +159,10 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
     .feed(staffLeakTestFeeder)
     .exec(
       http("Login (Patient Churn)")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(1.second)
     // Repeat read/update cycle many times
@@ -170,7 +170,7 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
       // Fetch patient list (large object graph)
       exec(
         http("GET /patients (Churn - Large Fetch)")
-          .get("/patients")
+          .get("/api/patients")
           .queryParam("page", "${churnIndex}")
           .queryParam("size", "50")
           .header("Authorization", "Bearer ${authToken}")
@@ -187,7 +187,7 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
         })
         .exec(
           http("PUT /patients/{id} (Churn - Update)")
-            .put("/patients/${churnPatientId}")
+            .put("/api/patients/${churnPatientId}")
             .header("Authorization", "Bearer ${authToken}")
             .body(StringBody(
               """{
@@ -207,10 +207,10 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
     .feed(staffLeakTestFeeder)
     .exec(
       http("Login (Exam Cycle)")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(1.second)
     .repeat(30, "examCycleIndex") {
@@ -255,17 +255,17 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
     .feed(staffLeakTestFeeder)
     .exec(
       http("Login (Invoice)")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(1.second)
     .repeat(40, "invoiceCycleIndex") {
       // Fetch completed appointments for invoicing
       exec(
         http("GET /appointments (For Invoice)")
-          .get("/appointments")
+          .get("/api/appointments")
           .queryParam("status", "COMPLETED")
           .queryParam("page", "0")
           .queryParam("size", "10")
@@ -329,17 +329,17 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
     .feed(staffLeakTestFeeder)
     .exec(
       http("Login (Large Fetch)")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(1.second)
     .repeat(20, "largeFetchIndex") {
       // Fetch large patient list (tests pagination memory)
       exec(
         http("GET /patients (Large - 500)")
-          .get("/patients")
+          .get("/api/patients")
           .queryParam("page", "0")
           .queryParam("size", "500")
           .header("Authorization", "Bearer ${authToken}")
@@ -350,7 +350,7 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
       // Fetch large appointment list
       .exec(
         http("GET /appointments (Large - 300)")
-          .get("/appointments")
+          .get("/api/appointments")
           .queryParam("page", "0")
           .queryParam("size", "300")
           .header("Authorization", "Bearer ${authToken}")
@@ -362,7 +362,7 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
       .repeat(5, "pageIndex") {
         exec(
           http("GET /patients (Sequential Page ${pageIndex})")
-            .get("/patients")
+            .get("/api/patients")
             .queryParam("page", "${pageIndex}")
             .queryParam("size", "100")
             .header("Authorization", "Bearer ${authToken}")
@@ -382,17 +382,17 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
       // Login (creates session objects, JWT)
       exec(
         http("POST /auth/login (Session Create)")
-          .post("/auth/login")
+          .post("/api/auth/login")
           .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
           .check(status.is(200))
-          .check(jsonPath("$.data.token").saveAs("sessionToken"))
+          .check(jsonPath("$.data.accessToken").saveAs("sessionToken"))
       )
       .pause(500.milliseconds)
       
       // Use token (validates JWT, accesses user context)
       .exec(
         http("GET /auth/me (Session Use)")
-          .get("/auth/me")
+          .get("/api/auth/me")
           .header("Authorization", "Bearer ${sessionToken}")
           .check(status.is(200))
       )
@@ -401,7 +401,7 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
       // Make authenticated request (UserContext created/destroyed)
       .exec(
         http("GET /patients (Authenticated)")
-          .get("/patients")
+          .get("/api/patients")
           .queryParam("page", "0")
           .queryParam("size", "10")
           .header("Authorization", "Bearer ${sessionToken}")
@@ -412,7 +412,7 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
       // Another login (should not accumulate sessions)
       .exec(
         http("POST /auth/login (Session Refresh)")
-          .post("/auth/login")
+          .post("/api/auth/login")
           .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
           .check(status.is(200))
       )
@@ -426,10 +426,10 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
     .feed(staffLeakTestFeeder)
     .exec(
       http("Login (Cache Test)")
-        .post("/auth/login")
+        .post("/api/auth/login")
         .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
         .check(status.is(200))
-        .check(jsonPath("$.data.token").saveAs("authToken"))
+        .check(jsonPath("$.data.accessToken").saveAs("authToken"))
     )
     .pause(1.second)
     .repeat(30, "cacheIndex") {
@@ -441,7 +441,7 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
         })
         .exec(
           http("GET /patients/{id} (Cache Miss)")
-            .get("/patients/${cachePatientId}")
+            .get("/api/patients/${cachePatientId}")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404))
         )
@@ -453,7 +453,7 @@ class MemoryLeakDetectionSimulation extends HmsSimulationBase {
       .repeat(5, "hitIndex") {
         exec(
           http("GET /patients/1 (Cache Hit)")
-            .get("/patients/1")
+            .get("/api/patients/1")
             .header("Authorization", "Bearer ${authToken}")
             .check(status.in(200, 404))
         )

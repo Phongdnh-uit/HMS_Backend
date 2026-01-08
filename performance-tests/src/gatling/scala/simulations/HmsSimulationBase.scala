@@ -87,11 +87,11 @@ trait HmsSimulationBase extends Simulation {
   // Login request that saves the JWT token
   def login = exec(
     http("Login")
-      .post("/auth/login")
+      .post("/api/auth/login")
       .body(StringBody("""{"email": "${email}", "password": "${password}"}""")).asJson
       .check(status.is(200))
-      .check(jsonPath("$.data.token").saveAs("authToken"))
-      .check(jsonPath("$.data.user.id").optional.saveAs("userId"))
+      .check(jsonPath("$.data.accessToken").saveAs("authToken"))
+      .check(jsonPath("$.data.account.id").optional.saveAs("userId"))
   )
 
   // Authenticated request helper
@@ -100,7 +100,7 @@ trait HmsSimulationBase extends Simulation {
   // Get current user profile
   def getCurrentUser = exec(
     http("Get Current User")
-      .get("/auth/me")
+      .get("/api/auth/me")
       .headers(authHeader)
       .check(status.is(200))
   )
