@@ -1,6 +1,7 @@
 package com.hms.appointment_service.services;
 
 import com.hms.appointment_service.clients.HrClient;
+import com.hms.appointment_service.clients.PatientClient;
 import com.hms.appointment_service.constants.AppointmentStatus;
 import com.hms.appointment_service.dtos.appointment.AppointmentStatsResponse;
 import com.hms.appointment_service.dtos.appointment.AppointmentResponse;
@@ -39,7 +40,9 @@ public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final HrClient hrClient;
+    private final PatientClient patientClient;
     private final AppointmentMapper appointmentMapper;
+    private final QueueService queueService;
 
     /**
      * Get available time slots for a doctor on a specific date.
@@ -280,7 +283,8 @@ public class AppointmentService {
                     "Appointment is already completed");
         }
 
-        if (appointment.getStatus() != AppointmentStatus.SCHEDULED) {
+        if (appointment.getStatus() != AppointmentStatus.SCHEDULED &&
+            appointment.getStatus() != AppointmentStatus.IN_PROGRESS) {
             throw new ApiException(
                     ErrorCode.OPERATION_NOT_ALLOWED,
                     "Cannot complete appointment with status: " + appointment.getStatus());
@@ -380,7 +384,14 @@ public class AppointmentService {
                 } else if (row[0] instanceof LocalDate) {
                     date = (LocalDate) row[0];
                 } else {
-                    date = LocalDate.parse(row[0].toString().substring(0, 10));
+                    String dateStr = row[0].toString();
+                    // Safely parse date - handle both "2026-01-01" and "2026-01-01T..." formats
+                    if (dateStr.length() >= 10) {
+                        date = LocalDate.parse(dateStr.substring(0, 10));
+                    } else {
+                        // Try parsing the whole string if it's shorter
+                        date = LocalDate.parse(dateStr);
+                    }
                 }
             }
             int count = ((Number) row[1]).intValue();
@@ -404,6 +415,139 @@ public class AppointmentService {
                 .averagePerDay(averagePerDay)
                 .generatedAt(Instant.now())
                 .build();
+    }
+    
+    // ========== Walk-in Queue Methods ==========
+    
+    /**
+     * Register a walk-in patient.
+     * Creates an immediate appointment with queue number.
+     *
+     * @param request Walk-in registration request
+     * @return The created appointment with queue number
+     */
+    @Transactional
+    public AppointmentResponse registerWalkIn(com.hms.appointment_service.dtos.WalkInRequest request) {
+        log.info("Registering walk-in patient: patientId={}, doctorId={}", 
+                request.getPatientId(), request.getDoctorId());
+        
+        // Get next queue number
+        int queueNumber = queueService.getNextQueueNumber();
+        
+        // Calculate priority
+        int priority = queueService.calculatePriority(request, 
+                com.hms.appointment_service.constants.AppointmentType.WALK_IN);
+        
+        // Create appointment
+        Appointment appointment = new Appointment();
+        appointment.setPatientId(request.getPatientId());
+        appointment.setDoctorId(request.getDoctorId());
+        appointment.setReason(request.getReason());
+        appointment.setAppointmentTime(Instant.now());
+        appointment.setStatus(AppointmentStatus.SCHEDULED);
+        appointment.setType(com.hms.appointment_service.constants.AppointmentType.WALK_IN);
+        
+        // Set queue fields
+        appointment.setQueueNumber(queueNumber);
+        appointment.setPriority(priority);
+        appointment.setPriorityReason(request.getPriorityReason());
+        
+        // Fetch patient name from patient-service
+        try {
+            var patientResponse = FeignHelper.safeCall(() -> patientClient.getPatientById(request.getPatientId()));
+            if (patientResponse != null && patientResponse.getData() != null) {
+                appointment.setPatientName(patientResponse.getData().fullName());
+                log.debug("Fetched patient name: {}", patientResponse.getData().fullName());
+            } else {
+                appointment.setPatientName("Walk-in Patient");
+                log.warn("Could not fetch patient name for patientId: {}", request.getPatientId());
+            }
+        } catch (Exception e) {
+            appointment.setPatientName("Walk-in Patient");
+            log.warn("Failed to fetch patient name: {}", e.getMessage());
+        }
+        
+        // Fetch doctor name and department from hr-service
+        try {
+            var doctorResponse = FeignHelper.safeCall(() -> hrClient.getEmployeeById(request.getDoctorId()));
+            if (doctorResponse != null && doctorResponse.getData() != null) {
+                appointment.setDoctorName(doctorResponse.getData().fullName());
+                appointment.setDoctorDepartment(doctorResponse.getData().departmentName());
+                log.debug("Fetched doctor: {} ({})", doctorResponse.getData().fullName(), doctorResponse.getData().departmentName());
+            } else {
+                appointment.setDoctorName("Doctor");
+                log.warn("Could not fetch doctor name for doctorId: {}", request.getDoctorId());
+            }
+        } catch (Exception e) {
+            appointment.setDoctorName("Doctor");
+            log.warn("Failed to fetch doctor name: {}", e.getMessage());
+        }
+        
+        appointment = appointmentRepository.save(appointment);
+        log.info("Walk-in registered: id={}, queueNumber={}, priority={}", 
+                appointment.getId(), queueNumber, priority);
+        
+        return appointmentMapper.entityToResponse(appointment);
+    }
+    
+    /**
+     * Get today's queue for a specific doctor.
+     *
+     * @param doctorId The doctor's ID
+     * @return List of appointments in queue order
+     */
+    public List<AppointmentResponse> getDoctorQueueToday(String doctorId) {
+        List<Appointment> queue = queueService.getDoctorQueueToday(doctorId);
+        return queue.stream()
+                .map(appointmentMapper::entityToResponse)
+                .toList();
+    }
+    
+    /**
+     * Get next patient in queue for a doctor.
+     *
+     * @param doctorId The doctor's ID
+     * @return Next appointment in queue, or null if empty
+     */
+    public AppointmentResponse getNextInQueue(String doctorId) {
+        Appointment next = queueService.getNextInQueue(doctorId);
+        return next != null ? appointmentMapper.entityToResponse(next) : null;
+    }
+    
+    /**
+     * Call next patient in queue (mark as IN_PROGRESS).
+     *
+     * @param doctorId The doctor's ID
+     * @return The called appointment, or null if no one in queue
+     */
+    @Transactional
+    public AppointmentResponse callNextPatient(String doctorId) {
+        Appointment next = queueService.getNextInQueue(doctorId);
+        if (next == null) {
+            return null;
+        }
+        
+        // Mark as IN_PROGRESS (being seen by doctor)
+        next.setStatus(AppointmentStatus.IN_PROGRESS);
+        next = appointmentRepository.save(next);
+        
+        log.info("Called patient: appointmentId={}, queueNumber={}", 
+                next.getId(), next.getQueueNumber());
+        
+        return appointmentMapper.entityToResponse(next);
+    }
+    
+    /**
+     * Get all queues for today across all doctors.
+     * Used by receptionist to see entire waiting room.
+     *
+     * @return List of all appointments with queue numbers, ordered by priority and queue number
+     */
+    public List<AppointmentResponse> getAllQueuesForToday() {
+        List<Appointment> allQueues = queueService.getAllQueuesForToday();
+        return allQueues.stream()
+                .map(appointmentMapper::entityToResponse)
+                .toList();
     }
 }
 

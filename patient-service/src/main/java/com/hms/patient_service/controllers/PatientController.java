@@ -10,26 +10,32 @@ import com.hms.common.services.CrudService;
 import com.hms.patient_service.dtos.patient.PatientStatsResponse;
 import com.hms.patient_service.dtos.patient.PatientRequest;
 import com.hms.patient_service.dtos.patient.PatientResponse;
+import com.hms.patient_service.dtos.patient.PatientSelfCreateRequest;
 import com.hms.patient_service.dtos.patient.PatientSelfUpdateRequest;
 import com.hms.patient_service.entities.Patient;
 import com.hms.patient_service.mappers.PatientMapper;
 import com.hms.patient_service.repositories.PatientRepository;
+import com.hms.patient_service.services.FileStorageService;
 import io.github.perplexhub.rsql.RSQLJPASupport;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RequestMapping("/patients")
 @RestController
@@ -37,14 +43,17 @@ public class PatientController extends GenericController<Patient, String, Patien
     
     private final PatientRepository patientRepository;
     private final PatientMapper patientMapper;
+    private final FileStorageService fileStorageService;
 
     public PatientController(
             CrudService<Patient, String, PatientRequest, PatientResponse> service,
             PatientRepository patientRepository,
-            PatientMapper patientMapper) {
+            PatientMapper patientMapper,
+            FileStorageService fileStorageService) {
         super(service);
         this.patientRepository = patientRepository;
         this.patientMapper = patientMapper;
+        this.fileStorageService = fileStorageService;
     }
 
     /**
@@ -71,6 +80,40 @@ public class PatientController extends GenericController<Patient, String, Patien
         
         PatientResponse response = patientMapper.entityToResponse(patient);
         return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    /**
+     * Create patient profile for the logged-in user (self-registration).
+     * This is used when a new account registers and needs to create their patient record.
+     */
+    @PostMapping("/me")
+    public ResponseEntity<ApiResponse<PatientResponse>> createMyProfile(
+            @Valid @RequestBody PatientSelfCreateRequest request) {
+        UserContext.User currentUser = UserContext.getUser();
+        if (currentUser == null || currentUser.getId() == null) {
+            throw new ApiException(ErrorCode.AUTHENTICATION_REQUIRED, "User not authenticated");
+        }
+        
+        // Check if patient already exists for this account
+        Optional<Patient> existing = patientRepository.findByAccountId(currentUser.getId());
+        if (existing.isPresent()) {
+            throw new ApiException(ErrorCode.RESOURCE_EXISTS, "Patient profile already exists for this account");
+        }
+        
+        // Create new patient
+        Patient patient = new Patient();
+        patient.setAccountId(currentUser.getId());
+        patient.setEmail(currentUser.getEmail());
+        patient.setFullName(request.getFullName());
+        patient.setPhoneNumber(request.getPhoneNumber());
+        patient.setDateOfBirth(request.getDateOfBirth());
+        patient.setGender(request.getGender());  // Request uses Gender enum
+        patient.setAddress(request.getAddress());
+        patient.setIdentificationNumber(request.getIdentificationNumber());
+        
+        Patient saved = patientRepository.save(patient);
+        PatientResponse response = patientMapper.entityToResponse(saved);
+        return ResponseEntity.ok(ApiResponse.ok("Profile created successfully", response));
     }
 
     @PatchMapping("/me")
@@ -107,6 +150,20 @@ public class PatientController extends GenericController<Patient, String, Patien
         Patient saved = patientRepository.save(patient);
         PatientResponse response = patientMapper.entityToResponse(saved);
         return ResponseEntity.ok(ApiResponse.ok("Profile updated successfully", response));
+    }
+
+    /**
+     * Get patient by account ID (for cross-service calls).
+     * Used by billing-service, medical-exam-service to lookup patient by their auth account.
+     */
+    @GetMapping("/by-account")
+    public ResponseEntity<ApiResponse<PatientResponse>> getByAccountId(
+            @RequestParam("accountId") String accountId) {
+        Patient patient = patientRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, 
+                    "Patient not found for accountId: " + accountId));
+        PatientResponse response = patientMapper.entityToResponse(patient);
+        return ResponseEntity.ok(ApiResponse.ok(response));
     }
     
     /**
@@ -189,5 +246,94 @@ public class PatientController extends GenericController<Patient, String, Patien
             .build();
         
         return ResponseEntity.ok(ApiResponse.ok(stats));
+    }
+
+    /**
+     * Upload profile image for a patient.
+     * Max file size: 2MB. Allowed types: JPEG, PNG, WebP.
+     */
+    @PostMapping(value = "/{id}/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<PatientResponse>> uploadProfileImage(
+            @PathVariable String id,
+            @RequestParam("file") MultipartFile file) {
+        
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Patient not found"));
+        
+        // Delete old image if exists
+        if (patient.getProfileImageUrl() != null) {
+            fileStorageService.deleteFile(patient.getProfileImageUrl());
+        }
+        
+        // Upload new image
+        String imageUrl = fileStorageService.uploadProfileImage(file, id);
+        patient.setProfileImageUrl(imageUrl);
+        Patient saved = patientRepository.save(patient);
+        
+        return ResponseEntity.ok(ApiResponse.ok("Profile image uploaded successfully", 
+                patientMapper.entityToResponse(saved)));
+    }
+
+    /**
+     * Delete profile image for a patient.
+     */
+    @DeleteMapping("/{id}/profile-image")
+    public ResponseEntity<ApiResponse<PatientResponse>> deleteProfileImage(@PathVariable String id) {
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Patient not found"));
+        
+        if (patient.getProfileImageUrl() != null) {
+            fileStorageService.deleteFile(patient.getProfileImageUrl());
+            patient.setProfileImageUrl(null);
+            patientRepository.save(patient);
+        }
+        
+        return ResponseEntity.ok(ApiResponse.ok("Profile image deleted successfully", 
+                patientMapper.entityToResponse(patient)));
+    }
+
+    // ============================================
+    // SELF-SERVICE PROFILE IMAGE ENDPOINTS (/me/profile-image)
+    // ============================================
+
+    /**
+     * Upload profile image for current patient (self-service).
+     */
+    @PostMapping(value = "/me/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<PatientResponse>> uploadMyProfileImage(
+            @RequestHeader("X-User-ID") String accountId,
+            @RequestParam("file") MultipartFile file) {
+        Patient patient = patientRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Patient profile not found"));
+        
+        if (patient.getProfileImageUrl() != null) {
+            fileStorageService.deleteFile(patient.getProfileImageUrl());
+        }
+        
+        String imageUrl = fileStorageService.uploadProfileImage(file, patient.getId());
+        patient.setProfileImageUrl(imageUrl);
+        Patient saved = patientRepository.save(patient);
+        
+        return ResponseEntity.ok(ApiResponse.ok("Profile image uploaded successfully", 
+                patientMapper.entityToResponse(saved)));
+    }
+
+    /**
+     * Delete profile image for current patient (self-service).
+     */
+    @DeleteMapping("/me/profile-image")
+    public ResponseEntity<ApiResponse<PatientResponse>> deleteMyProfileImage(
+            @RequestHeader("X-User-ID") String accountId) {
+        Patient patient = patientRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Patient profile not found"));
+        
+        if (patient.getProfileImageUrl() != null) {
+            fileStorageService.deleteFile(patient.getProfileImageUrl());
+            patient.setProfileImageUrl(null);
+            patientRepository.save(patient);
+        }
+        
+        return ResponseEntity.ok(ApiResponse.ok("Profile image deleted successfully", 
+                patientMapper.entityToResponse(patient)));
     }
 }

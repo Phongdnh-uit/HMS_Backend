@@ -11,10 +11,9 @@ ARG SERVICE
 # Copy root build files first (tối ưu cache)
 COPY settings.gradle.kts build.gradle.kts gradlew ./
 COPY gradle gradle
-RUN sed -i 's/\r$//' gradlew
-RUN chmod +x gradlew
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
 
-# Copy source code tất cả module
+# Copy source code for all modules
 COPY common ./common
 # COPY config-server ./config-server
 # COPY discovery-service ./discovery-service
@@ -38,16 +37,19 @@ COPY ${SERVICE} ./${SERVICE}
 # Chỉ build module cần thiết
 RUN ./gradlew :${SERVICE}:clean :${SERVICE}:bootJar --no-daemon
 
-# -------- Stage 2: Run --------
+# -------- Stage 2: Runtime (OPTIMIZED - only 1 JAR per image) --------
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
 
 RUN apk add --no-cache curl
 
 ARG SERVICE
+ENV SERVICE=${SERVICE}
 WORKDIR /app
 
-# curl cho healthcheck
-RUN apk add --no-cache curl
+# Copy ONLY the specific service JAR (reduces image from 2.14GB to ~300MB)
+COPY --from=builder /build/${SERVICE}/build/libs/${SERVICE}-*.jar ./app.jar
+
+# Note: HEALTHCHECK is defined in compose.yaml with correct port per service
 
 # Nhận biến SERVICE từ dòng lệnh docker build
 ARG SERVICE

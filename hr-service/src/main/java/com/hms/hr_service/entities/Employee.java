@@ -52,6 +52,8 @@ public class Employee {
 
     private Instant hiredAt;
 
+    private String profileImageUrl;
+
     private Instant deletedAt;
     private String deletedBy;
 

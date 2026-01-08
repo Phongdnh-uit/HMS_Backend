@@ -1,5 +1,6 @@
 package com.hms.billing_service.controllers;
 
+import com.hms.billing_service.clients.PatientClient;
 import com.hms.billing_service.dtos.CancelInvoiceRequest;
 import com.hms.billing_service.dtos.InvoiceRequest;
 import com.hms.billing_service.dtos.InvoiceResponse;
@@ -14,8 +15,11 @@ import com.hms.common.controllers.GenericController;
 import com.hms.common.dtos.ApiResponse;
 import com.hms.common.exceptions.errors.ApiException;
 import com.hms.common.exceptions.errors.ErrorCode;
+import com.hms.common.helpers.FeignHelper;
+import com.hms.common.securities.UserContext;
 import com.hms.common.services.CrudService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -32,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/invoices")
 public class InvoiceController extends GenericController<Invoice, String, InvoiceRequest, InvoiceResponse> {
@@ -40,18 +45,21 @@ public class InvoiceController extends GenericController<Invoice, String, Invoic
     private final PaymentRepository paymentRepository;
     private final InvoiceHook invoiceHook;
     private final InvoiceMapper invoiceMapper;
+    private final PatientClient patientClient;
 
     public InvoiceController(
             CrudService<Invoice, String, InvoiceRequest, InvoiceResponse> service,
             InvoiceRepository invoiceRepository,
             PaymentRepository paymentRepository,
             InvoiceMapper invoiceMapper,
-            InvoiceHook invoiceHook) {
+            InvoiceHook invoiceHook,
+            PatientClient patientClient) {
         super(service);
         this.invoiceRepository = invoiceRepository;
         this.paymentRepository = paymentRepository;
         this.invoiceMapper = invoiceMapper;
         this.invoiceHook = invoiceHook;
+        this.patientClient = patientClient;
     }
 
     /**
@@ -77,6 +85,61 @@ public class InvoiceController extends GenericController<Invoice, String, Invoic
     @PostMapping("/generate")
     public ResponseEntity<ApiResponse<InvoiceResponse>> generate(@RequestBody InvoiceRequest request) {
         return create(request);
+    }
+
+    /**
+     * Get invoices for the currently logged-in patient.
+     * Patient self-service endpoint - uses accountId from JWT to lookup patientId.
+     */
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<List<InvoiceResponse>>> getMyInvoices(
+            @RequestParam(required = false) String status) {
+        // Get current user from security context
+        UserContext.User currentUser = UserContext.getUser();
+        if (currentUser == null || currentUser.getId() == null) {
+            throw new ApiException(ErrorCode.AUTHENTICATION_REQUIRED, "User not authenticated");
+        }
+        
+        // Lookup patient by accountId
+        String patientId;
+        try {
+            var patientResponse = FeignHelper.safeCall(
+                () -> patientClient.getPatientByAccountId(currentUser.getId())
+            );
+            patientId = patientResponse.getData().id();
+            log.info("Found patient {} for accountId {}", patientId, currentUser.getId());
+        } catch (Exception e) {
+            log.error("Failed to lookup patient for accountId {}: {}", currentUser.getId(), e.getMessage());
+            throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND, 
+                "Patient profile not found. Please contact support.");
+        }
+        
+        // Get invoices for this patient
+        List<Invoice> invoices;
+        if (status != null) {
+            Invoice.InvoiceStatus invoiceStatus = Invoice.InvoiceStatus.valueOf(status);
+            invoices = invoiceRepository.findByPatientIdAndStatus(patientId, invoiceStatus);
+        } else {
+            invoices = invoiceRepository.findByPatientId(patientId);
+        }
+        
+        return ResponseEntity.ok(ApiResponse.ok(invoiceMapper.toResponseList(invoices)));
+    }
+    
+    /**
+     * Create or update invoice with all items (Consultation + Medicine + Lab Tests).
+     * If invoice exists, it will be UPDATED. If not, a new invoice will be created.
+     * This is the preferred endpoint for auto-invoice generation from other services.
+     */
+    @PostMapping("/upsert")
+    public ResponseEntity<ApiResponse<InvoiceResponse>> upsert(@RequestBody InvoiceRequest request) {
+        Invoice invoice = invoiceHook.upsertInvoice(
+            request.getAppointmentId(), 
+            request.getExamId(), 
+            request.getNotes()
+        );
+        InvoiceResponse response = invoiceMapper.entityToResponse(invoice);
+        return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     /**

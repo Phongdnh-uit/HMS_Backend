@@ -38,6 +38,7 @@ public class Appointment {
 
     private Instant appointmentTime;
 
+    @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
     
     @Enumerated(EnumType.STRING)
@@ -50,6 +51,13 @@ public class Appointment {
     private Instant cancelledAt;
 
     private String cancelReason;
+
+    // Queue fields for walk-in patients
+    private Integer queueNumber;  // Daily queue number (1, 2, 3...)
+    
+    private Integer priority;  // Lower = higher priority (10=Emergency, 100=Normal)
+    
+    private String priorityReason;  // EMERGENCY, ELDERLY, PREGNANT, APPOINTMENT, etc.
 
     @CreatedDate
     private Instant createdAt;

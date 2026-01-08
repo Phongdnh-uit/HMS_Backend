@@ -32,3 +32,12 @@ medicine-service:
 # Appointment service integration (for fetching appointment data during exam creation)
 appointment-service:
   base-url: http://${APPOINTMENT_SERVICE_HOST:appointment-service-pro}:${APPOINTMENT_SERVICE_PORT:8085}
+
+# MinIO object storage for lab test images
+minio:
+  endpoint: http://${MINIO_HOST:minio-storage}:${MINIO_PORT:9000}
+  public-endpoint: http://${MINIO_PUBLIC_HOST:localhost}:${MINIO_PUBLIC_PORT:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin123}
+  bucket-name: ${MINIO_BUCKET_NAME:lab-images}
+

@@ -1,5 +1,7 @@
 package com.hms.auth_service.controllers;
 
+import com.hms.auth_service.dtos.authentication.ChangePasswordRequest;
+import com.hms.auth_service.dtos.authentication.ResetPasswordRequest;
 import com.hms.auth_service.securities.TokenProvider;
 import com.hms.auth_service.services.AuthService;
 import com.hms.common.dtos.Action;
@@ -80,5 +82,40 @@ public class AuthController {
         String userId = jwt.getSubject();
         AccountResponse account = authService.findById(userId);
         return ResponseEntity.ok(ApiResponse.ok(account));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request) {
+        authService.changePassword(request);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @PostMapping("/send-password-reset-token")
+    public ResponseEntity<ApiResponse<Void>> sendPasswordResetToken(
+            @RequestParam("email") String email) {
+        authService.sendPasswordResetToken(email);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @PostMapping("/send-verification-email")
+    public ResponseEntity<ApiResponse<Void>> sendVerificationEmail(
+            @RequestParam("email") String email) {
+        authService.sendAccountActivationEmail(email);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<ApiResponse<Void>> verifyEmail(
+            @RequestParam("token") String token) {
+        authService.activateAccount(token);
+        return ResponseEntity.ok(ApiResponse.ok(null));
     }
 }

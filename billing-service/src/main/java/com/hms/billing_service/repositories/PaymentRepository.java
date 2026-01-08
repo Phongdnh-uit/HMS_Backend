@@ -55,4 +55,9 @@ public interface PaymentRepository extends SimpleRepository<Payment, String> {
         @Param("startDate") Instant startDate, 
         @Param("endDate") Instant endDate
     );
+    
+    /**
+     * Find all payments by status.
+     */
+    List<Payment> findByStatus(Payment.PaymentStatus status);
 }
