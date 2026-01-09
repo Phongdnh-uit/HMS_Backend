@@ -1,0 +1,20 @@
+services:
+  billing-service-test:
+    image: eclipse-temurin:23-jdk
+    container_name: billing-service-test
+    working_dir: /app
+    volumes:
+      - ../../../:/app
+      - gradle-cache:/root/.gradle
+    environment:
+      - SPRING_PROFILES_ACTIVE=test
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        apt-get update && apt-get install -y dos2unix
+        dos2unix gradlew
+        chmod +x gradlew
+        ./gradlew :billing-service:test --tests 'InvoiceHookCircuitBreakerTest' --no-daemon
+
+volumes:
+  gradle-cache:

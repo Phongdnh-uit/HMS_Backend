@@ -1,0 +1,170 @@
+name: CD Deploy to Render
+
+on:
+  # Manual trigger with service selection
+  workflow_dispatch:
+    inputs:
+      services:
+        description: 'Services to deploy (comma-separated, or "all")'
+        required: true
+        default: 'all'
+        type: string
+
+  # Auto-deploy when CI completes on main branch
+  workflow_run:
+    workflows: ["CI Build and Push Docker Images"]
+    types:
+      - completed
+    branches: [main]
+
+env:
+  # Default to 'all' for workflow_run events, use input for manual triggers
+  DEPLOY_SERVICES: ${{ github.event.inputs.services || 'all' }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Only run if triggered manually OR if the CI workflow succeeded
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Display deployment info
+        run: |
+          echo "🚀 Deploying services: ${{ env.DEPLOY_SERVICES }}"
+          echo "📌 Triggered by: ${{ github.event_name }}"
+          echo "🔗 Commit: ${{ github.sha }}"
+
+      # Deploy all services via Render Deploy Hooks
+      # Each service on Render has its own Deploy Hook URL
+      - name: Deploy Config Server
+        if: contains(env.DEPLOY_SERVICES, 'config-server') || env.DEPLOY_SERVICES == 'all'
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_CONFIG_SERVER }}" ]; then
+            curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_CONFIG_SERVER }}"
+            echo "✅ Config Server deploy triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_CONFIG_SERVER secret not configured"
+          fi
+
+      - name: Deploy Discovery Service
+        if: contains(env.DEPLOY_SERVICES, 'discovery-service') || env.DEPLOY_SERVICES == 'all'
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_DISCOVERY_SERVICE }}" ]; then
+            curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_DISCOVERY_SERVICE }}"
+            echo "✅ Discovery Service deploy triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_DISCOVERY_SERVICE secret not configured"
+          fi
+
+      - name: Deploy API Gateway
+        if: contains(env.DEPLOY_SERVICES, 'api-gateway') || env.DEPLOY_SERVICES == 'all'
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_API_GATEWAY }}" ]; then
+            curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_API_GATEWAY }}"
+            echo "✅ API Gateway deploy triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_API_GATEWAY secret not configured"
+          fi
+
+      - name: Deploy Auth Service
+        if: contains(env.DEPLOY_SERVICES, 'auth-service') || env.DEPLOY_SERVICES == 'all'
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_AUTH_SERVICE }}" ]; then
+            curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_AUTH_SERVICE }}"
+            echo "✅ Auth Service deploy triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_AUTH_SERVICE secret not configured"
+          fi
+
+      - name: Deploy Medicine Service
+        if: contains(env.DEPLOY_SERVICES, 'medicine-service') || env.DEPLOY_SERVICES == 'all'
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_MEDICINE_SERVICE }}" ]; then
+            curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_MEDICINE_SERVICE }}"
+            echo "✅ Medicine Service deploy triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_MEDICINE_SERVICE secret not configured"
+          fi
+
+      - name: Deploy Patient Service
+        if: contains(env.DEPLOY_SERVICES, 'patient-service') || env.DEPLOY_SERVICES == 'all'
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_PATIENT_SERVICE }}" ]; then
+            curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_PATIENT_SERVICE }}"
+            echo "✅ Patient Service deploy triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_PATIENT_SERVICE secret not configured"
+          fi
+
+      - name: Deploy HR Service
+        if: contains(env.DEPLOY_SERVICES, 'hr-service') || env.DEPLOY_SERVICES == 'all'
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_HR_SERVICE }}" ]; then
+            curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_HR_SERVICE }}"
+            echo "✅ HR Service deploy triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_HR_SERVICE secret not configured"
+          fi
+
+      - name: Deploy Appointment Service
+        if: contains(env.DEPLOY_SERVICES, 'appointment-service') || env.DEPLOY_SERVICES == 'all'
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_APPOINTMENT_SERVICE }}" ]; then
+            curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_APPOINTMENT_SERVICE }}"
+            echo "✅ Appointment Service deploy triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_APPOINTMENT_SERVICE secret not configured"
+          fi
+
+      - name: Deploy Medical Exam Service
+        if: contains(env.DEPLOY_SERVICES, 'medical-exam-service') || env.DEPLOY_SERVICES == 'all'
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_MEDICAL_EXAM_SERVICE }}" ]; then
+            curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_MEDICAL_EXAM_SERVICE }}"
+            echo "✅ Medical Exam Service deploy triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_MEDICAL_EXAM_SERVICE secret not configured"
+          fi
+
+      - name: Deploy Billing Service
+        if: contains(env.DEPLOY_SERVICES, 'billing-service') || env.DEPLOY_SERVICES == 'all'
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_BILLING_SERVICE }}" ]; then
+            curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_BILLING_SERVICE }}"
+            echo "✅ Billing Service deploy triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_BILLING_SERVICE secret not configured"
+          fi
+
+      - name: Deploy Report Service
+        if: contains(env.DEPLOY_SERVICES, 'report-service') || env.DEPLOY_SERVICES == 'all'
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_REPORT_SERVICE }}" ]; then
+            curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_REPORT_SERVICE }}"
+            echo "✅ Report Service deploy triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_REPORT_SERVICE secret not configured"
+          fi
+
+      - name: Deploy Notification Service
+        if: contains(env.DEPLOY_SERVICES, 'notification-service') || env.DEPLOY_SERVICES == 'all'
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_NOTIFICATION_SERVICE }}" ]; then
+            curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_NOTIFICATION_SERVICE }}"
+            echo "✅ Notification Service deploy triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_NOTIFICATION_SERVICE secret not configured"
+          fi
+
+      - name: Deployment Summary
+        run: |
+          echo "============================================"
+          echo "✅ Deploy hooks triggered for: ${{ env.DEPLOY_SERVICES }}"
+          echo "📦 Check Render Dashboard: https://dashboard.render.com"
+          echo "🔗 Commit: ${{ github.sha }}"
+          echo "============================================"

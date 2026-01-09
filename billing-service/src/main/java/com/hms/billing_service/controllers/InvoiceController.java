@@ -20,6 +20,7 @@ import com.hms.common.securities.UserContext;
 import com.hms.common.services.CrudService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -46,6 +47,7 @@ public class InvoiceController extends GenericController<Invoice, String, Invoic
     private final InvoiceHook invoiceHook;
     private final InvoiceMapper invoiceMapper;
     private final PatientClient patientClient;
+    private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
     public InvoiceController(
             CrudService<Invoice, String, InvoiceRequest, InvoiceResponse> service,
@@ -53,13 +55,15 @@ public class InvoiceController extends GenericController<Invoice, String, Invoic
             PaymentRepository paymentRepository,
             InvoiceMapper invoiceMapper,
             InvoiceHook invoiceHook,
-            PatientClient patientClient) {
+            PatientClient patientClient,
+            CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
         super(service);
         this.invoiceRepository = invoiceRepository;
         this.paymentRepository = paymentRepository;
         this.invoiceMapper = invoiceMapper;
         this.invoiceHook = invoiceHook;
         this.patientClient = patientClient;
+        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     /**
@@ -100,19 +104,26 @@ public class InvoiceController extends GenericController<Invoice, String, Invoic
             throw new ApiException(ErrorCode.AUTHENTICATION_REQUIRED, "User not authenticated");
         }
         
-        // Lookup patient by accountId
-        String patientId;
-        try {
-            var patientResponse = FeignHelper.safeCall(
-                () -> patientClient.getPatientByAccountId(currentUser.getId())
-            );
-            patientId = patientResponse.getData().id();
-            log.info("Found patient {} for accountId {}", patientId, currentUser.getId());
-        } catch (Exception e) {
-            log.error("Failed to lookup patient for accountId {}: {}", currentUser.getId(), e.getMessage());
-            throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND, 
-                "Patient profile not found. Please contact support.");
-        }
+        // Lookup patient by accountId (with Circuit Breaker)
+        var patientCircuitBreaker = circuitBreakerFactory.create("billingPatient");
+        String patientId = patientCircuitBreaker.run(
+            () -> {
+                var patientResponse = FeignHelper.safeCall(
+                    () -> patientClient.getPatientByAccountId(currentUser.getId())
+                );
+                if (patientResponse.getData() == null) {
+                    throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND, 
+                        "Patient profile not found. Please contact support.");
+                }
+                return patientResponse.getData().id();
+            },
+            throwable -> {
+                log.error("[CB-FALLBACK] Patient service unavailable: {}", throwable.getMessage());
+                throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                    "Patient service unavailable. Please try again later.");
+            }
+        );
+        log.info("Found patient {} for accountId {}", patientId, currentUser.getId());
         
         // Get invoices for this patient
         List<Invoice> invoices;

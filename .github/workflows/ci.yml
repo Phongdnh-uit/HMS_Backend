@@ -2,9 +2,9 @@ name: CI Build and Push Docker Images
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
 
 jobs:
   test:
@@ -14,7 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup JDK
+      # 2️⃣ Validate Gradle wrapper (security best practice)
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      # 3️⃣ Setup JDK
       - name: Set up JDK 23
         uses: actions/setup-java@v4
         with:
@@ -22,20 +26,34 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      # 3️⃣ Build all modules
+      # 4️⃣ Build all modules
       - name: Build all modules
         run: ./gradlew clean build -x test --no-daemon
 
-      # 4️⃣ Test all modules
+      # 5️⃣ Test all modules
       - name: Test all modules
         run: ./gradlew test --no-daemon
 
   build-and-push:
+    # Only run on push events (not PRs) to avoid pushing untested images
+    if: github.event_name == 'push'
+    needs: test # Wait for tests to pass before building images
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [ config-server, discovery-service, api-gateway, auth-service, medicine-service, patient-service, hr-service ]
-        java-version: [ "23" ]
+        service:
+          - config-server
+          - discovery-service
+          - api-gateway
+          - auth-service
+          - medicine-service
+          - patient-service
+          - hr-service
+          - appointment-service
+          - medical-exam-service
+          - billing-service
+          - report-service
+          - notification-service
 
     steps:
       # 1️⃣ Checkout source
@@ -44,7 +62,7 @@ jobs:
 
       # 2️⃣ Login Docker Hub
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -57,10 +75,14 @@ jobs:
       - name: Build & Push ${{ matrix.service }} Image
         uses: docker/build-push-action@v5
         with:
-          context: .                     # build toàn project nhưng Dockerfile chỉ dùng đúng service
+          context: .
           file: infrastructure/pro/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${{ github.sha }}
           build-args: |
             SERVICE=${{ matrix.service }}
-            JAVA_VERSION=${{ matrix.java-version }}
+            JAVA_VERSION=23
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

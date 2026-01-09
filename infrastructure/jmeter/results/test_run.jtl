@@ -1,0 +1,196 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1767882981072,34,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-1,,false,,493,303,14,23,http://localhost:8080/api/auth/login,34,0,28
+1767882981661,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-2,,false,,493,303,14,25,http://localhost:8080/api/auth/login,4,0,1
+1767882983651,14,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-3,,false,,493,303,16,29,http://localhost:8080/api/auth/login,14,0,1
+1767882986425,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-5,,false,,493,303,18,36,http://localhost:8080/api/auth/login,4,0,1
+1767882986638,5,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-7,,false,,493,303,19,37,http://localhost:8080/api/auth/login,5,0,2
+1767882988209,5,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-4,,false,,493,303,20,39,http://localhost:8080/api/auth/login,5,0,0
+1767882989423,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-8,,false,,493,303,21,42,http://localhost:8080/api/auth/login,4,0,1
+1767882990636,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-6,,false,,493,303,22,43,http://localhost:8080/api/auth/login,3,0,1
+1767882991990,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-9,,false,,493,303,24,46,http://localhost:8080/api/auth/login,4,0,1
+1767882993083,12,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-10,,false,,493,304,25,47,http://localhost:8080/api/auth/login,12,0,1
+1767882993690,3,POST /api/auth/login (Nurse),401,Unauthorized,Nurse Users (7 VUs) 3-3,,false,,493,297,7,47,http://localhost:8080/api/auth/login,3,0,0
+1767882994153,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-14,,false,,493,304,25,48,http://localhost:8080/api/auth/login,3,0,1
+1767882994725,3,POST /api/auth/login (Receptionist),401,Unauthorized,Receptionist Users (6 VUs) 4-1,,false,,493,311,6,49,http://localhost:8080/api/auth/login,3,0,1
+1767882994780,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-12,,false,,493,304,26,49,http://localhost:8080/api/auth/login,3,0,0
+1767882996230,5,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-11,,false,,493,304,27,50,http://localhost:8080/api/auth/login,5,0,1
+1767882996449,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-17,,false,,493,304,27,50,http://localhost:8080/api/auth/login,4,0,1
+1767882997134,6,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-1,,false,,573,222,27,50,http://localhost:8080/api/patients/me,6,0,0
+1767882997157,6,POST /api/auth/login (Nurse),401,Unauthorized,Nurse Users (7 VUs) 3-1,,false,,493,297,7,50,http://localhost:8080/api/auth/login,6,0,1
+1767882997803,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-13,,false,,493,304,27,50,http://localhost:8080/api/auth/login,3,0,0
+1767882997847,9,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-15,,false,,493,304,27,50,http://localhost:8080/api/auth/login,9,0,1
+1767882998127,5,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-2,,false,,573,222,27,50,http://localhost:8080/api/patients/me,5,0,0
+1767882999395,4,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-3,,false,,573,222,27,50,http://localhost:8080/api/patients/me,4,0,0
+1767882999444,8,POST /api/auth/login (Nurse),401,Unauthorized,Nurse Users (7 VUs) 3-2,,false,,493,297,7,50,http://localhost:8080/api/auth/login,8,0,1
+1767883000387,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-16,,false,,493,304,27,50,http://localhost:8080/api/auth/login,4,0,1
+1767883001131,4,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-7,,false,,573,222,27,50,http://localhost:8080/api/patients/me,4,0,0
+1767883001135,3,POST /api/auth/login (Nurse),401,Unauthorized,Nurse Users (7 VUs) 3-6,,false,,493,297,7,50,http://localhost:8080/api/auth/login,3,0,1
+1767883001441,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-18,,false,,493,304,27,50,http://localhost:8080/api/auth/login,4,0,1
+1767883001565,4,POST /api/auth/login (Nurse),401,Unauthorized,Nurse Users (7 VUs) 3-5,,false,,493,297,7,50,http://localhost:8080/api/auth/login,4,0,1
+1767883002190,6,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-4,,false,,573,222,27,50,http://localhost:8080/api/patients/me,6,0,0
+1767883002283,3,POST /api/auth/login (Receptionist),401,Unauthorized,Receptionist Users (6 VUs) 4-3,,false,,493,311,6,50,http://localhost:8080/api/auth/login,3,0,1
+1767883002361,5,POST /api/auth/login (Receptionist),401,Unauthorized,Receptionist Users (6 VUs) 4-2,,false,,493,311,6,50,http://localhost:8080/api/auth/login,5,0,2
+1767883003630,7,POST /api/auth/login (Receptionist),401,Unauthorized,Receptionist Users (6 VUs) 4-4,,false,,493,311,6,50,http://localhost:8080/api/auth/login,7,0,1
+1767883003629,8,POST /api/auth/login (Doctor),401,Unauthorized,Doctor Users (9 VUs) 2-2,,false,,493,299,9,50,http://localhost:8080/api/auth/login,8,0,1
+1767883003669,3,POST /api/auth/login (Nurse),401,Unauthorized,Nurse Users (7 VUs) 3-7,,false,,493,297,7,50,http://localhost:8080/api/auth/login,3,0,0
+1767883004431,8,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-23,,false,,493,304,27,50,http://localhost:8080/api/auth/login,8,0,1
+1767883004467,6,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-5,,false,,573,222,27,50,http://localhost:8080/api/patients/me,6,0,0
+1767883005145,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-21,,false,,493,304,27,50,http://localhost:8080/api/auth/login,4,0,1
+1767883005156,8,POST /api/auth/login (Doctor),401,Unauthorized,Doctor Users (9 VUs) 2-1,,false,,493,299,9,50,http://localhost:8080/api/auth/login,8,0,1
+1767883005159,13,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-19,,false,,493,304,27,50,http://localhost:8080/api/auth/login,13,0,1
+1767883005231,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-20,,false,,493,304,27,50,http://localhost:8080/api/auth/login,3,0,1
+1767883005714,3,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-10,,false,,573,222,27,50,http://localhost:8080/api/patients/me,3,0,0
+1767883005835,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-22,,false,,493,304,27,50,http://localhost:8080/api/auth/login,3,0,0
+1767883005891,5,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-8,,false,,573,222,27,50,http://localhost:8080/api/patients/me,5,0,0
+1767883007021,4,POST /api/auth/login (Receptionist),401,Unauthorized,Receptionist Users (6 VUs) 4-5,,false,,493,311,6,50,http://localhost:8080/api/auth/login,4,0,1
+1767883007049,3,POST /api/auth/login (Doctor),401,Unauthorized,Doctor Users (9 VUs) 2-4,,false,,493,299,9,50,http://localhost:8080/api/auth/login,3,0,0
+1767883007157,4,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-6,,false,,573,222,27,50,http://localhost:8080/api/patients/me,4,0,0
+1767883007455,4,POST /api/auth/login (Nurse),401,Unauthorized,Nurse Users (7 VUs) 3-4,,false,,493,297,7,50,http://localhost:8080/api/auth/login,4,0,1
+1767883008275,4,POST /api/auth/login (Doctor),401,Unauthorized,Doctor Users (9 VUs) 2-5,,false,,493,299,9,50,http://localhost:8080/api/auth/login,4,0,1
+1767883009383,5,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-24,,false,,493,304,27,50,http://localhost:8080/api/auth/login,5,0,1
+1767883009573,10,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-14,,false,,573,222,27,50,http://localhost:8080/api/patients/me,10,0,0
+1767883009780,5,GET /api/patients (Search),401,Unauthorized,Receptionist Users (6 VUs) 4-1,,false,,573,234,6,50,http://localhost:8080/api/patients?page=0&size=20,5,0,0
+1767883010626,4,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-2,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,4,0,0
+1767883010873,3,POST /api/auth/login (Doctor),401,Unauthorized,Doctor Users (9 VUs) 2-3,,false,,493,299,9,50,http://localhost:8080/api/auth/login,3,0,1
+1767883010922,4,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-9,,false,,573,222,27,50,http://localhost:8080/api/patients/me,4,0,0
+1767883011079,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-25,,false,,493,304,27,50,http://localhost:8080/api/auth/login,4,0,2
+1767883011246,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-26,,false,,493,304,27,50,http://localhost:8080/api/auth/login,4,0,2
+1767883011461,11,POST /api/auth/login (Receptionist),401,Unauthorized,Receptionist Users (6 VUs) 4-6,,false,,493,311,6,50,http://localhost:8080/api/auth/login,11,0,1
+1767883011474,4,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-12,,false,,573,222,27,50,http://localhost:8080/api/patients/me,4,0,0
+1767883012313,5,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-16,,false,,573,222,27,50,http://localhost:8080/api/patients/me,5,0,0
+1767883013099,6,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-1,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,6,0,0
+1767883013287,5,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-15,,false,,573,222,27,50,http://localhost:8080/api/patients/me,5,0,0
+1767883013808,3,POST /api/auth/login (Doctor),401,Unauthorized,Doctor Users (9 VUs) 2-9,,false,,493,299,9,50,http://localhost:8080/api/auth/login,3,0,1
+1767883014277,6,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-11,,false,,573,222,27,50,http://localhost:8080/api/patients/me,6,0,0
+1767883014336,10,POST /api/auth/login (Doctor),401,Unauthorized,Doctor Users (9 VUs) 2-6,,false,,493,299,9,50,http://localhost:8080/api/auth/login,10,0,1
+1767883014509,7,GET /api/appointments (Queue),401,Unauthorized,Nurse Users (7 VUs) 3-3,,false,,573,223,7,50,http://localhost:8080/api/appointments,7,0,0
+1767883014766,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-27,,false,,493,304,27,50,http://localhost:8080/api/auth/login,3,0,0
+1767883015079,9,GET /api/appointments (Queue),401,Unauthorized,Nurse Users (7 VUs) 3-2,,false,,573,223,7,50,http://localhost:8080/api/appointments,9,0,0
+1767883015219,8,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-3,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,8,0,0
+1767883015702,6,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-13,,false,,573,222,27,50,http://localhost:8080/api/patients/me,6,0,0
+1767883015808,4,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-17,,false,,573,222,27,50,http://localhost:8080/api/patients/me,4,0,0
+1767883015854,5,GET /api/appointments (Queue),401,Unauthorized,Nurse Users (7 VUs) 3-1,,false,,573,223,7,50,http://localhost:8080/api/appointments,5,0,0
+1767883016312,5,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-7,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,5,0,0
+1767883016926,9,POST /api/auth/login (Doctor),401,Unauthorized,Doctor Users (9 VUs) 2-8,,false,,493,299,9,50,http://localhost:8080/api/auth/login,9,0,0
+1767883017024,5,GET /api/patients (Search),401,Unauthorized,Receptionist Users (6 VUs) 4-3,,false,,573,234,6,50,http://localhost:8080/api/patients?page=0&size=20,5,0,0
+1767883017864,4,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-4,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,4,0,0
+1767883018106,3,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-18,,false,,573,222,27,50,http://localhost:8080/api/patients/me,3,0,0
+1767883018236,5,GET /api/patients (Search),401,Unauthorized,Receptionist Users (6 VUs) 4-2,,false,,573,234,6,50,http://localhost:8080/api/patients?page=0&size=20,5,0,0
+1767883018907,7,GET /api/patients (Search),401,Unauthorized,Receptionist Users (6 VUs) 4-4,,false,,573,234,6,50,http://localhost:8080/api/patients?page=0&size=20,7,0,0
+1767883019901,5,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-20,,false,,573,222,27,50,http://localhost:8080/api/patients/me,5,0,0
+1767883020652,4,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-23,,false,,573,222,27,50,http://localhost:8080/api/patients/me,4,0,0
+1767883021104,5,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-5,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,5,0,0
+1767883021257,6,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-10,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,6,0,0
+1767883021410,8,POST /api/auth/login (Doctor),401,Unauthorized,Doctor Users (9 VUs) 2-7,,false,,493,299,9,50,http://localhost:8080/api/auth/login,8,0,0
+1767883021467,3,GET /api/patients (Search),401,Unauthorized,Receptionist Users (6 VUs) 4-5,,false,,573,234,6,50,http://localhost:8080/api/patients?page=0&size=20,3,0,0
+1767883021639,4,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-19,,false,,573,222,27,50,http://localhost:8080/api/patients/me,4,0,0
+1767883022231,4,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-22,,false,,573,222,27,50,http://localhost:8080/api/patients/me,4,0,0
+1767883022297,5,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-21,,false,,573,222,27,50,http://localhost:8080/api/patients/me,5,0,0
+1767883022824,3,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-8,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,3,0,0
+1767883023153,5,GET /api/appointments (Queue),401,Unauthorized,Nurse Users (7 VUs) 3-5,,false,,573,223,7,50,http://localhost:8080/api/appointments,5,0,0
+1767883023480,3,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-6,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,3,0,0
+1767883025259,4,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-12,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,4,0,0
+1767883025427,4,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-2,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,4,0,0
+1767883025659,5,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-14,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,5,0,0
+1767883025714,4,GET /api/appointments (Queue),401,Unauthorized,Nurse Users (7 VUs) 3-7,,false,,573,223,7,50,http://localhost:8080/api/appointments,4,0,0
+1767883025874,5,GET /api/schedules/doctors,401,Unauthorized,Receptionist Users (6 VUs) 4-1,,false,,573,228,6,50,http://localhost:8080/api/schedules/doctors,5,0,0
+1767883025899,4,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-24,,false,,573,222,27,50,http://localhost:8080/api/patients/me,4,0,0
+1767883025982,3,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-26,,false,,573,222,27,50,http://localhost:8080/api/patients/me,3,0,0
+1767883026543,3,GET /api/patients,401,Unauthorized,Nurse Users (7 VUs) 3-2,,false,,573,234,7,50,http://localhost:8080/api/patients?page=0&size=20,3,0,0
+1767883026796,4,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-9,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,4,0,0
+1767883027251,5,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-3,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,5,0,0
+1767883027636,6,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-25,,false,,573,222,27,50,http://localhost:8080/api/patients/me,6,0,0
+1767883027776,5,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-1,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,5,0,0
+1767883028150,7,GET /api/patients (Search),401,Unauthorized,Receptionist Users (6 VUs) 4-6,,false,,573,234,6,50,http://localhost:8080/api/patients?page=0&size=20,7,0,0
+1767883028431,4,GET /api/appointments (Queue),401,Unauthorized,Nurse Users (7 VUs) 3-6,,false,,573,223,7,50,http://localhost:8080/api/appointments,4,0,0
+1767883028701,12,GET /api/patients,401,Unauthorized,Nurse Users (7 VUs) 3-3,,false,,573,234,7,50,http://localhost:8080/api/patients?page=0&size=20,12,0,0
+1767883029300,4,GET /api/appointments (Queue),401,Unauthorized,Nurse Users (7 VUs) 3-4,,false,,573,223,7,50,http://localhost:8080/api/appointments,4,0,0
+1767883029498,3,GET /api/schedules/doctors,401,Unauthorized,Receptionist Users (6 VUs) 4-3,,false,,573,228,6,50,http://localhost:8080/api/schedules/doctors,3,0,0
+1767883029877,4,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-15,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,4,0,0
+1767883030028,5,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-17,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,5,0,0
+1767883030028,5,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-13,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,5,0,0
+1767883031543,7,GET /api/patients,401,Unauthorized,Nurse Users (7 VUs) 3-1,,false,,573,234,7,50,http://localhost:8080/api/patients?page=0&size=20,7,0,0
+1767883031767,3,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-11,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,3,0,0
+1767883031989,14,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-16,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,14,0,0
+1767883032565,6,GET /api/schedules/doctors,401,Unauthorized,Receptionist Users (6 VUs) 4-4,,false,,573,228,6,50,http://localhost:8080/api/schedules/doctors,6,0,0
+1767883032984,4,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-18,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,4,0,0
+1767883033914,3,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-4,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,3,0,0
+1767883034336,4,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-7,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,4,0,0
+1767883034758,5,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-27,,false,,573,222,27,50,http://localhost:8080/api/patients/me,5,0,0
+1767883035883,4,GET /api/auth/me,401,Unauthorized,Doctor Users (9 VUs) 2-4,,false,,573,218,9,50,http://localhost:8080/api/auth/me,4,0,0
+1767883035946,4,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-23,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,4,0,0
+1767883036027,5,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-6,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,5,0,0
+1767883036880,3,GET /api/schedules/doctors,401,Unauthorized,Receptionist Users (6 VUs) 4-2,,false,,573,228,6,50,http://localhost:8080/api/schedules/doctors,3,0,0
+1767883037169,3,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-19,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,3,0,0
+1767883037458,4,GET /api/auth/me,401,Unauthorized,Doctor Users (9 VUs) 2-1,,false,,573,218,9,50,http://localhost:8080/api/auth/me,4,0,0
+1767883037954,10,GET /api/auth/me,401,Unauthorized,Doctor Users (9 VUs) 2-5,,false,,573,218,9,50,http://localhost:8080/api/auth/me,10,0,0
+1767883037968,6,POST /api/auth/login (Admin),401,Unauthorized,Admin User (1 VU) 5-1,,false,,493,299,1,50,http://localhost:8080/api/auth/login,6,0,1
+1767883037982,7,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-10,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,7,0,0
+1767883038528,8,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-22,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,8,0,0
+1767883038986,6,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-20,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,6,0,0
+1767883039208,11,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-24,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,11,0,0
+1767883039422,4,GET /api/appointments,401,Unauthorized,Receptionist Users (6 VUs) 4-1,,false,,573,223,6,50,http://localhost:8080/api/appointments,4,0,0
+1767883039699,4,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-8,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,4,0,0
+1767883039802,4,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-26,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,4,0,0
+1767883039992,4,GET /api/schedules/doctors,401,Unauthorized,Receptionist Users (6 VUs) 4-5,,false,,573,228,6,50,http://localhost:8080/api/schedules/doctors,4,0,0
+1767883040246,3,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-21,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,3,0,0
+1767883041299,4,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-14,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,4,0,0
+1767883041533,4,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-5,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,4,0,0
+1767883041943,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-3,,false,,573,299,27,50,http://localhost:8080/api/auth/login,3,0,1
+1767883042686,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-1,,false,,573,299,27,50,http://localhost:8080/api/auth/login,3,0,1
+1767883042719,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-2,,false,,573,299,27,50,http://localhost:8080/api/auth/login,3,0,1
+1767883042880,6,GET /api/auth/me,401,Unauthorized,Doctor Users (9 VUs) 2-9,,false,,573,218,9,50,http://localhost:8080/api/auth/me,6,0,0
+1767883042890,5,GET /api/patients,401,Unauthorized,Nurse Users (7 VUs) 3-5,,false,,573,234,7,50,http://localhost:8080/api/patients?page=0&size=20,5,0,0
+1767883043232,10,GET /api/auth/me,401,Unauthorized,Doctor Users (9 VUs) 2-2,,false,,573,218,9,50,http://localhost:8080/api/auth/me,10,0,0
+1767883043802,5,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-12,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,5,0,0
+1767883043818,4,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-13,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,4,0,0
+1767883044226,4,GET /api/appointments,401,Unauthorized,Receptionist Users (6 VUs) 4-3,,false,,573,223,6,50,http://localhost:8080/api/appointments,4,0,0
+1767883044242,3,POST /api/auth/login (Nurse),401,Unauthorized,Nurse Users (7 VUs) 3-3,,false,,573,292,7,50,http://localhost:8080/api/auth/login,3,0,1
+1767883044259,4,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-9,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,4,0,0
+1767883044799,7,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-25,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,7,0,0
+1767883044955,4,GET /api/schedules/doctors,401,Unauthorized,Receptionist Users (6 VUs) 4-6,,false,,573,228,6,50,http://localhost:8080/api/schedules/doctors,4,0,0
+1767883045219,3,GET /api/patients,401,Unauthorized,Nurse Users (7 VUs) 3-6,,false,,573,234,7,50,http://localhost:8080/api/patients?page=0&size=20,3,0,0
+1767883045440,6,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-16,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,6,0,0
+1767883045520,6,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-17,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,6,0,0
+1767883046173,6,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-15,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,6,0,0
+1767883046717,5,GET /api/patients,401,Unauthorized,Nurse Users (7 VUs) 3-7,,false,,573,234,7,50,http://localhost:8080/api/patients?page=0&size=20,5,0,0
+1767883046854,11,POST /api/auth/login (Nurse),401,Unauthorized,Nurse Users (7 VUs) 3-2,,false,,573,292,7,50,http://localhost:8080/api/auth/login,11,0,2
+1767883048572,4,GET /api/auth/me,401,Unauthorized,Doctor Users (9 VUs) 2-3,,false,,573,218,9,50,http://localhost:8080/api/auth/me,4,0,0
+1767883048942,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-4,,false,,573,298,27,50,http://localhost:8080/api/auth/login,3,0,1
+1767883049567,4,GET /api/appointments,401,Unauthorized,Receptionist Users (6 VUs) 4-4,,false,,573,223,6,50,http://localhost:8080/api/appointments,4,0,0
+1767883049826,6,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-18,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,6,0,0
+1767883050466,4,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-11,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,4,0,0
+1767883051679,5,GET /api/auth/me,401,Unauthorized,Doctor Users (9 VUs) 2-6,,false,,573,218,9,50,http://localhost:8080/api/auth/me,5,0,0
+1767883052247,2,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-7,,false,,573,298,27,50,http://localhost:8080/api/auth/login,2,0,1
+1767883052388,4,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-23,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,4,0,0
+1767883052570,5,GET /api/schedules/doctors,401,Unauthorized,Patient Users (27 VUs) 1-27,,false,,573,228,27,50,http://localhost:8080/api/schedules/doctors,5,0,0
+1767883052978,2,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-10,,false,,573,298,27,50,http://localhost:8080/api/auth/login,2,0,1
+1767883053273,3,POST /api/auth/login (Receptionist),401,Unauthorized,Receptionist Users (6 VUs) 4-1,,false,,573,306,6,50,http://localhost:8080/api/auth/login,3,0,1
+1767883053306,4,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-24,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,4,0,0
+1767883053722,4,GET /api/patients,401,Unauthorized,Nurse Users (7 VUs) 3-4,,false,,573,234,7,50,http://localhost:8080/api/patients?page=0&size=20,4,0,0
+1767883053754,5,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-6,,false,,573,298,27,50,http://localhost:8080/api/auth/login,5,0,3
+1767883053824,4,POST /api/auth/login (Nurse),401,Unauthorized,Nurse Users (7 VUs) 3-1,,false,,573,293,7,50,http://localhost:8080/api/auth/login,4,0,1
+1767883054009,5,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-20,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,5,0,0
+1767883054443,5,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-19,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,5,0,0
+1767883054873,7,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-26,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,7,0,0
+1767883055091,4,GET /api/auth/me,401,Unauthorized,Doctor Users (9 VUs) 2-8,,false,,573,218,9,50,http://localhost:8080/api/auth/me,4,0,0
+1767883055256,7,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-22,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,7,0,0
+1767883055933,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-14,,false,,573,298,27,50,http://localhost:8080/api/auth/login,4,0,2
+1767883056378,4,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-21,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,4,0,0
+1767883056422,5,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-3,,false,,573,222,27,50,http://localhost:8080/api/patients/me,5,0,0
+1767883056723,5,GET /api/appointments,401,Unauthorized,Receptionist Users (6 VUs) 4-5,,false,,573,223,6,50,http://localhost:8080/api/appointments,5,0,0
+1767883057171,5,GET /api/auth/me,401,Unauthorized,Doctor Users (9 VUs) 2-7,,false,,573,218,9,50,http://localhost:8080/api/auth/me,5,0,0
+1767883057293,9,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-1,,false,,573,222,27,50,http://localhost:8080/api/patients/me,9,0,0
+1767883057603,4,GET /api/patients/me,401,Unauthorized,Patient Users (27 VUs) 1-2,,false,,573,222,27,50,http://localhost:8080/api/patients/me,4,0,0
+1767883057715,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-8,,false,,573,298,27,50,http://localhost:8080/api/auth/login,4,0,1
+1767883058088,14,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-13,,false,,573,298,27,50,http://localhost:8080/api/auth/login,14,0,1
+1767883058301,4,GET /api/appointments,401,Unauthorized,Receptionist Users (6 VUs) 4-2,,false,,573,223,6,50,http://localhost:8080/api/appointments,4,0,0
+1767883058350,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-9,,false,,573,299,27,50,http://localhost:8080/api/auth/login,3,0,1
+1767883058599,5,POST /api/auth/login (Nurse),401,Unauthorized,Nurse Users (7 VUs) 3-5,,false,,573,292,7,50,http://localhost:8080/api/auth/login,5,0,2
+1767883059089,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-12,,false,,573,298,27,50,http://localhost:8080/api/auth/login,4,0,2
+1767883059594,3,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-16,,false,,573,299,27,50,http://localhost:8080/api/auth/login,3,0,1
+1767883060296,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-17,,false,,573,299,27,50,http://localhost:8080/api/auth/login,4,0,1
+1767883060379,4,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-5,,false,,573,298,27,50,http://localhost:8080/api/auth/login,4,0,1
+1767883060385,5,GET /api/appointments/by-patient,401,Unauthorized,Patient Users (27 VUs) 1-25,,false,,573,248,27,50,http://localhost:8080/api/appointments/by-patient/0?patientId=0,5,0,0
+1767883061061,4,POST /api/auth/login (Receptionist),401,Unauthorized,Receptionist Users (6 VUs) 4-3,,false,,573,306,6,50,http://localhost:8080/api/auth/login,4,0,1
+1767883061524,5,POST /api/auth/login (Patient),401,Unauthorized,Patient Users (27 VUs) 1-15,,false,,573,299,27,50,http://localhost:8080/api/auth/login,5,0,1

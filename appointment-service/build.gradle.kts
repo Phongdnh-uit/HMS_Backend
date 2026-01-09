@@ -3,9 +3,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.cloud:spring-cloud-config-client")
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
     runtimeOnly("com.mysql:mysql-connector-j")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    
+    // Test utilities from common module
+    testImplementation(testFixtures(project(":common")))
 }

@@ -1,0 +1,42 @@
+# Gradle build cache and outputs
+.gradle
+**/build
+# Re-include JAR files for prebuilt Docker images
+!**/build/libs/*.jar
+
+# IDE
+.idea
+*.iml
+.vscode
+
+# Logs
+*.log
+
+# Environment files (sensitive)
+.env
+.env.local
+
+# Git
+.git
+.github
+
+# Test files
+**/test-results
+**/test-reports
+
+# Postman collections
+*.postman_collection*.json
+
+# Temp files
+*.tmp
+*.temp
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation (not needed for build)
+docs
+*.md
+!README.md

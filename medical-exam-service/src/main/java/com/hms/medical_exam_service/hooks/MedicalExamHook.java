@@ -14,6 +14,7 @@ import com.hms.medical_exam_service.repositories.MedicalExamRepository;
 import com.hms.medical_exam_service.repositories.PrescriptionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -43,6 +44,7 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
     private final PrescriptionRepository prescriptionRepository;
     private final WebClient.Builder webClientBuilder;
     private final BillingClient billingClient;
+    private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
     
     // Injected from config: appointment-service.base-url
     @org.springframework.beans.factory.annotation.Value("${appointment-service.base-url:http://appointment-service-pro:8085}")
@@ -52,7 +54,7 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
     private static final Duration MODIFICATION_WINDOW = Duration.ofHours(24);
     
     // MVP flag: set to false to enable real appointment-service calls
-    private static final boolean USE_MOCK_APPOINTMENT = false;
+    private static final boolean USE_MOCK_APPOINTMENT = true;
 
     // ============================ VIEW ============================
     
@@ -172,27 +174,29 @@ public class MedicalExamHook implements GenericHook<MedicalExam, String, Medical
         // because appointmentServiceBaseUrl is a direct Docker network URL, not an Eureka-registered service name
         String url = appointmentServiceBaseUrl + "/appointments/" + appointmentId;
         log.info("📞 Fetching appointment from: {}", url);
-        
-        try {
+
+        return circuitBreakerFactory.create("examAppointment").run(() -> {
             var apiResponse = org.springframework.web.reactive.function.client.WebClient.create()
                 .get()
                 .uri(url)
                 .retrieve()
                 .bodyToMono(new org.springframework.core.ParameterizedTypeReference<com.hms.common.dtos.ApiResponse<AppointmentResponse>>() {})
-                .block();
-            
+                .block(Duration.ofSeconds(2));
+
             if (apiResponse != null && apiResponse.getData() != null) {
                 log.info("✅ Successfully fetched appointment: {} with patient={}, doctor={}",
                     appointmentId, apiResponse.getData().patientName(), apiResponse.getData().doctorName());
                 return apiResponse.getData();
             }
-            
+
             log.warn("⚠️ Appointment service returned null data for: {}", appointmentId);
             return null;
-        } catch (Exception e) {
-            log.error("❌ Error fetching appointment {}: {}", appointmentId, e.getMessage(), e);
-            return null;
-        }
+        }, throwable -> {
+            // CB fallback: fail fast with clear error indicating service unavailability (not "not found")
+            log.error("[CB-FALLBACK] Appointment service unavailable for {}: {}", appointmentId, throwable.getMessage());
+            throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                "Appointment service unavailable. Please try again later.");
+        });
     }
 
     @Override

@@ -16,6 +16,7 @@ import com.hms.hr_service.repositories.DepartmentRepository;
 import com.hms.hr_service.repositories.EmployeeRepository;
 import com.hms.hr_service.repositories.ScheduleRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +42,7 @@ public class ScheduleService {
     private final DepartmentRepository departmentRepository;
     private final ScheduleMapper scheduleMapper;
     private final AppointmentClient appointmentClient;
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
     // Manual constructor to apply @Lazy
     public ScheduleService(
@@ -48,12 +50,14 @@ public class ScheduleService {
             EmployeeRepository employeeRepository,
             DepartmentRepository departmentRepository,
             ScheduleMapper scheduleMapper,
-            @Lazy AppointmentClient appointmentClient) {
+            @Lazy AppointmentClient appointmentClient,
+            CircuitBreakerFactory circuitBreakerFactory) {
         this.scheduleRepository = scheduleRepository;
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
         this.scheduleMapper = scheduleMapper;
         this.appointmentClient = appointmentClient;
+        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     /**
@@ -221,13 +225,20 @@ public class ScheduleService {
         boolean appointmentsCancelled = false;
         
         try {
-            // Step 3: Call appointment-service to cancel appointments
+            // Step 3: Call appointment-service to cancel appointments (with circuit breaker)
             log.info("Cancel saga STEP 3: Calling appointment-service for schedule {}", id);
             
-            var result = appointmentClient.cancelByDoctorAndDate(
-                    schedule.getEmployeeId(),
-                    schedule.getWorkDate(),
-                    reason
+            var appointmentCircuitBreaker = circuitBreakerFactory.create("hrAppointment");
+            var result = appointmentCircuitBreaker.run(
+                () -> appointmentClient.cancelByDoctorAndDate(
+                        schedule.getEmployeeId(),
+                        schedule.getWorkDate(),
+                        reason
+                ),
+                throwable -> {
+                    log.error("CB fallback - appointment-service unavailable: {}", throwable.getMessage());
+                    throw new RuntimeException("Appointment service unavailable: " + throwable.getMessage(), throwable);
+                }
             );
             
             cancelledAppointments = result.getData() != null ? result.getData() : 0;
@@ -258,9 +269,19 @@ public class ScheduleService {
             // Final save failed AFTER appointments were cancelled - COMPENSATION needed!
             log.error("Cancel saga FAILED at STEP 4 (final save): {}. Triggering COMPENSATION.", e.getMessage());
             
-            // Compensate: Restore the appointments that were just cancelled
+            // Compensate: Restore the appointments that were just cancelled (with circuit breaker)
             try {
-                appointmentClient.restoreByDoctorAndDate(schedule.getEmployeeId(), schedule.getWorkDate());
+                var compensationCircuitBreaker = circuitBreakerFactory.create("hrAppointment");
+                compensationCircuitBreaker.run(
+                    () -> {
+                        appointmentClient.restoreByDoctorAndDate(schedule.getEmployeeId(), schedule.getWorkDate());
+                        return null;
+                    },
+                    throwable -> {
+                        log.error("COMPENSATION CB fallback - appointment-service unavailable: {}", throwable.getMessage());
+                        throw new RuntimeException("Compensation failed: " + throwable.getMessage(), throwable);
+                    }
+                );
                 log.info("COMPENSATION SUCCESS: Restored appointments for doctor {} on {}", 
                         schedule.getEmployeeId(), schedule.getWorkDate());
             } catch (Exception compensateError) {

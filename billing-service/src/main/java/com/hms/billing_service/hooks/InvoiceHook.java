@@ -16,6 +16,7 @@ import com.hms.common.helpers.FeignHelper;
 import com.hms.common.dtos.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -35,6 +36,7 @@ public class InvoiceHook implements GenericHook<Invoice, String, InvoiceRequest,
     private final AppointmentClient appointmentClient;
     private final PatientClient patientClient;
     private final HrClient hrClient;
+    private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
     // Simple counter for invoice number generation
     private static final AtomicLong invoiceCounter = new AtomicLong(System.currentTimeMillis() % 10000);
@@ -49,6 +51,9 @@ public class InvoiceHook implements GenericHook<Invoice, String, InvoiceRequest,
         String appointmentId = request.getAppointmentId();
         String examId = request.getExamId(); // New: examId passed directly
 
+        var medicalExamCircuitBreaker = circuitBreakerFactory.create("billingMedicalExam");
+        var hrCircuitBreaker = circuitBreakerFactory.create("billingHr");
+
         // Check if invoice already exists - if so, we'll UPDATE it instead of creating new
         Invoice existingInvoice = invoiceRepository.findByAppointmentId(appointmentId).orElse(null);
         if (existingInvoice != null) {
@@ -57,19 +62,30 @@ public class InvoiceHook implements GenericHook<Invoice, String, InvoiceRequest,
         }
 
         // Fetch medical exam - use examId if provided, otherwise by appointment
+        // This is CRITICAL - fail fast if medical exam service is unavailable
         MedicalExamClient.MedicalExamResponse exam;
         if (examId != null && !examId.isEmpty()) {
             // Direct exam lookup by ID (more reliable)
             log.info("Fetching exam directly by examId: {}", examId);
-            ApiResponse<MedicalExamClient.MedicalExamResponse> examResponse = FeignHelper.safeCall(
-                () -> medicalExamClient.getExamById(examId)
+            ApiResponse<MedicalExamClient.MedicalExamResponse> examResponse = medicalExamCircuitBreaker.run(
+                () -> FeignHelper.safeCall(() -> medicalExamClient.getExamById(examId)),
+                throwable -> {
+                    log.error("[CB-FALLBACK] Medical exam service unavailable: {}", throwable.getMessage());
+                    throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                        "Medical exam service unavailable. Cannot generate invoice.");
+                }
             );
             exam = examResponse.getData();
         } else {
             // Fallback: lookup by appointment
             log.info("Fetching exam by appointmentId: {}", appointmentId);
-            ApiResponse<MedicalExamClient.MedicalExamResponse> examResponse = FeignHelper.safeCall(
-                () -> medicalExamClient.getExamByAppointment(appointmentId)
+            ApiResponse<MedicalExamClient.MedicalExamResponse> examResponse = medicalExamCircuitBreaker.run(
+                () -> FeignHelper.safeCall(() -> medicalExamClient.getExamByAppointment(appointmentId)),
+                throwable -> {
+                    log.error("[CB-FALLBACK] Medical exam service unavailable: {}", throwable.getMessage());
+                    throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                        "Medical exam service unavailable. Cannot generate invoice.");
+                }
             );
             exam = examResponse.getData();
         }
@@ -80,49 +96,69 @@ public class InvoiceHook implements GenericHook<Invoice, String, InvoiceRequest,
         context.put(CONTEXT_EXAM, exam);
 
         // Fetch prescription using the CORRECT exam ID
+        // This is OPTIONAL - prescription may not exist for consultation-only visits
+        // BUT if service is down (CB open), we should NOT generate incomplete invoice
         String prescriptionExamId = examId != null && !examId.isEmpty() ? examId : exam.id();
-        try {
-            log.info("Fetching prescription by examId: {}", prescriptionExamId);
-            ApiResponse<MedicalExamClient.PrescriptionResponse> prescriptionResponse = FeignHelper.safeCall(
-                () -> medicalExamClient.getPrescriptionByExam(prescriptionExamId)
-            );
-            MedicalExamClient.PrescriptionResponse prescription = prescriptionResponse.getData();
-            if (prescription != null) {
-                context.put(CONTEXT_PRESCRIPTION, prescription);
-                log.info("Found prescription for exam: {}, items: {}", prescriptionExamId, 
-                    prescription.items() != null ? prescription.items().size() : 0);
-            } else {
-                log.info("No prescription found for exam: {} - creating consultation-only invoice", prescriptionExamId);
+        log.info("Fetching prescription by examId: {}", prescriptionExamId);
+        ApiResponse<MedicalExamClient.PrescriptionResponse> prescriptionResponse = medicalExamCircuitBreaker.run(
+            () -> FeignHelper.safeCall(() -> medicalExamClient.getPrescriptionByExam(prescriptionExamId)),
+            throwable -> {
+                // CB open = service unavailable. Don't generate incomplete invoice!
+                log.error("[CB-FALLBACK] Prescription service unavailable: {}", throwable.getMessage());
+                throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                    "Cannot verify prescription data. Please try again later to avoid incorrect invoice.");
             }
-        } catch (Exception e) {
-            // Prescription not found is OK - consultation-only invoice
-            log.info("No prescription for exam: {} - creating consultation-only invoice. Error: {}", prescriptionExamId, e.getMessage());
+        );
+        // Service responded - check if prescription exists
+        MedicalExamClient.PrescriptionResponse prescription = prescriptionResponse.getData();
+        if (prescription != null) {
+            context.put(CONTEXT_PRESCRIPTION, prescription);
+            log.info("Found prescription for exam: {}, items: {}", prescriptionExamId, 
+                prescription.items() != null ? prescription.items().size() : 0);
+        } else {
+            // Prescription genuinely doesn't exist - OK for consultation-only invoice
+            log.info("No prescription found for exam: {} - creating consultation-only invoice", prescriptionExamId);
         }
 
 
-        // Fetch lab test results (optional)
-        try {
-            ApiResponse<java.util.List<MedicalExamClient.LabTestResultResponse>> labTestsResponse = FeignHelper.safeCall(
-                () -> medicalExamClient.getLabResultsByExam(exam.id())
-            );
-            java.util.List<MedicalExamClient.LabTestResultResponse> labTests = labTestsResponse.getData();
-            if (labTests != null && !labTests.isEmpty()) {
-                context.put(CONTEXT_LAB_TESTS, labTests);
-                log.info("Found {} lab tests for exam: {}", labTests.size(), exam.id());
+        // Fetch lab test results (optional but price-affecting)
+        // If service is down (CB open), we should NOT generate incomplete invoice
+        log.info("Fetching lab tests by examId: {}", exam.id());
+        ApiResponse<java.util.List<MedicalExamClient.LabTestResultResponse>> labTestsResponse = medicalExamCircuitBreaker.run(
+            () -> FeignHelper.safeCall(() -> medicalExamClient.getLabResultsByExam(exam.id())),
+            throwable -> {
+                // CB open = service unavailable. Don't generate incomplete invoice!
+                log.error("[CB-FALLBACK] Lab test service unavailable: {}", throwable.getMessage());
+                throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                    "Cannot verify lab test data. Please try again later to avoid incorrect invoice.");
             }
-        } catch (Exception e) {
+        );
+        // Service responded - check if lab tests exist
+        java.util.List<MedicalExamClient.LabTestResultResponse> labTests = labTestsResponse.getData();
+        if (labTests != null && !labTests.isEmpty()) {
+            context.put(CONTEXT_LAB_TESTS, labTests);
+            log.info("Found {} lab tests for exam: {}", labTests.size(), exam.id());
+        } else {
             log.info("No lab tests for exam: {}", exam.id());
         }
 
-        // Fetch consultation fee
+        // Fetch consultation fee (optional - use default on failure)
+        // This is less critical - default fee is acceptable if HR service is down
         if (exam.doctor() != null) {
             try {
-                ApiResponse<HrClient.EmployeeResponse> doctorResponse = FeignHelper.safeCall(
-                    () -> hrClient.getEmployeeById(exam.doctor().id())
+                ApiResponse<HrClient.EmployeeResponse> doctorResponse = hrCircuitBreaker.run(
+                    () -> FeignHelper.safeCall(() -> hrClient.getEmployeeById(exam.doctor().id())),
+                    throwable -> {
+                        log.warn("[CB-FALLBACK] Could not fetch doctor info for consultation fee, using default: {}", 
+                            throwable.getMessage());
+                        return null;
+                    }
                 );
-                HrClient.EmployeeResponse doctor = doctorResponse.getData();
-                if (doctor.department() != null && doctor.department().consultationFee() != null) {
-                    context.put(CONTEXT_CONSULTATION_FEE, doctor.department().consultationFee());
+                if (doctorResponse != null) {
+                    HrClient.EmployeeResponse doctor = doctorResponse.getData();
+                    if (doctor != null && doctor.department() != null && doctor.department().consultationFee() != null) {
+                        context.put(CONTEXT_CONSULTATION_FEE, doctor.department().consultationFee());
+                    }
                 }
             } catch (Exception e) {
                 log.warn("Could not fetch consultation fee, using default: {}", e.getMessage());
@@ -241,6 +277,11 @@ public class InvoiceHook implements GenericHook<Invoice, String, InvoiceRequest,
     @org.springframework.transaction.annotation.Transactional
     public Invoice upsertInvoice(String appointmentId, String examId, String notes) {
         log.info("[UPSERT] Creating/updating invoice for appointmentId: {}, examId: {}", appointmentId, examId);
+
+        var medicalExamCircuitBreaker = circuitBreakerFactory.create("billingMedicalExam");
+        var appointmentCircuitBreaker = circuitBreakerFactory.create("billingAppointment");
+        var patientCircuitBreaker = circuitBreakerFactory.create("billingPatient");
+        var hrCircuitBreaker = circuitBreakerFactory.create("billingHr");
         
         // 1. Find or create invoice
         Invoice invoice = invoiceRepository.findByAppointmentId(appointmentId).orElse(null);
@@ -264,33 +305,53 @@ public class InvoiceHook implements GenericHook<Invoice, String, InvoiceRequest,
         
         invoice.setNotes(notes);
         
-        // 2. Fetch exam data
+        // 2. Fetch exam data (CRITICAL - fail fast if unavailable)
         MedicalExamClient.MedicalExamResponse exam = null;
         if (examId != null && !examId.isEmpty()) {
-            try {
-                var examResponse = FeignHelper.safeCall(() -> medicalExamClient.getExamById(examId));
-                exam = examResponse.getData();
-            } catch (Exception e) {
-                log.warn("[UPSERT] Could not fetch exam by ID: {}", e.getMessage());
-            }
+            log.info("[UPSERT] Fetching exam by examId: {}", examId);
+            var examResponse = medicalExamCircuitBreaker.run(
+                () -> FeignHelper.safeCall(() -> medicalExamClient.getExamById(examId)),
+                throwable -> {
+                    log.error("[CB-FALLBACK] Exam service unavailable: {}", throwable.getMessage());
+                    throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                        "Medical exam service unavailable. Cannot generate invoice.");
+                }
+            );
+            exam = examResponse.getData();
         }
         if (exam == null) {
-            try {
-                var examResponse = FeignHelper.safeCall(() -> medicalExamClient.getExamByAppointment(appointmentId));
-                exam = examResponse.getData();
-            } catch (Exception e) {
-                log.error("[UPSERT] Could not fetch exam: {}", e.getMessage());
-                throw new ApiException(ErrorCode.EXAM_NOT_FOUND, "Cannot fetch exam data for invoice");
-            }
+            log.info("[UPSERT] Fetching exam by appointmentId: {}", appointmentId);
+            var examResponse = medicalExamCircuitBreaker.run(
+                () -> FeignHelper.safeCall(() -> medicalExamClient.getExamByAppointment(appointmentId)),
+                throwable -> {
+                    log.error("[CB-FALLBACK] Exam service unavailable: {}", throwable.getMessage());
+                    throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                        "Medical exam service unavailable. Cannot generate invoice.");
+                }
+            );
+            exam = examResponse.getData();
+        }
+        
+        if (exam == null) {
+            throw new ApiException(ErrorCode.EXAM_NOT_FOUND, "Medical exam not found for invoice generation");
         }
         
         // Make exam effectively final for use in lambdas
         final MedicalExamClient.MedicalExamResponse finalExam = exam;
         
-        // 3. Fetch appointment to get type and patient info fallback
+        // 3. Fetch appointment to get type and patient info fallback (optional)
         AppointmentClient.AppointmentResponse appointment = null;
         try {
-            var appointmentResponse = FeignHelper.safeCall(() -> appointmentClient.getAppointmentById(appointmentId));
+            var appointmentResponse = appointmentCircuitBreaker.run(
+                () -> FeignHelper.safeCall(() -> appointmentClient.getAppointmentById(appointmentId)),
+                throwable -> {
+                    log.warn("[CB-FALLBACK] Appointment service unavailable: {}", throwable.getMessage());
+                    return null;
+                }
+            );
+            if (appointmentResponse == null) {
+                throw new IllegalStateException("Appointment service unavailable");
+            }
             appointment = appointmentResponse.getData();
             log.info("[UPSERT] Fetched appointment: id={}, type={}", appointmentId, appointment != null ? appointment.type() : "null");
         } catch (Exception e) {
@@ -322,7 +383,16 @@ public class InvoiceHook implements GenericHook<Invoice, String, InvoiceRequest,
         if (patientName == null && patientId != null) {
             try {
                 final String finalPatientId = patientId;
-                var patientResponse = FeignHelper.safeCall(() -> patientClient.getPatientById(finalPatientId));
+                var patientResponse = patientCircuitBreaker.run(
+                    () -> FeignHelper.safeCall(() -> patientClient.getPatientById(finalPatientId)),
+                    throwable -> {
+                        log.warn("[CB-FALLBACK] Patient service unavailable: {}", throwable.getMessage());
+                        return null;
+                    }
+                );
+                if (patientResponse == null) {
+                    throw new IllegalStateException("Patient service unavailable");
+                }
                 var patient = patientResponse.getData();
                 if (patient != null) {
                     patientName = patient.fullName();
@@ -337,11 +407,20 @@ public class InvoiceHook implements GenericHook<Invoice, String, InvoiceRequest,
         invoice.setPatientId(patientId);
         invoice.setPatientName(patientName);
         
-        // 5. Get consultation fee
+        // 5. Get consultation fee (optional - use default on failure)
         BigDecimal consultationFee = new BigDecimal("200000"); // default
         if (finalExam.doctor() != null) {
             try {
-                var doctorResponse = FeignHelper.safeCall(() -> hrClient.getEmployeeById(finalExam.doctor().id()));
+                var doctorResponse = hrCircuitBreaker.run(
+                    () -> FeignHelper.safeCall(() -> hrClient.getEmployeeById(finalExam.doctor().id())),
+                    throwable -> {
+                        log.warn("[CB-FALLBACK] HR service unavailable for consultation fee: {}", throwable.getMessage());
+                        return null;
+                    }
+                );
+                if (doctorResponse == null) {
+                    throw new IllegalStateException("HR service unavailable");
+                }
                 var doctor = doctorResponse.getData();
                 if (doctor.department() != null && doctor.department().consultationFee() != null) {
                     consultationFee = doctor.department().consultationFee();
@@ -367,9 +446,18 @@ public class InvoiceHook implements GenericHook<Invoice, String, InvoiceRequest,
             .build();
         invoice.addItem(consultationItem);
         
-        // 6. Fetch and add prescription items
+        // 6. Fetch and add prescription items (optional)
         try {
-            var prescriptionResponse = FeignHelper.safeCall(() -> medicalExamClient.getPrescriptionByExam(finalExam.id()));
+            var prescriptionResponse = medicalExamCircuitBreaker.run(
+                () -> FeignHelper.safeCall(() -> medicalExamClient.getPrescriptionByExam(finalExam.id())),
+                throwable -> {
+                    log.warn("[CB-FALLBACK] Could not fetch prescription: {}", throwable.getMessage());
+                    return null;
+                }
+            );
+            if (prescriptionResponse == null) {
+                throw new IllegalStateException("Exam service unavailable");
+            }
             var prescription = prescriptionResponse.getData();
             if (prescription != null && prescription.items() != null) {
                 for (var item : prescription.items()) {
@@ -390,9 +478,18 @@ public class InvoiceHook implements GenericHook<Invoice, String, InvoiceRequest,
             log.info("[UPSERT] No prescription found: {}", e.getMessage());
         }
         
-        // 7. Fetch and add lab test items
+        // 7. Fetch and add lab test items (optional)
         try {
-            var labTestsResponse = FeignHelper.safeCall(() -> medicalExamClient.getLabResultsByExam(finalExam.id()));
+            var labTestsResponse = medicalExamCircuitBreaker.run(
+                () -> FeignHelper.safeCall(() -> medicalExamClient.getLabResultsByExam(finalExam.id())),
+                throwable -> {
+                    log.warn("[CB-FALLBACK] Could not fetch lab tests: {}", throwable.getMessage());
+                    return null;
+                }
+            );
+            if (labTestsResponse == null) {
+                throw new IllegalStateException("Exam service unavailable");
+            }
             var labTests = labTestsResponse.getData();
             if (labTests != null && !labTests.isEmpty()) {
                 for (var labTest : labTests) {

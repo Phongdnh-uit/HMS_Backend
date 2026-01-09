@@ -116,10 +116,10 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/api/patients/*/profile-image").hasAnyAuthority("ADMIN", "RECEPTIONIST")
                         .pathMatchers(HttpMethod.DELETE, "/api/patients/*/profile-image").hasAnyAuthority("ADMIN", "RECEPTIONIST")
                         // Employee self-service image upload (all staff)
-                        .pathMatchers(HttpMethod.GET, "/api/hr/employees/me").hasAnyAuthority("DOCTOR", "NURSE", "RECEPTIONIST")
-                        .pathMatchers(HttpMethod.PUT, "/api/hr/employees/me").hasAnyAuthority("DOCTOR", "NURSE", "RECEPTIONIST")
-                        .pathMatchers(HttpMethod.POST, "/api/hr/employees/me/profile-image").hasAnyAuthority("DOCTOR", "NURSE", "RECEPTIONIST")
-                        .pathMatchers(HttpMethod.DELETE, "/api/hr/employees/me/profile-image").hasAnyAuthority("DOCTOR", "NURSE", "RECEPTIONIST")
+                        .pathMatchers(HttpMethod.GET, "/api/hr/employees/me").hasAnyAuthority("ADMIN", "DOCTOR", "NURSE", "RECEPTIONIST")
+                        .pathMatchers(HttpMethod.PUT, "/api/hr/employees/me").hasAnyAuthority("ADMIN", "DOCTOR", "NURSE", "RECEPTIONIST")
+                        .pathMatchers(HttpMethod.POST, "/api/hr/employees/me/profile-image").hasAnyAuthority("ADMIN", "DOCTOR", "NURSE", "RECEPTIONIST")
+                        .pathMatchers(HttpMethod.DELETE, "/api/hr/employees/me/profile-image").hasAnyAuthority("ADMIN", "DOCTOR", "NURSE", "RECEPTIONIST")
                         // Admin-only employee image upload
                         .pathMatchers(HttpMethod.POST, "/api/hr/employees/*/profile-image").hasAuthority("ADMIN")
                         .pathMatchers(HttpMethod.DELETE, "/api/hr/employees/*/profile-image").hasAuthority("ADMIN")
@@ -144,6 +144,8 @@ public class SecurityConfig {
                         // ============================================
                         .pathMatchers(HttpMethod.POST, "/api/hr/schedules/**").hasAnyAuthority("ADMIN", "RECEPTIONIST")
                         .pathMatchers(HttpMethod.PUT, "/api/hr/schedules/**").hasAnyAuthority("ADMIN", "RECEPTIONIST")
+                        .pathMatchers(HttpMethod.PATCH, "/api/hr/schedules/**").hasAnyAuthority("ADMIN", "RECEPTIONIST")
+                        .pathMatchers(HttpMethod.DELETE, "/api/hr/schedules/**").hasAnyAuthority("ADMIN")
                         .pathMatchers(HttpMethod.GET, "/api/hr/schedules/**").authenticated()
                         
                         // ============================================

@@ -20,6 +20,7 @@ public enum ErrorCode {
     SIGNATURE_INVALID(2011, HttpStatus.BAD_REQUEST, "Signature Invalid"),
     OAUTH2_ERROR(2012, HttpStatus.UNAUTHORIZED, "OAuth2 Error"),
     INTERNAL_SERVER_ERROR(2099, HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"),
+    SERVICE_UNAVAILABLE(2098, HttpStatus.SERVICE_UNAVAILABLE, "Service Temporarily Unavailable"),
 
     // === OTP Errors (2100-2199) ===
     OTP_EXPIRED(2100, HttpStatus.BAD_REQUEST, "OTP Expired"),
