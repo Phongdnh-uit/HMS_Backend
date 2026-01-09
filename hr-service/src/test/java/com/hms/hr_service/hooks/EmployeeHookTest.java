@@ -20,16 +20,22 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.lenient;
 
 /**
  * Unit tests for EmployeeHook.
@@ -45,7 +51,13 @@ class EmployeeHookTest {
     @Mock
     private AccountClient accountClient;
 
-    @InjectMocks
+    @Mock
+    private CircuitBreakerFactory<?, ?> circuitBreakerFactory;
+
+    @Mock
+    private CircuitBreaker circuitBreaker;
+
+    // Use manual construction instead of @InjectMocks to properly control circuit breaker setup
     private EmployeeHook employeeHook;
 
     private Employee testEmployee;
@@ -57,6 +69,21 @@ class EmployeeHookTest {
     @BeforeEach
     void setUp() {
         String departmentId = TestDataFactory.uuid();
+
+        // Setup circuit breaker to execute supplier directly (no circuit breaking in tests)
+        lenient().when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
+        lenient().when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+                .thenAnswer(invocation -> {
+                    Supplier<?> supplier = invocation.getArgument(0);
+                    return supplier.get();
+                });
+
+        // Create EmployeeHook manually after circuit breaker setup
+        employeeHook = new EmployeeHook(
+            departmentRepository,
+            accountClient,
+            circuitBreakerFactory
+        );
 
         testDepartment = new Department();
         testDepartment.setId(departmentId);

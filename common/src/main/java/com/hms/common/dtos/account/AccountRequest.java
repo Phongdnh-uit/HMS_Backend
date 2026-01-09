@@ -13,8 +13,8 @@ import lombok.Setter;
 @Setter
 @Builder
 public class AccountRequest {
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email is required", groups = {Action.Create.class, jakarta.validation.groups.Default.class})
+    @Email(message = "Invalid email format", groups = {Action.Create.class, jakarta.validation.groups.Default.class})
     private String email;
 
     @NotBlank(message = "Password is required", groups = {Action.Create.class})

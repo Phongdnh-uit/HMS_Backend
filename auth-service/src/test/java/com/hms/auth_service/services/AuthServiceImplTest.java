@@ -22,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
+import org.springframework.data.jpa.domain.Specification;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,6 +58,9 @@ class AuthServiceImplTest {
     
     @Mock
     private AuthenticationManagerBuilder authenticationManagerBuilder;
+
+    @Mock
+    private MailService mailService;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -95,6 +100,8 @@ class AuthServiceImplTest {
         @DisplayName("TC-AUTH-001: Should register new user successfully")
         void register_withValidData_shouldCreateAccount() {
             // Given
+            given(accountRepository.existsByEmail(anyString()))
+                .willReturn(false);
             given(accountMapper.requestToEntity(any(AccountRequest.class)))
                 .willReturn(testAccount);
             given(passwordEncoder.encode(anyString()))
@@ -103,6 +110,9 @@ class AuthServiceImplTest {
                 .willReturn(testAccount);
             given(accountMapper.entityToResponse(any(Account.class)))
                 .willReturn(testAccountResponse);
+            // Stub for sendAccountActivationEmail
+            given(accountRepository.findOne(any(Specification.class)))
+                .willReturn(Optional.of(testAccount));
 
             // When
             AccountResponse result = authService.register(testAccountRequest);
@@ -120,26 +130,29 @@ class AuthServiceImplTest {
             // Given
             Account capturedAccount = new Account();
             capturedAccount.setEmail(testEmail);
+            capturedAccount.setPassword("rawPassword");
             
+            given(accountRepository.existsByEmail(anyString()))
+                .willReturn(false);
             given(accountMapper.requestToEntity(any(AccountRequest.class)))
                 .willReturn(capturedAccount);
             given(passwordEncoder.encode(anyString()))
                 .willReturn("encodedPassword");
             given(accountRepository.save(any(Account.class)))
-                .willAnswer(invocation -> {
-                    Account saved = invocation.getArgument(0);
-                    // Verify role is set to PATIENT
-                    assertThat(saved.getRole()).isEqualTo(RoleEnum.PATIENT);
-                    return saved;
-                });
+                .willReturn(capturedAccount);
             given(accountMapper.entityToResponse(any(Account.class)))
                 .willReturn(testAccountResponse);
+            // Stub for sendAccountActivationEmail
+            given(accountRepository.findOne(any(Specification.class)))
+                .willReturn(Optional.of(capturedAccount));
 
             // When
             authService.register(testAccountRequest);
 
-            // Then - verified in the answer above
-            verify(accountRepository).save(any(Account.class));
+            // Then - use ArgumentCaptor to verify the role was set
+            var captor = org.mockito.ArgumentCaptor.forClass(Account.class);
+            verify(accountRepository).save(captor.capture());
+            assertThat(captor.getValue().getRole()).isEqualTo(RoleEnum.PATIENT);
         }
 
         @Test
@@ -152,6 +165,8 @@ class AuthServiceImplTest {
             testAccountRequest.setPassword(rawPassword);
             testAccount.setPassword(rawPassword);
             
+            given(accountRepository.existsByEmail(anyString()))
+                .willReturn(false);
             given(accountMapper.requestToEntity(any(AccountRequest.class)))
                 .willReturn(testAccount);
             given(passwordEncoder.encode(rawPassword))
@@ -160,6 +175,9 @@ class AuthServiceImplTest {
                 .willReturn(testAccount);
             given(accountMapper.entityToResponse(any(Account.class)))
                 .willReturn(testAccountResponse);
+            // Stub for sendAccountActivationEmail
+            given(accountRepository.findOne(any(Specification.class)))
+                .willReturn(Optional.of(testAccount));
 
             // When
             authService.register(testAccountRequest);
