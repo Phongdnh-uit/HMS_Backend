@@ -85,4 +85,41 @@ public class EmailService {
             throw new RuntimeException("Failed to send email", e);
         }
     }
+
+    /**
+     * Send appointment reminder email to patient.
+     * Sent one day before the scheduled appointment.
+     */
+    public void sendAppointmentReminder(String toEmail, String patientName, String doctorName,
+                                         String appointmentDate, String appointmentTime,
+                                         String department, String reason) {
+        try {
+            Context context = new Context();
+            context.setVariable("patientName", patientName);
+            context.setVariable("doctorName", doctorName);
+            context.setVariable("appointmentDate", appointmentDate);
+            context.setVariable("appointmentTime", appointmentTime);
+            context.setVariable("department", department);
+            context.setVariable("reason", reason);
+            context.setVariable("appName", appName);
+            context.setVariable("bookingUrl", bookingUrl);
+
+            String htmlContent = templateEngine.process("appointment-reminder", context);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject("🔔 Nhắc Nhở Lịch Hẹn Khám Bệnh - " + appName);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            log.info("Appointment reminder sent to {}", toEmail);
+
+        } catch (MessagingException e) {
+            log.error("Failed to send appointment reminder to {}: {}", toEmail, e.getMessage());
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
 }

@@ -89,6 +89,15 @@ public interface AppointmentRepository extends SimpleRepository<Appointment, Str
      */
     @Query("SELECT a FROM Appointment a WHERE a.createdAt >= :startTime AND a.createdAt < :endTime AND a.queueNumber IS NOT NULL ORDER BY a.priority ASC, a.queueNumber ASC")
     List<Appointment> findAllQueuesForDate(@Param("startTime") Instant startTime, @Param("endTime") Instant endTime);
+
+    // ========== Reminder notification queries ==========
+
+    /**
+     * Find appointments that need reminder notification.
+     * Returns SCHEDULED appointments within date range where reminderSent = false.
+     */
+    List<Appointment> findByAppointmentTimeBetweenAndStatusAndReminderSent(
+            Instant startTime, Instant endTime, AppointmentStatus status, boolean reminderSent);
 }
 
 

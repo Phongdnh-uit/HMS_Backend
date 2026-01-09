@@ -1,562 +1,1150 @@
-# HMS Backend - Comprehensive Test Plan
 
-## 📋 Project Overview
+## 📦 Phase 6: Performance Tests (11 tests)
 
-**Project:** Hospital Management System (HMS) Backend  
-**Architecture:** Microservices with Spring Boot / Spring Cloud  
-**Services:**
-- `api-gateway` - API Gateway with JWT validation and routing
-- `auth-service` - Authentication and account management
-- `patient-service` - Patient profile management
-- `appointment-service` - Appointment scheduling and queue management
-- `medical-exam-service` - Medical examinations, prescriptions, lab orders
-- `medicine-service` - Medicine and category management
-- `hr-service` - HR, department, employee, and schedule management
-- `billing-service` - Invoice and payment processing
-- `common` - Shared utilities, DTOs, generic controllers
-- `config-server` - Centralized configuration
-- `discovery-service` - Eureka service discovery
+### 🖥️ System Resources: 8GB RAM | 4 Logical Cores
 
----
+**Optimized Container Resource Allocation (Constrained Environment):**
 
-## 🧪 Test Types Required
+| Container                | CPU Limit | CPU Reserved | RAM Limit  | RAM Reserved | Priority |
+| ------------------------ | --------- | ------------ | ---------- | ------------ | -------- |
+| **PostgreSQL**           | 1.0       | 0.5          | 1.5GB      | 1.0GB        | High     |
+| **API Gateway**          | 0.5       | 0.25         | 512MB      | 384MB        | High     |
+| **Discovery Service**    | 0.25      | 0.1          | 384MB      | 256MB        | High     |
+| **Auth Service**         | 0.5       | 0.25         | 640MB      | 512MB        | High     |
+| **Patient Service**      | 0.4       | 0.2          | 512MB      | 384MB        | Medium   |
+| **Appointment Service**  | 0.5       | 0.25         | 640MB      | 512MB        | High     |
+| **Medical Exam Service** | 0.4       | 0.2          | 512MB      | 384MB        | Medium   |
+| **Medicine Service**     | 0.25      | 0.1          | 384MB      | 256MB        | Low      |
+| **HR Service**           | 0.4       | 0.2          | 512MB      | 384MB        | Medium   |
+| **Billing Service**      | 0.4       | 0.2          | 512MB      | 384MB        | Medium   |
+| **Notification Service** | 0.15      | 0.05         | 256MB      | 128MB        | Low      |
+| **Config Server**        | 0.2       | 0.1          | 384MB      | 256MB        | Medium   |
+| **Load Test Tool**       | 1.0       | 0.5          | 1.0GB      | 768MB        | -        |
+| **TOTAL**                | **5.95**  | **2.9**      | **7.75GB** | **5.5GB**    | -        |
 
-### 1. Unit Tests
-Test individual components in isolation.
+**Notes:**
 
-### 2. Integration Tests
-Test component interactions with real or embedded dependencies.
+- Total reserved: 5.5GB RAM (leaves ~2.5GB for Windows OS overhead)
+- CPU limits allow bursting up to 5.95 cores (time-sliced on 4 cores)
+- Database connection pool reduced to 50 max connections
+- JVM heap sizes: -Xmx384m to -Xmx512m per service
+- Consider running non-critical services on-demand only
+- Network: All containers share host network
 
-### 3. API/Controller Tests
-Test REST endpoints with MockMvc or WebTestClient.
+**Recommended JVM Settings (per microservice):**
 
-### 4. Repository Tests
-Test JPA repositories with embedded H2 database.
+```
+JAVA_OPTS=-Xms256m -Xmx384m -XX:+UseG1GC -XX:MaxGCPauseMillis=200
+```
 
-### 5. Service-to-Service (Feign Client) Tests
-Test inter-service communication.
+**Docker Compose Settings:**
 
-### 6. Security Tests
-Test authentication, authorization, and security configurations.
+```yaml
+version: "3.8"
+services:
+  postgres:
+    cpus: "1.0"
+    cpu_shares: 1024
+    mem_limit: 1536m
+    mem_reservation: 1024m
+    environment:
+      - POSTGRES_MAX_CONNECTIONS=50
+      - POSTGRES_SHARED_BUFFERS=256MB
 
-### 7. End-to-End (E2E) Tests
-Test complete user flows through API Gateway.
+  api-gateway:
+    cpus: "0.5"
+    cpu_shares: 512
+    mem_limit: 512m
+    mem_reservation: 384m
 
-### 8. Performance/Load Tests
-Test system behavior under load.
+  auth-service:
+    cpus: "0.5"
+    cpu_shares: 512
+    mem_limit: 640m
+    mem_reservation: 512m
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m
 
-### 9. Contract Tests
-Ensure API contracts are maintained between services.
+  appointment-service:
+    cpus: "0.5"
+    cpu_shares: 512
+    mem_limit: 640m
+    mem_reservation: 512m
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m
+```
 
----
+**⚠️ Resource Optimization Tips for 8GB System:**
 
-## 📊 Test Coverage Matrix
-
-| Service | Unit | Integration | API | Repository | Security | E2E |
-|---------|------|-------------|-----|------------|----------|-----|
-| auth-service | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| patient-service | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| appointment-service | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| medical-exam-service | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| medicine-service | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| hr-service | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| billing-service | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| api-gateway | ⬜ | ⬜ | ⬜ | N/A | ⬜ | ⬜ |
-| common | ⬜ | ⬜ | N/A | ⬜ | N/A | N/A |
-| config-server | ⬜ | ⬜ | ⬜ | N/A | N/A | N/A |
-| discovery-service | ⬜ | ⬜ | ⬜ | N/A | N/A | N/A |
-
-**Legend:** ⬜ Not Started | 🟡 In Progress | ✅ Complete
-
----
-
-## 📝 Detailed Test Checklist
-
-### Phase 1: Unit Tests (Isolation Testing)
-
-#### 1.1 Auth Service Unit Tests
-- [ ] **UC-AUTH-001:** `AuthServiceImpl.register()` - Valid registration
-- [ ] **UC-AUTH-002:** `AuthServiceImpl.register()` - Duplicate email rejection
-- [ ] **UC-AUTH-003:** `AuthServiceImpl.login()` - Valid credentials
-- [ ] **UC-AUTH-004:** `AuthServiceImpl.login()` - Invalid credentials
-- [ ] **UC-AUTH-005:** `AuthServiceImpl.refreshToken()` - Valid refresh token
-- [ ] **UC-AUTH-006:** `AuthServiceImpl.refreshToken()` - Expired token handling
-- [ ] **UC-AUTH-007:** `TokenProvider.generateToken()` - Token generation
-- [ ] **UC-AUTH-008:** `TokenProvider.validateToken()` - Token validation
-- [ ] **UC-AUTH-009:** `TokenProvider.validateToken()` - Expired token rejection
-- [ ] **UC-AUTH-010:** `AccountMapper` - Entity to DTO mapping
-- [ ] **UC-AUTH-011:** `AccountMapper` - DTO to Entity mapping
-- [ ] **UC-AUTH-012:** `AccountHook.beforeCreate()` - Password encoding
-- [ ] **UC-AUTH-013:** `CustomUserDetailsService.loadUserByUsername()` - User loading
-
-#### 1.2 Patient Service Unit Tests
-- [ ] **UC-PAT-001:** `PatientMapper` - Patient entity to response mapping
-- [ ] **UC-PAT-002:** `PatientMapper` - Request to entity mapping
-- [ ] **UC-PAT-003:** `PatientHook.beforeCreate()` - Pre-creation validation
-- [ ] **UC-PAT-004:** `PatientHook.afterCreate()` - Post-creation processing
-- [ ] **UC-PAT-005:** `PatientHelper` - Helper utility methods
-- [ ] **UC-PAT-006:** `FileStorageService.uploadFile()` - File upload handling
-- [ ] **UC-PAT-007:** `FileStorageService.deleteFile()` - File deletion
-
-#### 1.3 Appointment Service Unit Tests
-- [ ] **UC-APT-001:** `AppointmentMapper` - Appointment entity to response
-- [ ] **UC-APT-002:** `AppointmentMapper` - Request to entity
-- [ ] **UC-APT-003:** `AppointmentService.createAppointment()` - Valid appointment
-- [ ] **UC-APT-004:** `AppointmentService.createAppointment()` - Conflict detection
-- [ ] **UC-APT-005:** `AppointmentService.cancelAppointment()` - Cancellation logic
-- [ ] **UC-APT-006:** `AppointmentService.getAvailableSlots()` - Time slot calculation
-- [ ] **UC-APT-007:** `QueueService.addToQueue()` - Queue management
-- [ ] **UC-APT-008:** `QueueService.getNextInQueue()` - Queue ordering
-- [ ] **UC-APT-009:** `AppointmentHook.beforeCreate()` - Validation hooks
-- [ ] **UC-APT-010:** `AppointmentHook.afterUpdate()` - Status change handling
-
-#### 1.4 Medical Exam Service Unit Tests
-- [ ] **UC-EXAM-001:** `MedicalExamMapper` - Exam entity to response
-- [ ] **UC-EXAM-002:** `MedicalExamMapper` - Request to entity
-- [ ] **UC-EXAM-003:** `PrescriptionMapper` - Prescription mapping
-- [ ] **UC-EXAM-004:** `PrescriptionItemMapper` - Item mapping
-- [ ] **UC-EXAM-005:** `LabOrderMapper` - Lab order mapping
-- [ ] **UC-EXAM-006:** `LabTestMapper` - Lab test mapping
-- [ ] **UC-EXAM-007:** `LabTestResultMapper` - Result mapping
-- [ ] **UC-EXAM-008:** `MedicalExamHook.beforeCreate()` - Appointment validation
-- [ ] **UC-EXAM-009:** `MedicalExamHook.beforeDelete()` - Delete prevention
-- [ ] **UC-EXAM-010:** `MedicalExamHook.afterRead()` - Data enrichment
-- [ ] **UC-EXAM-011:** `PrescriptionHook.beforeCreate()` - Exam validation
-- [ ] **UC-EXAM-012:** `LabTestService` - Test CRUD operations
-- [ ] **UC-EXAM-013:** `LabTestResultService` - Result CRUD operations
-
-#### 1.5 Medicine Service Unit Tests
-- [ ] **UC-MED-001:** `MedicineMapper` - Medicine entity to response
-- [ ] **UC-MED-002:** `MedicineMapper` - Request to entity
-- [ ] **UC-MED-003:** `CategoryMapper` - Category mapping
-- [ ] **UC-MED-004:** `MedicineHook.beforeCreate()` - Validation
-- [ ] **UC-MED-005:** `MedicineHook.beforeUpdate()` - Stock validation
-- [ ] **UC-MED-006:** `CategoryHook.beforeDelete()` - Cascade prevention
-
-#### 1.6 HR Service Unit Tests
-- [ ] **UC-HR-001:** `EmployeeMapper` - Employee mapping
-- [ ] **UC-HR-002:** `DepartmentMapper` - Department mapping
-- [ ] **UC-HR-003:** `ScheduleMapper` - Schedule mapping
-- [ ] **UC-HR-004:** `ScheduleService.createSchedule()` - Schedule creation
-- [ ] **UC-HR-005:** `ScheduleService.cancelSchedule()` - Schedule cancellation
-- [ ] **UC-HR-006:** `ScheduleService.getAvailableDoctors()` - Doctor availability
-- [ ] **UC-HR-007:** `DepartmentHook.beforeDelete()` - Cascade prevention
-- [ ] **UC-HR-008:** `EmployeeHook.beforeCreate()` - Account creation
-- [ ] **UC-HR-009:** `ScheduleHook.beforeCreate()` - Conflict detection
-- [ ] **UC-HR-010:** `FileStorageService` - Employee photo handling
-
-#### 1.7 Billing Service Unit Tests
-- [ ] **UC-BILL-001:** `InvoiceMapper` - Invoice mapping
-- [ ] **UC-BILL-002:** `PaymentMapper` - Payment mapping
-- [ ] **UC-BILL-003:** `VNPayService.createPaymentUrl()` - Payment URL generation
-- [ ] **UC-BILL-004:** `VNPayService.verifyPayment()` - Payment verification
-- [ ] **UC-BILL-005:** `InvoiceHook.beforeCreate()` - Amount calculation
-- [ ] **UC-BILL-006:** `InvoiceHook.afterCreate()` - External service calls
-
-#### 1.8 Common Module Unit Tests
-- [ ] **UC-CMN-001:** `GenericController` - CRUD operations
-- [ ] **UC-CMN-002:** `GenericService` - Service layer logic
-- [ ] **UC-CMN-003:** `CrudService` - Base CRUD functionality
-- [ ] **UC-CMN-004:** `GenericMapper` - Base mapping
-- [ ] **UC-CMN-005:** `GenericHook` - Hook interface
-- [ ] **UC-CMN-006:** `ApiException` - Exception handling
-- [ ] **UC-CMN-007:** `GlobalExceptionHandler` - Error responses
-- [ ] **UC-CMN-008:** `ApiResponse` - Response wrapping
-- [ ] **UC-CMN-009:** `PageResponse` - Pagination handling
-- [ ] **UC-CMN-010:** `UserContext` - User context parsing
-- [ ] **UC-CMN-011:** `UserContextFilter` - Header extraction
-- [ ] **UC-CMN-012:** `FeignHelper` - Feign utilities
-- [ ] **UC-CMN-013:** `FeignCustomErrorDecoder` - Error decoding
-
-#### 1.9 API Gateway Unit Tests
-- [ ] **UC-GW-001:** `AuthFilter` - JWT validation
-- [ ] **UC-GW-002:** `AuthFilter` - Header injection
-- [ ] **UC-GW-003:** `SecurityConfig` - Route security rules
-- [ ] **UC-GW-004:** `CorsConfig` - CORS configuration
-- [ ] **UC-GW-005:** `SecurityConstant` - Public endpoints list
+1. Run load test tool on a separate machine if possible
+2. Disable non-essential services during testing (notification, config-server)
+3. Use external database instead of containerized PostgreSQL
+4. Reduce VU count to 200-300 for stable testing
+5. Increase think times to reduce concurrent load
 
 ---
 
-### Phase 2: Integration Tests
+### 📊 Load Test Data Seeding Plan
 
-#### 2.1 Repository Integration Tests
-- [ ] **IT-REPO-001:** `AccountRepository` - CRUD with H2
-- [ ] **IT-REPO-002:** `AccountRepository.findByEmail()` - Custom query
-- [ ] **IT-REPO-003:** `PatientRepository` - CRUD with H2
-- [ ] **IT-REPO-004:** `PatientRepository.findByAccountId()` - Custom query
-- [ ] **IT-REPO-005:** `AppointmentRepository` - CRUD with H2
-- [ ] **IT-REPO-006:** `AppointmentRepository` - Complex queries (by date, status)
-- [ ] **IT-REPO-007:** `MedicalExamRepository` - CRUD with H2
-- [ ] **IT-REPO-008:** `MedicalExamRepository.existsByAppointmentId()` - Custom query
-- [ ] **IT-REPO-009:** `PrescriptionRepository` - CRUD with H2
-- [ ] **IT-REPO-010:** `LabOrderRepository` - CRUD with H2
-- [ ] **IT-REPO-011:** `LabTestRepository` - CRUD with H2
-- [ ] **IT-REPO-012:** `LabTestResultRepository` - CRUD with H2
-- [ ] **IT-REPO-013:** `MedicineRepository` - CRUD with H2
-- [ ] **IT-REPO-014:** `CategoryRepository` - CRUD with H2
-- [ ] **IT-REPO-015:** `EmployeeRepository` - CRUD with H2
-- [ ] **IT-REPO-016:** `DepartmentRepository` - CRUD with H2
-- [ ] **IT-REPO-017:** `ScheduleRepository` - CRUD with H2
-- [ ] **IT-REPO-018:** `InvoiceRepository` - CRUD with H2
-- [ ] **IT-REPO-019:** `PaymentRepository` - CRUD with H2
-- [ ] **IT-REPO-020:** `InvoiceItemRepository` - CRUD with H2
+**Scripts Location:** `infrastructure/pro/`
 
-#### 2.2 Service Integration Tests
-- [ ] **IT-SVC-001:** `AuthService` - Full registration flow
-- [ ] **IT-SVC-002:** `AuthService` - Full login flow
-- [ ] **IT-SVC-003:** `AuthService` - Token refresh flow
-- [ ] **IT-SVC-004:** `PatientController + Repository` - CRUD integration
-- [ ] **IT-SVC-005:** `AppointmentService + Repository` - Booking flow
-- [ ] **IT-SVC-006:** `MedicalExamService + Hooks` - Exam creation
-- [ ] **IT-SVC-007:** `PrescriptionService + MedicineClient` - Prescription flow
-- [ ] **IT-SVC-008:** `LabOrderService + LabTestService` - Lab workflow
-- [ ] **IT-SVC-009:** `ScheduleService + EmployeeRepository` - Scheduling
-- [ ] **IT-SVC-010:** `InvoiceService + PaymentService` - Billing flow
+| File                     | Description                                        |
+| ------------------------ | -------------------------------------------------- |
+| `seed-loadtest-data.sql` | Complete SQL seed data with all entities           |
+| `seed-loadtest-data.ps1` | PowerShell automation script for Docker DB seeding |
 
-#### 2.3 Feign Client Integration Tests (with WireMock)
-- [ ] **IT-FEIGN-001:** `PatientClient` - Patient data fetching
-- [ ] **IT-FEIGN-002:** `HrClient` - Employee/Doctor data fetching
-- [ ] **IT-FEIGN-003:** `AppointmentClient` - Appointment data fetching
-- [ ] **IT-FEIGN-004:** `BillingClient` - Invoice creation
-- [ ] **IT-FEIGN-005:** `MedicalExamClient` - Exam data fetching
-- [ ] **IT-FEIGN-006:** `AccountClient` - Account management
-- [ ] **IT-FEIGN-007:** Feign error handling - 4xx errors
-- [ ] **IT-FEIGN-008:** Feign error handling - 5xx errors
-- [ ] **IT-FEIGN-009:** Feign timeout handling
-- [ ] **IT-FEIGN-010:** Feign retry mechanism
+#### Data Volume Summary
 
----
+| Entity                 | Count | Purpose                                                                          |
+| ---------------------- | ----- | -------------------------------------------------------------------------------- |
+| **Accounts**           | 1,155 | Auth data (5 admin + 60 doctors + 50 nurses + 40 receptionists + 1,000 patients) |
+| **Patients**           | 1,000 | Patient profiles with full demographics                                          |
+| **Employees**          | 155   | Staff records (60 doctors + 50 nurses + 40 receptionists + 5 admins)             |
+| **Departments**        | 10    | Hospital departments (Cardiology, Neurology, etc.)                               |
+| **Employee Schedules** | 420   | Doctor availability (60 doctors × 7 days)                                        |
+| **Medicines**          | 200   | Medicine catalog across 10 categories                                            |
+| **Categories**         | 10    | Medicine categories (Antibiotics, Analgesics, etc.)                              |
+| **Lab Tests**          | 50    | Lab test definitions (20 LAB + 20 IMAGING + 10 PATHOLOGY)                        |
+| **Appointments**       | 500   | Historical appointment data for testing                                          |
 
-### Phase 3: API/Controller Tests
+#### Seeding Commands
 
-#### 3.1 Auth Controller Tests
-- [ ] **API-AUTH-001:** `POST /auth/login` - Valid credentials, returns JWT
-- [ ] **API-AUTH-002:** `POST /auth/login` - Invalid credentials, returns 401
-- [ ] **API-AUTH-003:** `POST /auth/register` - Valid registration
-- [ ] **API-AUTH-004:** `POST /auth/register` - Duplicate email, returns 400
-- [ ] **API-AUTH-005:** `POST /auth/register` - Invalid input validation
-- [ ] **API-AUTH-006:** `POST /auth/refresh` - Valid refresh token
-- [ ] **API-AUTH-007:** `POST /auth/refresh` - Expired token, returns 401
-- [ ] **API-AUTH-008:** `GET /auth/me` - Returns current user profile
-- [ ] **API-AUTH-009:** `POST /auth/logout` - Successful logout
+```powershell
+# Execute all seed scripts
+.\infrastructure\pro\seed-loadtest-data.ps1
 
-#### 3.2 Account Controller Tests
-- [ ] **API-ACC-001:** `GET /accounts` - List all accounts (admin)
-- [ ] **API-ACC-002:** `GET /accounts/{id}` - Get account by ID
-- [ ] **API-ACC-003:** `POST /accounts` - Create new account
-- [ ] **API-ACC-004:** `PUT /accounts/{id}` - Update account
-- [ ] **API-ACC-005:** `DELETE /accounts/{id}` - Delete account
-- [ ] **API-ACC-006:** `GET /accounts` - Pagination support
-- [ ] **API-ACC-007:** `GET /accounts` - Search/filter support
+# Reset and reseed (truncate tables first)
+.\infrastructure\pro\seed-loadtest-data.ps1 -Reset
 
-#### 3.3 Patient Controller Tests
-- [ ] **API-PAT-001:** `GET /patients` - List all patients
-- [ ] **API-PAT-002:** `GET /patients/{id}` - Get patient by ID
-- [ ] **API-PAT-003:** `POST /patients` - Create new patient
-- [ ] **API-PAT-004:** `PUT /patients/{id}` - Update patient
-- [ ] **API-PAT-005:** `DELETE /patients/{id}` - Delete patient
-- [ ] **API-PAT-006:** `GET /patients/me` - Get current patient profile
-- [ ] **API-PAT-007:** `PATCH /patients/me` - Update own profile
-- [ ] **API-PAT-008:** `GET /patients` - Search by name
-- [ ] **API-PAT-009:** `GET /patients` - Pagination
+# Verify existing data
+.\infrastructure\pro\seed-loadtest-data.ps1 -Verify
+```
 
-#### 3.4 Appointment Controller Tests
-- [ ] **API-APT-001:** `GET /appointments` - List appointments
-- [ ] **API-APT-002:** `GET /appointments/{id}` - Get appointment by ID
-- [ ] **API-APT-003:** `POST /appointments` - Book new appointment
-- [ ] **API-APT-004:** `POST /appointments` - Walk-in appointment
-- [ ] **API-APT-005:** `PUT /appointments/{id}` - Update appointment
-- [ ] **API-APT-006:** `DELETE /appointments/{id}` - Cancel appointment
-- [ ] **API-APT-007:** `GET /appointments/by-patient/{patientId}` - Patient appointments
-- [ ] **API-APT-008:** `GET /appointments/by-doctor/{doctorId}` - Doctor appointments
-- [ ] **API-APT-009:** `GET /appointments/available-slots` - Time slot availability
-- [ ] **API-APT-010:** `POST /appointments/{id}/check-in` - Check-in
-- [ ] **API-APT-011:** `POST /appointments/{id}/check-out` - Check-out
-- [ ] **API-APT-012:** `GET /appointments/queue` - Queue status
-- [ ] **API-APT-013:** `GET /appointments/stats` - Statistics
+#### Entity Field Mapping (Verified from Source Code)
 
-#### 3.5 Medical Exam Controller Tests
-- [ ] **API-EXAM-001:** `GET /exams` - List medical exams
-- [ ] **API-EXAM-002:** `GET /exams/{id}` - Get exam by ID
-- [ ] **API-EXAM-003:** `POST /exams` - Create new exam
-- [ ] **API-EXAM-004:** `PUT /exams/{id}` - Update exam
-- [ ] **API-EXAM-005:** `GET /exams/by-appointment/{appointmentId}` - Get by appointment
-- [ ] **API-EXAM-006:** `GET /exams/by-patient/{patientId}` - Patient exam history
+| Service              | Table                | Key Fields (snake_case)                                                              |
+| -------------------- | -------------------- | ------------------------------------------------------------------------------------ |
+| auth-service         | `accounts`           | `id`, `email`, `password`, `role`, `email_verified`                                  |
+| patient-service      | `patient`            | `id`, `account_id`, `full_name`, `email`, `date_of_birth`, `gender`, `phone_number`  |
+| hr-service           | `employees`          | `id`, `account_id`, `full_name`, `role`, `department_id`, `status`, `hired_at`       |
+| hr-service           | `departments`        | `id`, `name`, `description`, `location`, `phone_extension`, `status`                 |
+| hr-service           | `employee_schedules` | `id`, `employee_id`, `work_date`, `start_time`, `end_time`, `status`                 |
+| medicine-service     | `medicine`           | `id`, `name`, `active_ingredient`, `unit`, `quantity`, `selling_price`, `expires_at` |
+| medicine-service     | `category`           | `id`, `name`, `description`                                                          |
+| medical-exam-service | `lab_tests`          | `id`, `code`, `name`, `category`, `price`, `normal_range`, `is_active`               |
+| appointment-service  | `appointment`        | `id`, `patient_id`, `doctor_id`, `appointment_time`, `status`, `type`                |
 
-#### 3.6 Prescription Controller Tests
-- [ ] **API-PRESC-001:** `GET /prescriptions` - List prescriptions
-- [ ] **API-PRESC-002:** `GET /prescriptions/{id}` - Get prescription by ID
-- [ ] **API-PRESC-003:** `POST /prescriptions` - Create prescription
-- [ ] **API-PRESC-004:** `PUT /prescriptions/{id}` - Update prescription
-- [ ] **API-PRESC-005:** `DELETE /prescriptions/{id}` - Cancel prescription
-- [ ] **API-PRESC-006:** `GET /prescriptions/by-exam/{examId}` - By exam
+#### Enum Values Reference
 
-#### 3.7 Lab Order Controller Tests
-- [ ] **API-LAB-001:** `GET /lab-orders` - List lab orders
-- [ ] **API-LAB-002:** `GET /lab-orders/{id}` - Get lab order by ID
-- [ ] **API-LAB-003:** `POST /lab-orders` - Create lab order
-- [ ] **API-LAB-004:** `PUT /lab-orders/{id}` - Update lab order
-- [ ] **API-LAB-005:** `DELETE /lab-orders/{id}` - Cancel lab order
-- [ ] **API-LAB-006:** `PATCH /lab-orders/{id}/status` - Update status
-
-#### 3.8 Lab Test Controller Tests
-- [ ] **API-TEST-001:** `GET /lab-tests` - List available tests
-- [ ] **API-TEST-002:** `GET /lab-tests/{id}` - Get test by ID
-- [ ] **API-TEST-003:** `POST /lab-tests` - Create test type
-- [ ] **API-TEST-004:** `PUT /lab-tests/{id}` - Update test type
-- [ ] **API-TEST-005:** `DELETE /lab-tests/{id}` - Delete test type
-- [ ] **API-TEST-006:** `GET /lab-tests/by-category/{category}` - By category
-
-#### 3.9 Lab Test Result Controller Tests
-- [ ] **API-RESULT-001:** `GET /lab-results` - List results
-- [ ] **API-RESULT-002:** `GET /lab-results/{id}` - Get result by ID
-- [ ] **API-RESULT-003:** `POST /lab-results` - Create result
-- [ ] **API-RESULT-004:** `PUT /lab-results/{id}` - Update result
-- [ ] **API-RESULT-005:** `GET /lab-results/by-order/{orderId}` - By order
-
-#### 3.10 Medicine Controller Tests
-- [ ] **API-MED-001:** `GET /medicines` - List medicines
-- [ ] **API-MED-002:** `GET /medicines/{id}` - Get medicine by ID
-- [ ] **API-MED-003:** `POST /medicines` - Create medicine
-- [ ] **API-MED-004:** `PUT /medicines/{id}` - Update medicine
-- [ ] **API-MED-005:** `DELETE /medicines/{id}` - Delete medicine
-- [ ] **API-MED-006:** `PATCH /medicines/{id}/stock` - Update stock
-- [ ] **API-MED-007:** `GET /medicines/low-stock` - Low stock alert
-
-#### 3.11 Category Controller Tests
-- [ ] **API-CAT-001:** `GET /categories` - List categories
-- [ ] **API-CAT-002:** `GET /categories/{id}` - Get category by ID
-- [ ] **API-CAT-003:** `POST /categories` - Create category
-- [ ] **API-CAT-004:** `PUT /categories/{id}` - Update category
-- [ ] **API-CAT-005:** `DELETE /categories/{id}` - Delete category
-
-#### 3.12 Employee Controller Tests
-- [ ] **API-EMP-001:** `GET /employees` - List employees
-- [ ] **API-EMP-002:** `GET /employees/{id}` - Get employee by ID
-- [ ] **API-EMP-003:** `POST /employees` - Create employee
-- [ ] **API-EMP-004:** `PUT /employees/{id}` - Update employee
-- [ ] **API-EMP-005:** `DELETE /employees/{id}` - Delete employee
-- [ ] **API-EMP-006:** `GET /employees/doctors` - List doctors
-- [ ] **API-EMP-007:** `GET /employees/by-department/{deptId}` - By department
-
-#### 3.13 Department Controller Tests
-- [ ] **API-DEPT-001:** `GET /departments` - List departments
-- [ ] **API-DEPT-002:** `GET /departments/{id}` - Get department by ID
-- [ ] **API-DEPT-003:** `POST /departments` - Create department
-- [ ] **API-DEPT-004:** `PUT /departments/{id}` - Update department
-- [ ] **API-DEPT-005:** `DELETE /departments/{id}` - Delete department
-
-#### 3.14 Schedule Controller Tests
-- [ ] **API-SCHED-001:** `GET /schedules` - List schedules
-- [ ] **API-SCHED-002:** `GET /schedules/{id}` - Get schedule by ID
-- [ ] **API-SCHED-003:** `POST /schedules` - Create schedule
-- [ ] **API-SCHED-004:** `PUT /schedules/{id}` - Update schedule
-- [ ] **API-SCHED-005:** `DELETE /schedules/{id}` - Cancel schedule
-- [ ] **API-SCHED-006:** `GET /schedules/by-employee/{empId}` - By employee
-- [ ] **API-SCHED-007:** `GET /schedules/doctors` - Available doctors
-
-#### 3.15 Invoice Controller Tests
-- [ ] **API-INV-001:** `GET /invoices` - List invoices
-- [ ] **API-INV-002:** `GET /invoices/{id}` - Get invoice by ID
-- [ ] **API-INV-003:** `POST /invoices` - Create invoice
-- [ ] **API-INV-004:** `PUT /invoices/{id}` - Update invoice
-- [ ] **API-INV-005:** `DELETE /invoices/{id}` - Cancel invoice
-- [ ] **API-INV-006:** `GET /invoices/by-patient/{patientId}` - By patient
-- [ ] **API-INV-007:** `GET /invoices/stats` - Statistics
-
-#### 3.16 Payment Controller Tests
-- [ ] **API-PAY-001:** `POST /payments/init` - Initialize VNPay payment
-- [ ] **API-PAY-002:** `GET /payments/callback` - VNPay callback handling
-- [ ] **API-PAY-003:** `GET /payments/{id}` - Get payment by ID
-- [ ] **API-PAY-004:** `GET /payments/by-invoice/{invoiceId}` - By invoice
+| Enum                | Values                                                          |
+| ------------------- | --------------------------------------------------------------- |
+| `RoleEnum`          | `ADMIN`, `PATIENT`, `DOCTOR`, `NURSE`, `RECEPTIONIST`           |
+| `EmployeeRole`      | `DOCTOR`, `NURSE`, `RECEPTIONIST`, `ADMIN`                      |
+| `EmployeeStatus`    | `ACTIVE`, `ON_LEAVE`, `RESIGNED`                                |
+| `ScheduleStatus`    | `AVAILABLE`, `BOOKED`, `PENDING_CANCEL`, `CANCELLED`            |
+| `Gender`            | `MALE`, `FEMALE`, `OTHER`                                       |
+| `AppointmentStatus` | `SCHEDULED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`, `NO_SHOW` |
+| `AppointmentType`   | `CONSULTATION`, `FOLLOW_UP`, `EMERGENCY`, `WALK_IN`             |
+| `LabTestCategory`   | `LAB`, `IMAGING`, `PATHOLOGY`                                   |
+| `DepartmentStatus`  | `ACTIVE`, `INACTIVE`                                            |
 
 ---
 
-### Phase 4: Security Tests
+### Load Tests (5 tests)
 
-#### 4.1 Authentication Tests
-- [ ] **SEC-AUTH-001:** Valid JWT grants access
-- [ ] **SEC-AUTH-002:** Missing JWT returns 401
-- [ ] **SEC-AUTH-003:** Invalid JWT returns 401
-- [ ] **SEC-AUTH-004:** Expired JWT returns 401
-- [ ] **SEC-AUTH-005:** Malformed JWT returns 401
+#### PERF-LOAD-001: Combined Business Flow - 500 Concurrent Users
 
-#### 4.2 Authorization Tests
-- [ ] **SEC-AUTHZ-001:** Admin can access admin endpoints
-- [ ] **SEC-AUTHZ-002:** Doctor can access doctor endpoints
-- [ ] **SEC-AUTHZ-003:** Nurse can access nurse endpoints
-- [ ] **SEC-AUTHZ-004:** Receptionist can access receptionist endpoints
-- [ ] **SEC-AUTHZ-005:** Patient can access patient endpoints
-- [ ] **SEC-AUTHZ-006:** Patient cannot access admin endpoints
-- [ ] **SEC-AUTHZ-007:** Unauthorized role returns 403
-- [ ] **SEC-AUTHZ-008:** Cross-patient data access prevented
-
-#### 4.3 Gateway Security Tests
-- [ ] **SEC-GW-001:** Public endpoints accessible without auth
-- [ ] **SEC-GW-002:** Protected endpoints require auth
-- [ ] **SEC-GW-003:** X-User-* headers injected correctly
-- [ ] **SEC-GW-004:** Direct service access blocked in prod
-
-#### 4.4 Input Validation Tests
-- [ ] **SEC-VAL-001:** SQL injection prevention
-- [ ] **SEC-VAL-002:** XSS prevention
-- [ ] **SEC-VAL-003:** Request body size limits
-- [ ] **SEC-VAL-004:** Path traversal prevention
-- [ ] **SEC-VAL-005:** CORS configuration validation
+| ID            | PERF-LOAD-001                                                                                        |
+| ------------- | ---------------------------------------------------------------------------------------------------- |
+| **Test Case** | 500 VU Combined Business Flow (Full Hospital Day Simulation)                                         |
+| **Status**    | [ ]                                                                                                  |
+| **Scenario**  | Comprehensive load test simulating all HMS user roles executing core business workflows concurrently |
 
 ---
 
-### Phase 5: End-to-End (E2E) Tests
+#### 👥 Role Distribution & Virtual User Allocation (500 VUs Total)
 
-#### 5.1 Patient Registration Flow
-- [ ] **E2E-REG-001:** Complete patient registration through gateway
-- [ ] **E2E-REG-002:** Login after registration
-- [ ] **E2E-REG-003:** View own profile
+| Role             | VUs | % of Total | Primary Workflows                                      | Think Time | Session Duration |
+| ---------------- | --- | ---------- | ------------------------------------------------------ | ---------- | ---------------- |
+| **Patient**      | 275 | 55%        | Registration, Booking, View Records, Payment           | 5-10s      | 15-30 min        |
+| **Doctor**       | 90  | 18%        | View Schedule, Examine Patients, Prescribe, Lab Orders | 10-20s     | Full test        |
+| **Nurse**        | 70  | 14%        | Check Vitals, Update Records, Assist Doctor            | 5-15s      | Full test        |
+| **Receptionist** | 60  | 12%        | Walk-in Registration, Appointment Booking, Billing     | 3-8s       | Full test        |
+| **Admin**        | 5   | 1%         | Manage Staff, Departments, Reports, Medicine Stock     | 10-30s     | Full test        |
 
-#### 5.2 Appointment Booking Flow
-- [ ] **E2E-APT-001:** Patient books appointment with available doctor
-- [ ] **E2E-APT-002:** Patient views their appointments
-- [ ] **E2E-APT-003:** Patient cancels appointment
-- [ ] **E2E-APT-004:** Receptionist creates walk-in appointment
-- [ ] **E2E-APT-005:** Patient check-in flow
-
-#### 5.3 Medical Examination Flow
-- [ ] **E2E-EXAM-001:** Doctor creates exam for appointment
-- [ ] **E2E-EXAM-002:** Doctor adds diagnosis and notes
-- [ ] **E2E-EXAM-003:** Doctor creates prescription
-- [ ] **E2E-EXAM-004:** Doctor orders lab tests
-- [ ] **E2E-EXAM-005:** Lab technician enters results
-- [ ] **E2E-EXAM-006:** Complete exam with billing
-
-#### 5.4 Billing Flow
-- [ ] **E2E-BILL-001:** Invoice created after exam
-- [ ] **E2E-BILL-002:** Patient views invoice
-- [ ] **E2E-BILL-003:** VNPay payment flow
-- [ ] **E2E-BILL-004:** Payment confirmation
-
-#### 5.5 HR Management Flow
-- [ ] **E2E-HR-001:** Admin creates department
-- [ ] **E2E-HR-002:** Admin creates employee/doctor
-- [ ] **E2E-HR-003:** Admin creates schedule for doctor
-- [ ] **E2E-HR-004:** View doctor availability
+**Total**: 500 Virtual Users
 
 ---
 
-### Phase 6: Performance Tests
+#### 🔄 Detailed Workflow Scenarios by Role
 
-#### 6.1 Load Tests
-- [ ] **PERF-LOAD-001:** 100 concurrent login requests
-- [ ] **PERF-LOAD-002:** 50 concurrent appointment bookings
-- [ ] **PERF-LOAD-003:** 200 concurrent patient list queries
-- [ ] **PERF-LOAD-004:** Gateway routing under load
+### **1. PATIENT Workflow (275 VUs - 55%)**
 
-#### 6.2 Stress Tests
-- [ ] **PERF-STRESS-001:** Database connection pool limits
-- [ ] **PERF-STRESS-002:** Memory usage under sustained load
-- [ ] **PERF-STRESS-003:** Service recovery after overload
+**Sub-scenarios:**
 
-#### 6.3 Endurance Tests
-- [ ] **PERF-END-001:** 24-hour continuous operation
-- [ ] **PERF-END-002:** Memory leak detection
-- [ ] **PERF-END-003:** Connection leak detection
+- **Appointment Booking (140 VUs - 28%)**:
 
----
+  ```
+  1. POST /auth/login
+  2. GET /schedules/doctors (browse doctors)
+  3. GET /appointments/available-slots?doctorId=X&date=Y
+  4. POST /appointments (book appointment)
+  5. GET /appointments/by-patient/{id} (confirm)
+  Duration: 5-10 minutes
+  Think time: 5-10s between steps
+  ```
 
-### Phase 7: Contract Tests
+- **View Medical History (70 VUs - 14%)**:
 
-#### 7.1 API Contract Tests
-- [ ] **CONTRACT-001:** Auth service API contract
-- [ ] **CONTRACT-002:** Patient service API contract
-- [ ] **CONTRACT-003:** Appointment service API contract
-- [ ] **CONTRACT-004:** Medical exam service API contract
-- [ ] **CONTRACT-005:** Medicine service API contract
-- [ ] **CONTRACT-006:** HR service API contract
-- [ ] **CONTRACT-007:** Billing service API contract
+  ```
+  1. POST /auth/login
+  2. GET /patients/me
+  3. GET /exams/by-patient/{id}
+  4. GET /prescriptions/{id}
+  5. GET /lab-results/by-patient/{id}
+  Duration: 3-7 minutes
+  ```
 
-#### 7.2 Feign Client Contract Tests
-- [ ] **CONTRACT-FEIGN-001:** PatientClient contract
-- [ ] **CONTRACT-FEIGN-002:** HrClient contract
-- [ ] **CONTRACT-FEIGN-003:** AppointmentClient contract
-- [ ] **CONTRACT-FEIGN-004:** BillingClient contract
-- [ ] **CONTRACT-FEIGN-005:** MedicalExamClient contract
+- **Payment Processing (65 VUs - 13%)**:
+  ```
+  1. POST /auth/login
+  2. GET /invoices/by-patient/{id}
+  3. POST /payments/init (VNPay)
+  4. GET /payments/callback (simulate callback)
+  5. GET /invoices/{id} (verify paid)
+  Duration: 3-5 minutes
+  ```
 
----
+**Traffic Pattern**:
 
-## 🛠️ Test Infrastructure Setup Checklist
-
-### Dependencies to Add
-- [ ] JUnit 5 (Jupiter)
-- [ ] Mockito
-- [ ] AssertJ
-- [ ] H2 Database (test scope)
-- [ ] Spring Boot Test
-- [ ] Spring Security Test
-- [ ] Testcontainers (for integration tests)
-- [ ] WireMock (for Feign client tests)
-- [ ] JaCoCo (code coverage)
-- [ ] Gatling/JMeter (performance tests)
-- [ ] Rest-Assured (API tests)
-- [ ] Pact (contract tests)
-
-### Test Configuration Files
-- [ ] `application-test.yml` for each service
-- [ ] Test database configurations
-- [ ] Mock configurations for external services
-- [ ] Test data fixtures/factories
-
-### CI/CD Integration
-- [ ] GitHub Actions workflow for tests
-- [ ] Coverage report generation
-- [ ] Test result publishing
-- [ ] Quality gate configuration
+- Ramp-up: 0→250 in 2 minutes
+- Sustain: 250 VUs for 20 minutes
+- Variable arrivals (Poisson distribution)
 
 ---
 
-## 📈 Coverage Goals
+### **2. DOCTOR Workflow (90 VUs - 18%)**
 
-| Category | Target Coverage |
-|----------|-----------------|
-| Unit Tests | 80%+ line coverage |
-| Integration Tests | 70%+ critical paths |
-| API Tests | 100% endpoints |
-| Security Tests | 100% auth/authz scenarios |
-| E2E Tests | Core business flows |
+**Main Workflow (Continuous Loop):**
 
----
+```
+1. POST /auth/login
+2. GET /appointments/by-doctor/{id}?status=CHECKED_IN (queue)
+3. GET /appointments/{id} (patient details)
+4. GET /patients/{id} (medical history)
+5. GET /exams/by-patient/{id} (previous exams)
 
-## 📅 Recommended Test Priority
+6. POST /exams (create medical exam)
+   - diagnosis, symptoms, vital signs
 
-### Week 1-2: Foundation
-1. Set up test infrastructure
-2. Unit tests for `common` module
-3. Unit tests for `auth-service`
+7. POST /prescriptions (80% of cases)
+   - Select medicines
+   - Set dosage, frequency, duration
+   - Add instructions
 
-### Week 3-4: Core Services
-4. Unit tests for remaining services
-5. Repository integration tests
-6. Service integration tests
+8. POST /lab-orders (40% of cases)
+   - Order blood test, X-ray, etc.
 
-### Week 5-6: API & Security
-7. Controller/API tests for all services
-8. Security tests
-9. Feign client tests
+9. PUT /appointments/{id} (mark COMPLETED)
 
-### Week 7-8: E2E & Performance
-10. End-to-End tests
-11. Performance tests
-12. Contract tests
+10. Wait 10-20s (think time)
+11. Loop back to step 2 (next patient)
 
----
+Duration: Full test (30 minutes)
+Patients per doctor: 5-8 during test
+```
 
-## 📝 Notes
+**Resource Intensity**:
 
-- All tests should disable Eureka client and Config Server for isolation
-- Use `@SpringBootTest` with H2 for integration tests
-- Mock Feign clients in unit tests using `@MockBean`
-- Use `@WithMockUser` for security context in tests
-- Generate test coverage reports with each PR
+- High read operations (patient history)
+- Complex writes (exams, prescriptions)
+- Multiple service interactions (Feign calls)
 
 ---
 
-*Last Updated: 2026-01-07*
-*Created by: Test Planning Assistant*
+### **3. NURSE Workflow (70 VUs - 14%)**
+
+**Main Workflow (Continuous Loop):**
+
+```
+1. POST /auth/login
+2. GET /appointments/queue (waiting patients)
+3. POST /appointments/{id}/check-in (patient arrival)
+4. GET /patients/{id}
+5. PUT /patients/{id} (update vital signs - weight, BP, temp)
+6. POST /exams/{examId}/vitals (record vitals)
+7. GET /lab-orders?status=PENDING (check lab queue)
+8. PUT /lab-orders/{id}/status (update to IN_PROGRESS)
+9. Wait 5-15s
+10. Loop
+
+Duration: Full test
+Actions per nurse: 15-25 during test
+```
+
+**Resource Intensity**:
+
+- Medium read/write balance
+- Queue management
+- Real-time updates
+
+---
+
+### **4. RECEPTIONIST Workflow (60 VUs - 12%)**
+
+**Main Workflow (Continuous Loop):**
+
+```
+1. POST /auth/login
+
+Scenario A - Walk-in Registration (30% of time):
+  2a. POST /patients (register walk-in)
+  3a. POST /appointments (create walk-in appointment)
+  4a. POST /appointments/{id}/check-in
+
+Scenario B - Appointment Booking (40% of time):
+  2b. GET /patients?search=name/phone
+  3b. GET /schedules/doctors
+  4b. GET /appointments/available-slots
+  5b. POST /appointments
+
+Scenario C - Billing (30% of time):
+  2c. GET /appointments?status=COMPLETED
+  3c. POST /invoices (create invoice)
+  4c. GET /invoices/{id}
+  5c. POST /payments (cash payment)
+
+6. Wait 3-8s
+7. Loop
+
+Duration: Full test
+Transactions per receptionist: 20-35 during test
+```
+
+**Resource Intensity**:
+
+- High transaction volume
+- Mixed operations
+- Critical path for patient flow
+
+---
+
+### **5. ADMIN Workflow (5 VUs - 1%)**
+
+**Main Workflow:**
+
+```
+1. POST /auth/login
+
+Cycle through scenarios:
+
+Scenario A - Staff Management (every 5 min):
+  2. GET /employees
+  3. POST /employees (add new staff)
+  4. PUT /employees/{id} (update schedule)
+  5. GET /employees/doctors
+
+Scenario B - Department Management (every 8 min):
+  6. GET /departments
+  7. POST /schedules (create doctor schedules)
+  8. GET /schedules/doctors
+
+Scenario C - Medicine Inventory (every 10 min):
+  9. GET /medicines/low-stock
+  10. PUT /medicines/{id}/stock (restock)
+  11. GET /categories
+
+Scenario D - Reports & Analytics (every 15 min):
+  12. GET /appointments/stats
+  13. GET /invoices/stats
+  14. GET /patients?page=0&size=100 (patient list)
+
+Duration: Full test
+Think time: 10-30s between operations
+```
+
+**Resource Intensity**:
+
+- Lower frequency, heavier queries
+- Administrative operations
+- Reporting/analytics
+
+---
+
+#### ⚙️ Test Execution Configuration
+
+**Load Profile:**
+
+```
+Phase 1: Ramp-Up (5 minutes)
+  - Minute 0-1: 100 VUs (staff login)
+  - Minute 1-3: 100→300 VUs (gradual patient arrivals)
+  - Minute 3-5: 300→500 VUs (peak morning rush)
+
+Phase 2: Peak Load (20 minutes)
+  - Sustained 500 VUs
+  - All workflows running concurrently
+  - Natural think times between actions
+
+Phase 3: Ramp-Down (5 minutes)
+  - 500→200 VUs (patients leaving)
+  - 200→50 VUs (staff completing tasks)
+  - 50→0 VUs (close)
+
+Total Duration: 30 minutes
+```
+
+**Data Requirements:**
+
+- 1,000 pre-registered patient accounts
+- 60 doctor accounts with schedules
+- 50 nurse accounts
+- 40 receptionist accounts
+- 5 admin accounts
+- 500 available appointment slots
+- 200 medicine items in inventory
+- 50 lab test templates
+
+---
+
+#### 📊 Acceptance Criteria
+
+**Response Time SLAs:**
+
+- ✅ Login (P95): < 500ms
+- ✅ Patient Registration (P95): < 1500ms
+- ✅ Appointment Booking (P95): < 1000ms
+- ✅ Medical Exam Creation (P95): < 2000ms
+- ✅ Prescription Creation (P95): < 1500ms
+- ✅ Lab Order Creation (P95): < 1000ms
+- ✅ Payment Processing (P95): < 2000ms
+- ✅ Query Operations (P95): < 300ms
+
+**System Health:**
+
+- ✅ Overall error rate < 1%
+- ✅ No 500 errors (server crashes)
+- ✅ 4xx errors < 0.5% (validation only)
+- ✅ Database connection pool < 80% utilization
+- ✅ CPU usage per container < 75%
+- ✅ Memory usage stable (no growing trend)
+- ✅ No circuit breaker trips
+
+**Business Logic Validation:**
+
+- ✅ Zero double-booking conflicts
+- ✅ All appointments have unique time slots per doctor
+- ✅ Prescriptions linked to valid exams
+- ✅ Lab orders processed in FIFO order
+- ✅ Invoice amounts calculated correctly
+- ✅ Payment status updates reflected immediately
+- ✅ Queue positions accurate
+- ✅ Data consistency across services (eventual consistency < 5s)
+
+**Throughput Targets:**
+
+- ✅ Total requests/second: > 250 req/s
+- ✅ Successful transactions: > 95%
+- ✅ Concurrent active sessions: 500
+- ✅ Database queries/second: > 500
+- ✅ Feign client calls: < 200ms average
+
+---
+
+#### 🔍 Metrics Collection
+
+**Application Metrics (per service):**
+
+- Request count, rate, duration
+- Error rate by endpoint
+- JVM heap/non-heap memory
+- GC frequency and duration
+- Thread pool usage
+- Circuit breaker state
+
+**Database Metrics:**
+
+- Active connections
+- Query execution time
+- Deadlocks/lock waits
+- Transaction rate
+- Cache hit ratio
+
+**Infrastructure Metrics:**
+
+- Container CPU %
+- Container memory MB
+- Network I/O
+- Disk I/O
+- API Gateway latency
+
+**Business Metrics:**
+
+- Appointments created/cancelled
+- Patients registered
+- Exams completed
+- Prescriptions issued
+- Lab orders processed
+- Payments successful
+- Revenue generated (mock)
+
+---
+
+#### 🛠️ Load Testing Tools Configuration
+
+**Option 1: JMeter (Recommended)**
+
+```xml
+<ThreadGroup>
+  <numThreads>500</numThreads>
+  <rampUp>300</rampUp>
+  <duration>1800</duration>
+  <scheduler>true</scheduler>
+
+  <!-- Patient Thread Group: 275 threads -->
+  <!-- Doctor Thread Group: 90 threads -->
+  <!-- Nurse Thread Group: 70 threads -->
+  <!-- Receptionist Thread Group: 60 threads -->
+  <!-- Admin Thread Group: 5 threads -->
+</ThreadGroup>
+
+<HTTPSamplerProxy>
+  <connectTimeout>10000</connectTimeout>
+  <responseTimeout>30000</responseTimeout>
+</HTTPSamplerProxy>
+```
+
+**Option 2: Gatling (Alternative)**
+
+```scala
+setUp(
+  patientScenario.inject(
+    rampUsers(275) during (300 seconds)
+  ),
+  doctorScenario.inject(
+    rampUsers(90) during (60 seconds)
+  ),
+  nurseScenario.inject(
+    rampUsers(70) during (60 seconds)
+  ),
+  receptionistScenario.inject(
+    rampUsers(60) during (60 seconds)
+  ),
+  adminScenario.inject(
+    rampUsers(5) during (60 seconds)
+  )
+).protocols(httpProtocol)
+  .assertions(
+    global.responseTime.percentile(95).lt(2000),
+    global.successfulRequests.percent.gt(95)
+  )
+```
+
+---
+
+#### 📋 Pre-Test Checklist
+
+- [ ] All 12 containers deployed with resource limits
+- [ ] Database seeded with test data (1000+ patients)
+- [ ] JWT tokens pre-generated for test users
+- [ ] Monitoring dashboards configured (Grafana)
+- [ ] Prometheus scraping all services
+- [ ] Load balancer configured (if using multiple instances)
+- [ ] Test environment isolated from production
+- [ ] Backup database before test
+- [ ] Log aggregation ready (ELK/Loki)
+- [ ] Network bandwidth verified
+- [ ] Cleanup script prepared (delete test data post-run)
+
+---
+
+### Load Tests (Original - 4 tests)
+
+#### PERF-LOAD-001: 100 Concurrent User Logins
+
+| ID            | PERF-LOAD-001                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------ |
+| **Test Case** | 100 concurrent logins                                                                                  |
+| **Status**    | [x] ✅ ConcurrentLoginsSimulation.scala                                                                |
+| **Scenario**  | Simulate morning peak hours when hospital staff (doctors, nurses, receptionists) log in simultaneously |
+
+**Test Steps:**
+
+1. Prepare 100 valid user accounts (mixed roles: 30 doctors, 30 nurses, 20 receptionists, 20 patients)
+2. Execute concurrent login requests via API Gateway
+3. Each thread performs: POST `/auth/login` → Validate JWT → GET `/auth/me`
+4. Ramp-up: 0 to 100 users in 10 seconds
+5. Sustain load for 5 minutes
+6. Ramp-down: 100 to 0 in 10 seconds
+
+**Acceptance Criteria:**
+
+- ✅ 95th percentile response time < 500ms
+- ✅ 99th percentile response time < 1000ms
+- ✅ Error rate < 1%
+- ✅ Successful JWT generation for all valid logins
+- ✅ CPU usage < 70% across auth-service containers
+- ✅ Memory usage remains stable (no leaks)
+- ✅ Database connection pool < 80% utilization
+
+**Metrics to Collect:**
+
+- Response time (min, max, avg, p95, p99)
+- Throughput (requests/second)
+- Error rate
+- CPU/Memory usage per service
+- Database connection pool metrics
+- JWT generation time
+
+---
+
+#### PERF-LOAD-002: 50 Concurrent Appointment Bookings
+
+| ID            | PERF-LOAD-002                                                                                       |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| **Test Case** | 50 concurrent bookings                                                                              |
+| **Status**    | [x] ✅ ConcurrentBookingsSimulation.scala                                                           |
+| **Scenario**  | Simulate peak booking hours (8-9 AM) when patients book appointments through mobile/web application |
+
+**Test Steps:**
+
+1. Prepare test data:
+   - 50 authenticated patient accounts
+   - 10 active doctors with available schedules
+   - Schedule slots: 100 available slots across different times
+2. Each virtual user performs:
+   - GET `/schedules/doctors` (find available doctors)
+   - GET `/appointments/available-slots?doctorId=X&date=Y` (check slots)
+   - POST `/appointments` (book appointment)
+   - GET `/appointments/by-patient/{id}` (verify booking)
+3. Concurrent execution: 50 users booking simultaneously
+4. Duration: 3 minutes sustained load
+
+**Acceptance Criteria:**
+
+- ✅ 95th percentile response time < 800ms for booking
+- ✅ 99th percentile response time < 1500ms
+- ✅ Zero double-booking errors (data consistency)
+- ✅ All 50 bookings successful without conflicts
+- ✅ Pessimistic locking prevents race conditions
+- ✅ Queue system handles overflow correctly
+- ✅ Notification service triggered for each booking
+- ✅ Error rate < 0.5%
+
+**Business Logic Validation:**
+
+- No overlapping appointments for same doctor/time slot
+- Appointment status correctly transitions
+- Queue position assigned when slots full
+- Audit trail recorded for each booking
+
+**Metrics to Collect:**
+
+- Booking success rate
+- Conflict detection accuracy
+- Database lock wait time
+- Transaction rollback rate
+- Feign client call latency (HR service for doctor info)
+
+---
+
+#### PERF-LOAD-003: 1000 Concurrent Read Queries
+
+| ID            | PERF-LOAD-003                                                                                    |
+| ------------- | ------------------------------------------------------------------------------------------------ |
+| **Test Case** | 1000 concurrent queries                                                                          |
+| **Status**    | [x] ✅ ConcurrentQueriesSimulation.scala                                                         |
+| **Scenario**  | Simulate multiple staff members querying patient records, appointments, and medical exam history |
+
+**Test Steps:**
+
+1. Populate database with realistic data:
+   - 5,000 patients
+   - 10,000 appointments (historical + upcoming)
+   - 3,000 medical exams
+   - 2,000 prescriptions
+2. Execute mixed read operations:
+   - 30% GET `/patients?page=X&size=20` (paginated list)
+   - 25% GET `/patients/{id}` (individual patient)
+   - 20% GET `/appointments/by-doctor/{id}` (doctor's schedule)
+   - 15% GET `/exams/by-patient/{id}` (medical history)
+   - 10% GET `/prescriptions/{id}` (prescription details)
+3. Ramp-up: 0 to 1000 users in 30 seconds
+4. Sustain: 1000 concurrent users for 10 minutes
+5. Ramp-down: 30 seconds
+
+**Acceptance Criteria:**
+
+- ✅ 95th percentile response time < 200ms
+- ✅ 99th percentile response time < 500ms
+- ✅ Throughput > 500 requests/second
+- ✅ Database query execution time < 50ms (avg)
+- ✅ Proper index utilization (check query plans)
+- ✅ Cache hit ratio > 70% (if caching enabled)
+- ✅ Error rate < 0.1%
+- ✅ No database connection timeouts
+
+**Performance Optimizations to Verify:**
+
+- Database connection pooling efficiency
+- JPA query optimization (N+1 prevention)
+- Pagination performance
+- Index usage on foreign keys
+- Feign client circuit breaker functionality
+
+**Metrics to Collect:**
+
+- Request distribution per endpoint
+- Database connection pool usage
+- Cache hit/miss ratio
+- Query execution time breakdown
+- Network latency between services
+
+---
+
+#### PERF-LOAD-004: Gateway Routing Under Load
+
+| ID            | PERF-LOAD-004                                                                          |
+| ------------- | -------------------------------------------------------------------------------------- |
+| **Test Case** | Gateway routing under load                                                             |
+| **Status**    | [x] ✅ GatewayRoutingSimulation.scala                                                  |
+| **Scenario**  | Test API Gateway routing, load balancing, and circuit breaker under mixed traffic load |
+
+**Test Steps:**
+
+1. Configure multiple instances:
+   - API Gateway: 2 instances
+   - Each microservice: 2 instances
+   - Discovery Service: 1 instance
+2. Generate mixed traffic (500 concurrent users):
+   - 20% Authentication requests → auth-service
+   - 20% Patient operations → patient-service
+   - 20% Appointment operations → appointment-service
+   - 15% Medical exam operations → medical-exam-service
+   - 15% Billing operations → billing-service
+   - 10% HR operations → hr-service
+3. Simulate service failure scenarios:
+   - Kill 1 instance of appointment-service mid-test
+   - Introduce 3-second delay in medical-exam-service
+4. Duration: 15 minutes
+
+**Acceptance Criteria:**
+
+- ✅ Gateway routing latency < 50ms (overhead)
+- ✅ Successful failover to healthy instances
+- ✅ Circuit breaker opens after 50% error threshold
+- ✅ Load distribution: 50/50 between instances (±5%)
+- ✅ JWT validation at gateway < 20ms
+- ✅ Header injection (X-User-Id, X-User-Role) working
+- ✅ Rate limiting enforced (if configured)
+- ✅ Overall error rate < 2% during failure scenarios
+- ✅ Service discovery updates within 30 seconds
+
+**Gateway Features to Validate:**
+
+- Spring Cloud Gateway routing rules
+- Resilience4j circuit breaker patterns
+- Token validation performance
+- CORS handling under load
+- WebFlux non-blocking I/O efficiency
+
+**Metrics to Collect:**
+
+- Routing overhead (latency added by gateway)
+- Circuit breaker state transitions
+- Load balancer distribution
+- Failed requests during instance failure
+- Service discovery sync time
+
+---
+
+### Stress Tests (3 tests)
+
+#### PERF-STRESS-001: Database Connection Pool Limits
+
+| ID            | PERF-STRESS-001                                                                    |
+| ------------- | ---------------------------------------------------------------------------------- |
+| **Test Case** | DB connection pool limits                                                          |
+| **Status**    | [x] ✅ DbConnectionPoolSimulation.scala                                            |
+| **Scenario**  | Push database connection pool to its limits and test graceful degradation/recovery |
+
+**Test Steps:**
+
+1. Configure connection pool:
+   - Max connections: 100
+   - Min idle: 10
+   - Connection timeout: 30 seconds
+2. Gradually increase concurrent database operations:
+   - Start: 50 concurrent users
+   - Increment: +25 users every minute
+   - Peak: 300 concurrent users (3x pool size)
+3. Each user performs complex queries:
+   - JOIN operations across 3-4 tables
+   - Transaction with multiple INSERT/UPDATE
+   - Hold connection for 2-5 seconds
+4. Monitor until connection pool exhaustion
+5. Reduce load and verify recovery
+
+**Acceptance Criteria:**
+
+- ✅ Connection pool reaches 100 active connections
+- ✅ Additional requests queue (not fail immediately)
+- ✅ Connection timeout after 30 seconds for waiting requests
+- ✅ Proper error handling: 503 Service Unavailable
+- ✅ No connection leaks after load reduction
+- ✅ Pool recovers to baseline within 60 seconds
+- ✅ Circuit breaker opens to protect database
+- ✅ Zero data corruption or transaction failures
+
+**Failure Scenarios:**
+
+- Long-running queries blocking connections
+- Unintended connection leaks in code
+- Transaction deadlocks under contention
+
+**Metrics to Collect:**
+
+- Active connections over time
+- Waiting queue length
+- Connection acquisition time
+- Query execution time
+- Timeout error rate
+- Connection leak detection
+
+---
+
+#### PERF-STRESS-002: Memory Usage Under Load
+
+| ID            | PERF-STRESS-002                                                                       |
+| ------------- | ------------------------------------------------------------------------------------- |
+| **Test Case** | Memory usage under load                                                               |
+| **Status**    | [x] ✅ MemoryUsageSimulation.scala                                                    |
+| **Scenario**  | Test service behavior when approaching JVM heap limits and trigger garbage collection |
+
+**Test Steps:**
+
+1. Configure JVM settings:
+   - Initial heap: 512MB
+   - Max heap: 2GB
+   - GC: G1GC with logging enabled
+2. Execute memory-intensive operations:
+   - Fetch large datasets (1000+ patient records with full history)
+   - Generate PDF reports for medical exams
+   - Process file uploads (images, documents)
+   - Export large Excel reports
+3. Sustain load: 100 concurrent users for 30 minutes
+4. Monitor heap usage, GC frequency, and response degradation
+
+**Acceptance Criteria:**
+
+- ✅ Heap usage stays below 80% of max (< 1.6GB)
+- ✅ Full GC events < 5 during test period
+- ✅ GC pause time < 200ms
+- ✅ No OutOfMemoryError exceptions
+- ✅ Response time degradation < 20% at 70% heap usage
+- ✅ Proper pagination for large datasets
+- ✅ File uploads handled with streaming (not loaded into memory)
+- ✅ Memory released after request completion
+
+**Memory Optimization Checks:**
+
+- Lazy loading of JPA relationships
+- DTOs prevent over-fetching
+- Stream processing for large files
+- Proper closure of resources (files, streams)
+- Cache size limits enforced
+
+**Metrics to Collect:**
+
+- Heap usage over time
+- GC frequency and duration
+- Object allocation rate
+- Memory leaks (growing old generation)
+- Response time correlation with memory usage
+
+---
+
+#### PERF-STRESS-003: Service Recovery After Failure
+
+| ID            | PERF-STRESS-003                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------ |
+| **Test Case** | Service recovery                                                                                 |
+| **Status**    | [x] ✅ ServiceRecoverySimulation.scala                                                           |
+| **Scenario**  | Test system resilience and automatic recovery after cascading failures and network interruptions |
+
+**Test Steps:**
+
+1. Establish baseline load: 200 concurrent users
+2. Inject failure scenarios sequentially:
+   - **T+0min**: Kill patient-service instance (simulate crash)
+   - **T+2min**: Network partition: appointment-service cannot reach HR service
+   - **T+5min**: Database connection failure (restart PostgreSQL)
+   - **T+8min**: API Gateway overload (rate limit exceeded)
+3. Observe circuit breakers, fallbacks, retries
+4. Restore all services
+5. Verify full system recovery
+
+**Acceptance Criteria:**
+
+- ✅ Circuit breaker opens within 10 seconds of failure
+- ✅ Fallback responses returned (cached data or default)
+- ✅ Services auto-reconnect to database within 30 seconds
+- ✅ Service discovery detects instance failure < 30 seconds
+- ✅ Load redistributed to healthy instances
+- ✅ Retry logic: 3 attempts with exponential backoff
+- ✅ Error rate < 10% during failure
+- ✅ Full recovery within 2 minutes after restoration
+- ✅ No manual intervention required
+- ✅ Transaction consistency maintained (no partial updates)
+
+**Resilience Patterns to Validate:**
+
+- Circuit Breaker (Resilience4j)
+- Retry with backoff
+- Timeout handling
+- Bulkhead isolation
+- Graceful degradation
+
+**Metrics to Collect:**
+
+- Circuit breaker state changes
+- Retry attempt distribution
+- Time to recovery
+- Error rate during failure
+- Impact radius (affected services)
+
+---
+
+### Endurance Tests (3 tests)
+
+#### PERF-END-001: 24-Hour Continuous Operation
+
+| ID            | PERF-END-001                                                                     |
+| ------------- | -------------------------------------------------------------------------------- |
+| **Test Case** | 24-hour operation                                                                |
+| **Status**    | [x] ✅ ContinuousOperationSimulation.scala                                       |
+| **Scenario**  | Simulate realistic hospital workload over 24 hours with varying traffic patterns |
+
+**Test Steps:**
+
+1. Create realistic daily traffic pattern:
+   - **00:00-06:00**: Low (10 users) - Night shift, emergency only
+   - **06:00-09:00**: Ramp-up (10→100 users) - Morning arrival
+   - **09:00-12:00**: Peak (100-150 users) - Morning consultations
+   - **12:00-14:00**: Medium (50-80 users) - Lunch break
+   - **14:00-18:00**: Peak (100-150 users) - Afternoon consultations
+   - **18:00-24:00**: Ramp-down (100→10 users) - Evening closure
+2. Mixed operations throughout:
+   - Patient registration: 5%
+   - Appointment booking: 20%
+   - Medical exams: 25%
+   - Prescription management: 15%
+   - Lab orders/results: 15%
+   - Billing/payments: 10%
+   - Reporting/queries: 10%
+3. Run continuously for 24 hours
+4. No restarts or manual interventions
+
+**Acceptance Criteria:**
+
+- ✅ Zero unhandled exceptions
+- ✅ All services running continuously (100% uptime)
+- ✅ Response time remains consistent (< 10% variance)
+- ✅ Database maintains consistent performance
+- ✅ No gradual performance degradation
+- ✅ Scheduled tasks execute correctly (notifications, backups)
+- ✅ Log file rotation working properly
+- ✅ Session management: expired sessions cleaned up
+- ✅ Metrics collection continuous without gaps
+
+**Long-Running Concerns:**
+
+- Thread pool stability
+- Session/token cleanup
+- Log file growth
+- Temporary file cleanup
+- Cache invalidation
+- Background job execution
+
+**Metrics to Collect (hourly snapshots):**
+
+- Response time trends
+- Error rate trends
+- Memory usage trends
+- CPU usage trends
+- Database connection pool
+- Thread pool usage
+- Disk space usage
+
+---
+
+#### PERF-END-002: Memory Leak Detection
+
+| ID            | PERF-END-002                                                                |
+| ------------- | --------------------------------------------------------------------------- |
+| **Test Case** | Memory leak detection                                                       |
+| **Status**    | [x] ✅ MemoryLeakDetectionSimulation.scala                                  |
+| **Scenario**  | Run extended tests specifically designed to expose memory leaks in services |
+
+**Test Steps:**
+
+1. Enable heap dump on OOM: `-XX:+HeapDumpOnOutOfMemoryError`
+2. Execute repetitive operations over 12 hours:
+   - Create and delete 10,000 appointments
+   - Upload and delete 5,000 patient files
+   - Generate 1,000 medical exam reports (PDF)
+   - Process 2,000 billing invoices
+3. Take heap dumps every 2 hours
+4. Force full GC between cycles
+5. Analyze heap growth patterns
+
+**Acceptance Criteria:**
+
+- ✅ Old generation heap stable (±5% variance)
+- ✅ Objects properly garbage collected after use
+- ✅ No ClassLoader leaks
+- ✅ ThreadLocal variables cleaned up
+- ✅ File handles closed properly
+- ✅ Database connections returned to pool
+- ✅ Cache size remains bounded
+- ✅ No abandoned HTTP connections
+
+**Common Leak Sources to Check:**
+
+- Static collections growing unbounded
+- Event listeners not deregistered
+- ThreadLocal not cleared
+- Unclosed streams/readers
+- Cache without eviction policy
+- Circular references preventing GC
+
+**Tools to Use:**
+
+- JProfiler / VisualVM
+- Heap dump analysis (Eclipse MAT)
+- GC logs analysis
+
+**Metrics to Collect:**
+
+- Heap size over time (young/old generation)
+- GC frequency and type
+- Object retention
+- Class instance counts
+- Native memory usage
+
+---
+
+#### PERF-END-003: Connection Leak Detection
+
+| ID            | PERF-END-003                                                                  |
+| ------------- | ----------------------------------------------------------------------------- |
+| **Test Case** | Connection leak detection                                                     |
+| **Status**    | [ ]                                                                           |
+| **Scenario**  | Detect and prevent database and HTTP connection leaks over extended operation |
+
+**Test Steps:**
+
+1. Enable connection leak detection:
+   - HikariCP leak detection threshold: 10 seconds
+   - Feign client connection pool monitoring
+2. Execute operations prone to leaks (8 hours):
+   - Exception scenarios (rollback without close)
+   - Timeout scenarios (abandoned connections)
+   - Async operations with failures
+   - Long-running transactions
+3. Deliberately inject leak scenarios:
+   - Service method throws exception before closing
+   - Transaction timeout without cleanup
+   - Feign client call never completes
+4. Monitor connection pool exhaustion
+
+**Acceptance Criteria:**
+
+- ✅ Database connection pool size stable
+- ✅ All connections returned within 30 seconds
+- ✅ Leak detection warnings logged
+- ✅ No connection pool exhaustion
+- ✅ HTTP connection pool (Feign) stable
+- ✅ Connections closed in finally blocks
+- ✅ Transaction timeout triggers rollback + close
+- ✅ Proper exception handling releases resources
+
+**Connection Types to Monitor:**
+
+- Database connections (HikariCP)
+- HTTP connections (Feign, RestTemplate)
+- File handles
+- Socket connections
+- Thread pool threads
+
+**Detection Methods:**
+
+- HikariCP leak detection logs
+- Connection pool metrics
+- Thread dump analysis
+- Network connection monitoring (netstat)
+
+**Metrics to Collect:**
+
+- Active database connections over time
+- Connection acquisition wait time
+- Leaked connection count
+- Connection lifetime distribution
+- Pool exhaustion events
+
+---
+
+## 📊 Performance Test Execution Checklist
+
+Before running performance tests:
+
+- [ ] All services deployed in containers
+- [ ] Database populated with realistic data volume
+- [ ] Monitoring tools configured (Prometheus, Grafana)
+- [ ] Load testing tool installed (JMeter/Gatling)
+- [ ] Baseline metrics captured
+- [ ] Test environment isolated from production
+- [ ] Network bandwidth sufficient
+- [ ] Backup/recovery plan in place
+
+---
+
+---
+
+## 📦 Phase 7: Contract Tests (12 tests)
+
+### API Contracts (7 tests)
+
+| ID           | Test Case                     | Status | Notes |
+| ------------ | ----------------------------- | ------ | ----- |
+| CONTRACT-001 | Auth service contract         | [ ]    |       |
+| CONTRACT-002 | Patient service contract      | [ ]    |       |
+| CONTRACT-003 | Appointment service contract  | [ ]    |       |
+| CONTRACT-004 | Medical exam service contract | [ ]    |       |
+| CONTRACT-005 | Medicine service contract     | [ ]    |       |
+| CONTRACT-006 | HR service contract           | [ ]    |       |
+| CONTRACT-007 | Billing service contract      | [ ]    |       |
+
+### Feign Client Contracts (5 tests)
+
+| ID                 | Test Case                  | Status | Notes |
+| ------------------ | -------------------------- | ------ | ----- |
+| CONTRACT-FEIGN-001 | PatientClient contract     | [ ]    |       |
+| CONTRACT-FEIGN-002 | HrClient contract          | [ ]    |       |
+| CONTRACT-FEIGN-003 | AppointmentClient contract | [ ]    |       |
+| CONTRACT-FEIGN-004 | BillingClient contract     | [ ]    |       |
+| CONTRACT-FEIGN-005 | MedicalExamClient contract | [ ]    |       |
+
+---
+
+## 📝 Test Session Log
+
+Use this section to track your testing sessions:
+
+| Date       | Session   | Tests Completed | Notes       |
+| ---------- | --------- | --------------- | ----------- |
+| YYYY-MM-DD | Session 1 | 0               | Starting... |
+
+---
+
+_Last Updated: 2026-01-07_

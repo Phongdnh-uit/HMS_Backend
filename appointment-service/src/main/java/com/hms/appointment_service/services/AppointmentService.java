@@ -559,6 +559,58 @@ public class AppointmentService {
                 .map(appointmentMapper::entityToResponse)
                 .toList();
     }
+
+    // ========== Reminder Notification Methods ==========
+
+    /**
+     * Get appointments that need reminder notification.
+     * Returns SCHEDULED appointments for a specific date where reminderSent = false.
+     *
+     * @param scheduledDate The date to check for appointments
+     * @return List of appointments needing reminders
+     */
+    public List<com.hms.appointment_service.dtos.AppointmentReminderDTO> getAppointmentsForReminder(LocalDate scheduledDate) {
+        log.info("Getting appointments for reminder on date: {}", scheduledDate);
+        
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+        Instant startOfDay = scheduledDate.atStartOfDay(zoneId).toInstant();
+        Instant endOfDay = scheduledDate.plusDays(1).atStartOfDay(zoneId).toInstant();
+
+        List<Appointment> appointments = appointmentRepository
+                .findByAppointmentTimeBetweenAndStatusAndReminderSent(
+                        startOfDay, endOfDay, AppointmentStatus.SCHEDULED, false);
+
+        log.info("Found {} appointments needing reminders for {}", appointments.size(), scheduledDate);
+
+        return appointments.stream()
+                .map(a -> new com.hms.appointment_service.dtos.AppointmentReminderDTO(
+                        a.getId(),
+                        a.getPatientId(),
+                        a.getPatientName(),
+                        a.getDoctorName(),
+                        a.getDoctorDepartment(),
+                        a.getAppointmentTime(),
+                        a.getReason()
+                ))
+                .toList();
+    }
+
+    /**
+     * Mark an appointment's reminder as sent.
+     *
+     * @param id The appointment ID
+     */
+    @Transactional
+    public void markReminderSent(String id) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ApiException(
+                        ErrorCode.RESOURCE_NOT_FOUND,
+                        "Appointment not found with id: " + id));
+
+        appointment.setReminderSent(true);
+        appointmentRepository.save(appointment);
+        log.info("Marked reminder sent for appointment: {}", id);
+    }
 }
 
 

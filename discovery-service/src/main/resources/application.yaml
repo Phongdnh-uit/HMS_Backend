@@ -3,3 +3,10 @@ spring:
     name: discovery-service
   config:
     import: optional:configserver:http://${CONFIG_SERVER_HOST:localhost}:${CONFIG_SERVER_PORT}
+
+# Disable OpenAPI/Swagger for Discovery Service (infrastructure service)
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

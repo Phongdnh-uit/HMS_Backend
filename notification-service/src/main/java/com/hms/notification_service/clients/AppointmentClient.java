@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -32,6 +33,21 @@ public interface AppointmentClient {
     ApiResponse<Void> markFollowUpNotificationSent(@PathVariable("id") String id);
 
     /**
+     * Get appointments that need reminder notification.
+     * Returns SCHEDULED appointments for a specific date where reminderSent = false.
+     */
+    @GetMapping("/appointments/pending-reminders")
+    ApiResponse<List<AppointmentReminderInfo>> getAppointmentsForReminder(
+            @RequestParam("scheduledDate") String scheduledDate
+    );
+
+    /**
+     * Mark an appointment's reminder as sent.
+     */
+    @PutMapping("/appointments/{id}/mark-reminder-sent")
+    ApiResponse<Void> markReminderSent(@PathVariable("id") String id);
+
+    /**
      * Appointment record for notification purposes.
      */
     record AppointmentInfo(
@@ -40,6 +56,19 @@ public interface AppointmentClient {
             String patientName,
             String doctorName,
             LocalDate followUpDate,
+            String reason
+    ) {}
+
+    /**
+     * Appointment reminder record for notification purposes.
+     */
+    record AppointmentReminderInfo(
+            String id,
+            String patientId,
+            String patientName,
+            String doctorName,
+            String doctorDepartment,
+            Instant appointmentTime,
             String reason
     ) {}
 }

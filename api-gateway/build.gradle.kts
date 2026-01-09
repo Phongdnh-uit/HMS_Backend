@@ -6,6 +6,10 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.springframework.cloud:spring-cloud-config-client")
+    
+    // OpenAPI aggregation for API Gateway (WebFlux version)
+    // Version 2.8.0+ required for Spring Boot 3.5.x compatibility
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.4")
 
 }
 

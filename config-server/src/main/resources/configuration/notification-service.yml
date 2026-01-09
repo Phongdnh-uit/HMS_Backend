@@ -53,6 +53,12 @@ notification:
     cron: "${FOLLOWUP_CRON:0 0 8 * * ?}"
     # Days offset: 1 = tomorrow (production), 0 = today (testing)
     days-offset: ${FOLLOWUP_DAYS_OFFSET:1}
+  reminder:
+    # Cron expression: 8 AM every day (production)
+    # For testing: "*/5 * * * * ?" runs every 5 seconds
+    cron: "${REMINDER_CRON:0 0 8 * * ?}"
+    # Days offset: 1 = tomorrow (production), 0 = today (testing)
+    days-offset: ${REMINDER_DAYS_OFFSET:1}
 
 # App name for emails
 app:
