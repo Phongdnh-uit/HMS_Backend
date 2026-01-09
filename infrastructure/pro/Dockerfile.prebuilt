@@ -1,0 +1,15 @@
+ARG JAVA_VERSION=23
+
+# -------- Single Stage: Use PRE-BUILT JARs (no network needed!) --------
+FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
+
+RUN apk add --no-cache curl
+
+ARG SERVICE
+ENV SERVICE=${SERVICE}
+WORKDIR /app
+
+# Copy the pre-built JAR directly (build locally first with: ./gradlew clean bootJar)
+COPY ${SERVICE}/build/libs/${SERVICE}-*.jar ./app.jar
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

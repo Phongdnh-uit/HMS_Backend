@@ -256,4 +256,27 @@ public class AppointmentController extends GenericController<Appointment, String
         }
         return ResponseEntity.ok(ApiResponse.ok("Patient called", called));
     }
+
+    // ========== Reminder Notification Endpoints ==========
+
+    /**
+     * Get appointments that need reminder notification.
+     * Called by notification-service to send reminder emails.
+     */
+    @GetMapping("/pending-reminders")
+    public ResponseEntity<ApiResponse<java.util.List<com.hms.appointment_service.dtos.AppointmentReminderDTO>>> getAppointmentsForReminder(
+            @RequestParam("scheduledDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate scheduledDate) {
+        var appointments = appointmentService.getAppointmentsForReminder(scheduledDate);
+        return ResponseEntity.ok(ApiResponse.ok(appointments));
+    }
+
+    /**
+     * Mark an appointment's reminder as sent.
+     * Called by notification-service after successfully sending reminder email.
+     */
+    @PutMapping("/{id}/mark-reminder-sent")
+    public ResponseEntity<ApiResponse<Void>> markReminderSent(@PathVariable String id) {
+        appointmentService.markReminderSent(id);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
 }

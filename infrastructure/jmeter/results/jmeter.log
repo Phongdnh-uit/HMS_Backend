@@ -1,0 +1,136 @@
+2026-01-08 21:36:05,669 INFO o.a.j.u.JMeterUtils: Setting Locale to en_EN
+2026-01-08 21:36:05,697 INFO o.a.j.JMeter: Loading user properties from: C:\Users\giang\AppData\Local\Programs\JMeter\bin\user.properties
+2026-01-08 21:36:05,697 INFO o.a.j.JMeter: Loading system properties from: C:\Users\giang\AppData\Local\Programs\JMeter\bin\system.properties
+2026-01-08 21:36:05,697 INFO o.a.j.JMeter: Setting JMeter property: dataDir=data
+2026-01-08 21:36:05,697 INFO o.a.j.JMeter: Setting JMeter property: duration=10
+2026-01-08 21:36:05,705 INFO o.a.j.JMeter: Copyright (c) 1998-2024 The Apache Software Foundation
+2026-01-08 21:36:05,705 INFO o.a.j.JMeter: Version 5.6.3
+2026-01-08 21:36:05,706 INFO o.a.j.JMeter: java.version=21.0.9
+2026-01-08 21:36:05,706 INFO o.a.j.JMeter: java.vm.name=OpenJDK 64-Bit Server VM
+2026-01-08 21:36:05,707 INFO o.a.j.JMeter: os.name=Windows 11
+2026-01-08 21:36:05,707 INFO o.a.j.JMeter: os.arch=amd64
+2026-01-08 21:36:05,707 INFO o.a.j.JMeter: os.version=10.0
+2026-01-08 21:36:05,707 INFO o.a.j.JMeter: file.encoding=UTF-8
+2026-01-08 21:36:05,707 INFO o.a.j.JMeter: java.awt.headless=true
+2026-01-08 21:36:05,707 INFO o.a.j.JMeter: Max memory     =1073741824
+2026-01-08 21:36:05,708 INFO o.a.j.JMeter: Available Processors =16
+2026-01-08 21:36:05,716 INFO o.a.j.JMeter: Default Locale=English (EN)
+2026-01-08 21:36:05,716 INFO o.a.j.JMeter: JMeter  Locale=English (EN)
+2026-01-08 21:36:05,716 INFO o.a.j.JMeter: JMeterHome=C:\Users\giang\AppData\Local\Programs\JMeter
+2026-01-08 21:36:05,716 INFO o.a.j.JMeter: user.dir  =D:\1_Hoc_Tap\1_1_Dai_Hoc\Tai_lieu_ki_1_nam_3\CongNghePhanMemChuyenSau\HMS-total\HMS_Backend\infrastructure\jmeter
+2026-01-08 21:36:05,717 INFO o.a.j.JMeter: PWD       =D:\1_Hoc_Tap\1_1_Dai_Hoc\Tai_lieu_ki_1_nam_3\CongNghePhanMemChuyenSau\HMS-total\HMS_Backend\infrastructure\jmeter
+2026-01-08 21:36:05,723 INFO o.a.j.JMeter: IP: 172.17.96.1 Name: GiangNgoc FullName: GiangNgoc.mshome.net
+2026-01-08 21:36:05,734 INFO o.a.j.s.FileServer: Default base='D:\1_Hoc_Tap\1_1_Dai_Hoc\Tai_lieu_ki_1_nam_3\CongNghePhanMemChuyenSau\HMS-total\HMS_Backend\infrastructure\jmeter'
+2026-01-08 21:36:05,737 INFO o.a.j.s.FileServer: Set new base='D:\1_Hoc_Tap\1_1_Dai_Hoc\Tai_lieu_ki_1_nam_3\CongNghePhanMemChuyenSau\HMS-total\HMS_Backend\infrastructure\jmeter\test-plans'
+2026-01-08 21:36:05,970 INFO o.a.j.s.SaveService: Testplan (JMX) version: 2.2. Testlog (JTL) version: 2.2
+2026-01-08 21:36:06,009 INFO o.a.j.s.SaveService: Using SaveService properties version 5.0
+2026-01-08 21:36:06,011 INFO o.a.j.s.SaveService: Using SaveService properties file encoding UTF-8
+2026-01-08 21:36:06,015 INFO o.a.j.s.SaveService: Loading file: test-plans\HMS_LoadTest_50VU.jmx
+2026-01-08 21:36:06,077 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/html is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-01-08 21:36:06,077 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xhtml+xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-01-08 21:36:06,077 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-01-08 21:36:06,077 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-01-08 21:36:06,077 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/vnd.wap.wml is org.apache.jmeter.protocol.http.parser.RegexpHTMLParser
+2026-01-08 21:36:06,077 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/css is org.apache.jmeter.protocol.http.parser.CssParser
+2026-01-08 21:36:06,124 INFO o.a.j.JMeter: Creating summariser <summary>
+2026-01-08 21:36:06,141 INFO o.a.j.e.StandardJMeterEngine: Running the test!
+2026-01-08 21:36:06,142 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2026-01-08 21:36:06,142 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2026-01-08 21:36:06,148 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must contain the string: '.functions.'
+2026-01-08 21:36:06,148 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must not contain the string: '.gui.'
+2026-01-08 21:36:06,252 INFO o.a.j.JMeter: Running test (1767882966252)
+2026-01-08 21:36:06,268 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 1 : Patient Users (27 VUs)
+2026-01-08 21:36:06,268 INFO o.a.j.e.StandardJMeterEngine: Starting 27 threads for group Patient Users (27 VUs).
+2026-01-08 21:36:06,268 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2026-01-08 21:36:06,268 INFO o.a.j.t.ThreadGroup: Starting thread group... number=1 threads=27 ramp-up=30 delayedStart=false
+2026-01-08 21:36:06,288 INFO o.a.j.t.ThreadGroup: Started thread group number 1
+2026-01-08 21:36:06,288 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 2 : Doctor Users (9 VUs)
+2026-01-08 21:36:06,288 INFO o.a.j.e.StandardJMeterEngine: Starting 9 threads for group Doctor Users (9 VUs).
+2026-01-08 21:36:06,288 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2026-01-08 21:36:06,288 INFO o.a.j.t.ThreadGroup: Starting thread group... number=2 threads=9 ramp-up=15 delayedStart=false
+2026-01-08 21:36:06,298 INFO o.a.j.t.ThreadGroup: Started thread group number 2
+2026-01-08 21:36:06,298 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 3 : Nurse Users (7 VUs)
+2026-01-08 21:36:06,298 INFO o.a.j.e.StandardJMeterEngine: Starting 7 threads for group Nurse Users (7 VUs).
+2026-01-08 21:36:06,298 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2026-01-08 21:36:06,298 INFO o.a.j.t.ThreadGroup: Starting thread group... number=3 threads=7 ramp-up=15 delayedStart=false
+2026-01-08 21:36:06,304 INFO o.a.j.t.ThreadGroup: Started thread group number 3
+2026-01-08 21:36:06,304 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 4 : Receptionist Users (6 VUs)
+2026-01-08 21:36:06,305 INFO o.a.j.e.StandardJMeterEngine: Starting 6 threads for group Receptionist Users (6 VUs).
+2026-01-08 21:36:06,305 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2026-01-08 21:36:06,305 INFO o.a.j.t.ThreadGroup: Starting thread group... number=4 threads=6 ramp-up=15 delayedStart=false
+2026-01-08 21:36:06,313 INFO o.a.j.t.ThreadGroup: Started thread group number 4
+2026-01-08 21:36:06,313 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 5 : Admin User (1 VU)
+2026-01-08 21:36:06,313 INFO o.a.j.e.StandardJMeterEngine: Starting 1 threads for group Admin User (1 VU).
+2026-01-08 21:36:06,313 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2026-01-08 21:36:06,313 INFO o.a.j.t.ThreadGroup: Starting thread group... number=5 threads=1 ramp-up=5 delayedStart=false
+2026-01-08 21:36:06,313 INFO o.a.j.t.ThreadGroup: Started thread group number 5
+2026-01-08 21:36:06,314 INFO o.a.j.e.StandardJMeterEngine: All thread groups have been started
+2026-01-08 21:36:06,444 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-1
+2026-01-08 21:36:06,450 INFO o.a.j.s.FileServer: Stored: data/patient_credentials.csv
+2026-01-08 21:36:07,553 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-2
+2026-01-08 21:36:08,664 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-3
+2026-01-08 21:36:09,775 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-4
+2026-01-08 21:36:10,886 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-5
+2026-01-08 21:36:11,289 INFO o.a.j.t.JMeterThread: Thread started: Doctor Users (9 VUs) 2-1
+2026-01-08 21:36:11,289 INFO o.a.j.s.FileServer: Stored: data/doctor_credentials.csv
+2026-01-08 21:36:11,990 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-6
+2026-01-08 21:36:12,956 INFO o.a.j.t.JMeterThread: Thread started: Doctor Users (9 VUs) 2-2
+2026-01-08 21:36:13,104 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-7
+2026-01-08 21:36:14,216 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-8
+2026-01-08 21:36:14,622 INFO o.a.j.t.JMeterThread: Thread started: Doctor Users (9 VUs) 2-3
+2026-01-08 21:36:15,324 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-9
+2026-01-08 21:36:16,290 INFO o.a.j.t.JMeterThread: Thread started: Doctor Users (9 VUs) 2-4
+2026-01-08 21:36:16,298 INFO o.a.j.t.JMeterThread: Thread started: Nurse Users (7 VUs) 3-1
+2026-01-08 21:36:16,298 INFO o.a.j.s.FileServer: Stored: data/nurse_credentials.csv
+2026-01-08 21:36:16,433 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-10
+2026-01-08 21:36:17,546 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-11
+2026-01-08 21:36:17,957 INFO o.a.j.t.JMeterThread: Thread started: Doctor Users (9 VUs) 2-5
+2026-01-08 21:36:18,442 INFO o.a.j.t.JMeterThread: Thread started: Nurse Users (7 VUs) 3-2
+2026-01-08 21:36:18,658 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-12
+2026-01-08 21:36:19,625 INFO o.a.j.t.JMeterThread: Thread started: Doctor Users (9 VUs) 2-6
+2026-01-08 21:36:19,767 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-13
+2026-01-08 21:36:20,584 INFO o.a.j.t.JMeterThread: Thread started: Nurse Users (7 VUs) 3-3
+2026-01-08 21:36:20,878 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-14
+2026-01-08 21:36:20,975 INFO o.a.j.p.h.s.HTTPHCAbstractImpl: Local host = GiangNgoc
+2026-01-08 21:36:20,984 INFO o.a.j.p.h.s.HTTPHC4Impl: HTTP request retry count = 0
+2026-01-08 21:36:20,985 INFO o.a.j.s.SampleResult: Note: Sample TimeStamps are START times
+2026-01-08 21:36:20,985 INFO o.a.j.s.SampleResult: sampleresult.default.encoding is set to UTF-8
+2026-01-08 21:36:20,985 INFO o.a.j.s.SampleResult: sampleresult.useNanoTime=true
+2026-01-08 21:36:20,985 INFO o.a.j.s.SampleResult: sampleresult.nanoThreadSleep=5000
+2026-01-08 21:36:21,292 INFO o.a.j.t.JMeterThread: Thread started: Doctor Users (9 VUs) 2-7
+2026-01-08 21:36:21,305 INFO o.a.j.t.JMeterThread: Thread started: Receptionist Users (6 VUs) 4-1
+2026-01-08 21:36:21,305 INFO o.a.j.s.FileServer: Stored: data/receptionist_credentials.csv
+2026-01-08 21:36:21,990 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-15
+2026-01-08 21:36:22,728 INFO o.a.j.t.JMeterThread: Thread started: Nurse Users (7 VUs) 3-4
+2026-01-08 21:36:22,959 INFO o.a.j.t.JMeterThread: Thread started: Doctor Users (9 VUs) 2-8
+2026-01-08 21:36:23,097 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-16
+2026-01-08 21:36:23,808 INFO o.a.j.t.JMeterThread: Thread started: Receptionist Users (6 VUs) 4-2
+2026-01-08 21:36:24,211 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-17
+2026-01-08 21:36:24,626 INFO o.a.j.t.JMeterThread: Thread started: Doctor Users (9 VUs) 2-9
+2026-01-08 21:36:24,871 INFO o.a.j.t.JMeterThread: Thread started: Nurse Users (7 VUs) 3-5
+2026-01-08 21:36:25,320 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-18
+2026-01-08 21:36:26,306 INFO o.a.j.t.JMeterThread: Thread started: Receptionist Users (6 VUs) 4-3
+2026-01-08 21:36:26,314 INFO o.a.j.t.JMeterThread: Thread started: Admin User (1 VU) 5-1
+2026-01-08 21:36:26,430 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-19
+2026-01-08 21:36:27,013 INFO o.a.j.t.JMeterThread: Thread started: Nurse Users (7 VUs) 3-6
+2026-01-08 21:36:27,541 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-20
+2026-01-08 21:36:28,653 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-21
+2026-01-08 21:36:28,806 INFO o.a.j.t.JMeterThread: Thread started: Receptionist Users (6 VUs) 4-4
+2026-01-08 21:36:29,156 INFO o.a.j.t.JMeterThread: Thread started: Nurse Users (7 VUs) 3-7
+2026-01-08 21:36:29,761 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-22
+2026-01-08 21:36:30,642 INFO o.a.j.r.Summariser: summary +      8 in 00:00:24 =    0.3/s Avg:     9 Min:     3 Max:    34 Err:     8 (100.00%) Active: 43 Started: 43 Finished: 0
+2026-01-08 21:36:30,873 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-23
+2026-01-08 21:36:31,306 INFO o.a.j.t.JMeterThread: Thread started: Receptionist Users (6 VUs) 4-5
+2026-01-08 21:36:31,981 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-24
+2026-01-08 21:36:33,093 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-25
+2026-01-08 21:36:33,807 INFO o.a.j.t.JMeterThread: Thread started: Receptionist Users (6 VUs) 4-6
+2026-01-08 21:36:34,201 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-26
+2026-01-08 21:36:35,315 INFO o.a.j.t.JMeterThread: Thread started: Patient Users (27 VUs) 1-27
+2026-01-08 21:37:00,657 INFO o.a.j.r.Summariser: summary +     72 in 00:00:30 =    2.4/s Avg:     5 Min:     3 Max:    13 Err:    72 (100.00%) Active: 50 Started: 50 Finished: 0
+2026-01-08 21:37:00,657 INFO o.a.j.r.Summariser: summary =     80 in 00:00:54 =    1.5/s Avg:     5 Min:     3 Max:    34 Err:    80 (100.00%)
+2026-01-08 21:37:21,938 INFO o.a.j.u.JsseSSLManager: Using default SSL protocol: TLS
+2026-01-08 21:37:21,938 INFO o.a.j.u.JsseSSLManager: SSL session context: per-thread
+2026-01-08 21:37:30,470 INFO o.a.j.r.Summariser: summary +     81 in 00:00:30 =    2.7/s Avg:     5 Min:     3 Max:    14 Err:    81 (100.00%) Active: 50 Started: 50 Finished: 0
+2026-01-08 21:37:30,471 INFO o.a.j.r.Summariser: summary =    161 in 00:01:24 =    1.9/s Avg:     5 Min:     3 Max:    34 Err:   161 (100.00%)
+2026-01-08 21:37:41,535 INFO o.a.j.r.ResultCollector: Shutdown hook started
+2026-01-08 21:37:41,535 INFO o.a.j.r.ResultCollector: Shutdown hook ended

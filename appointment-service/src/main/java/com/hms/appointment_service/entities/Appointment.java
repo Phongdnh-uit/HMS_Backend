@@ -59,6 +59,9 @@ public class Appointment {
     
     private String priorityReason;  // EMERGENCY, ELDERLY, PREGNANT, APPOINTMENT, etc.
 
+    // Reminder notification tracking
+    private boolean reminderSent = false;  // Track if reminder email was sent
+
     @CreatedDate
     private Instant createdAt;
 

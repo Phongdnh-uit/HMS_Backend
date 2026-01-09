@@ -43,11 +43,11 @@ public class AuthServiceImpl implements AuthService {
     private final MailService mailService;
 
     @Value("${app.frontend.reset-password-url}")
-    private String resetPasswordBaseUrl = "http://localhost:3000/auth/reset-password";
+    private String resetPasswordBaseUrl = "http://localhost:3000/password-reset/new-password";
 
 
     @Value("${app.frontend.activate-account-url}")
-    private String activeAccountBaseUrl = "http://localhost:3000/auth/activate-account";
+    private String activeAccountBaseUrl = "http://localhost:3000/verify-email";
 
     private final Cache<String, String> passwordResetCache = Caffeine.newBuilder()
             .maximumSize(10_000)

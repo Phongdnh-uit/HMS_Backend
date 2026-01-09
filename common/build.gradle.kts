@@ -11,6 +11,11 @@ dependencies {
     api("io.github.perplexhub:rsql-jpa-spring-boot-starter:6.0.32")
     api("org.mapstruct:mapstruct:1.6.3")
     api("com.h2database:h2")
+    
+    // OpenAPI/Swagger documentation (automatically available to all services)
+    // Version 2.8.0+ required for Spring Boot 3.5.x compatibility
+    api("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4")
+    
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

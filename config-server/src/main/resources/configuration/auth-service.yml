@@ -51,5 +51,5 @@ eureka:
 
 app:
   frontend:
-    reset-password-url: ${FRONTEND_RESET_PASSWORD_URL:http://localhost:3000/auth/reset-password}
-    activate-account-url: ${FRONTEND_ACTIVATE_ACCOUNT_URL:http://localhost:3000/auth/activate-account}
+    reset-password-url: ${FRONTEND_RESET_PASSWORD_URL:http://localhost:3000/password-reset/new-password}
+    activate-account-url: ${FRONTEND_ACTIVATE_ACCOUNT_URL:http://localhost:3000/verify-email}
