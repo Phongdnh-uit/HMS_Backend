@@ -13,4 +13,7 @@ dependencies {
     testImplementation("com.h2database:h2")
     testImplementation("io.github.resilience4j:resilience4j-spring-boot3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    
+    // Test utilities from common module
+    testImplementation(testFixtures(project(":common")))
 }

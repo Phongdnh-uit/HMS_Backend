@@ -15,6 +15,21 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 jwt:
   private-key: ${JWT_PRIVATE_KEY:-----BEGIN PRIVATE KEY-----MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCz/IlwcBFUAafXHNVud2/K6PWyk6KfHghcs/6vvfNGl30CqOryAoOcmiUQ8dcznnB0vGS+NcwS/enrrm1txFdTIdRYjr+n9Qh4HqkRnI1SpSPoGKITSWG/ecg2aUBd5eJuKAxo7NRcEAiXt+7Db2gblsJaOOhQFaBUwVGQYAl84FkOeobU6BfWJuMI/ioMjlGAG6/fbEA/f+fd5SY16Xf6TECP8RNWSZFsl+ImHrWpzifdtTFdekmQ+cB0bI3FxU9cCsBIuQoOVvU9JA4nXHzezvnK9eAszHO3WGBOECszi+UVlHHwiNNtYikkCMCqKXQ8tEhfovcXOhFbrG4dGYwbAgMBAAECggEARy9aLF4mfFMrTqjYwRf73wTEKBy79LKsG/4UfO1jikff6W1lftH/u7A7eLgtpPzE/WaFcbVVQS2rlssl/IPrBbYbhervYj5HWzrFI3IHcuhdiy4y6+3Z+yDvTpXSH1EMfQTZ46XHV6H/xAG7LRCi3EaEF6rqNsJW5y6OU8un9PsbLs/Gmpi25f983qZsoDdXfHL3xEF/ESzYiCf1x9Gnm9rRNJx8NgrxjLlJxzfAToKlPsY4M6vYaL/Rqyyp1hAFRVYN5ZC2ju75yAKqhR+2u4aoTE2NPDZJNFn4HvwIcb7FzCjKQn3qgCCOyYbfCnt0E6ICbsTYP/6yvoidRxB6AQKBgQDyfZG3F3IOMEoO0eoIh9MdUQ85nfhhbCzyYJy/3dMf98ADrFcS8x7OaJxjzpfIOB4m2ELCbysfBOIil6wlhrzUDoxsSwl+cfxUE8nYVEC6YTAxGQpCKUrPlSCnFjOwN34+AZpSrWy0R6DztpLFoNnCRNcD9rQOHfOZ/hw0gPAJjQKBgQC+A4bw0qSj5IkMLJ3RLSV6d6MEkIgQk64ziy8i3qagQHgyn4QHKE+qIUSYQMGjbTvRmY+ZV4OC1nDMNoatwAq9dk9c4jQCIfz+K0ik/0EYL+XbeH/ogUJgtcgI7qegdVhS5qNNnCev6tw93H8PuWe6qymIgscEvP/NW7aCJYH+RwKBgH1xZiMwVsluQ7F8+DPnh9gfqd+lj+teGbZdMlmzOFfOQ5/i1Lyx1pry1QxwwGZMWZTAxXBuMAGA9jbs/ZoAJMkSqaQQAV5POziHcCCgHUgNpO+RQ5RMZi4SuGyXeK/NVVpgW+QvYQ+2ClZpeW4RMvVjxVOAmU7AQdfE8/RZS1O1AoGARdwIHbxkObmJRYeV0lUV5Wvc7I2y6N1S+7JddyWC/4IUbxBEu1jvyS4ICS4tw0ci6hHaQNdzC4SJ3hrh8zma+UNpNE4aLvqOCGijgb4zEZByovkvla0IWYQb8mTEDnN2MKyJN7yEvuHLbZcGxCI3Z+MMFxt1zmEqbzcb58egfnsCgYEA1dBSsNNJJVSuj+HcrxCKRb1BmgIpD4Mbr7M/sp4OZQ5jDqBOjyWdBHnZfpzMVLbqgWwunsDTjA0tFYqziunpI/MmzTfsy5oPEu05GeIQ8X+8Aqw7RCBP+dv8T8Wur+eMWS9wDcObV3nLaBad6G+DIZJwaPdoZJpQ2NQruQbGOm0=-----END PRIVATE KEY-----}
@@ -33,3 +48,8 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://${DISCOVERY_SERVICE_HOST:localhost}:${DISCOVERY_SERVICE_PORT:8761}/eureka/
+
+app:
+  frontend:
+    reset-password-url: ${FRONTEND_RESET_PASSWORD_URL:http://localhost:3000/auth/reset-password}
+    activate-account-url: ${FRONTEND_ACTIVATE_ACCOUNT_URL:http://localhost:3000/auth/activate-account}
