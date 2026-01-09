@@ -17,28 +17,33 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
- * Tests for graceful degradation behavior in EmployeeHook.
+ * Tests for Circuit Breaker behavior in EmployeeHook.
  * 
  * Key Pattern: VALIDATION WITH EXTERNAL SERVICE
- * When auth-service is unavailable, the validation fails with a clear error.
+ * When auth-service CB is open, validation fails with SERVICE_UNAVAILABLE.
  * 
  * Verifies:
- * 1. Account validation using FeignHelper.safeCall
- * 2. Handling of auth-service failures
+ * 1. Account validation with CB pass-through (service healthy)
+ * 2. CB fallback behavior (SERVICE_UNAVAILABLE)
  * 3. Local department validation
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("EmployeeHook Validation Tests")
+@DisplayName("EmployeeHook Circuit Breaker Tests")
 class EmployeeHookValidationTest {
 
     @Mock
@@ -47,6 +52,12 @@ class EmployeeHookValidationTest {
     @Mock
     private AccountClient accountClient;
 
+    @Mock
+    private CircuitBreakerFactory<?, ?> circuitBreakerFactory;
+
+    @Mock
+    private CircuitBreaker circuitBreaker;
+
     private EmployeeHook employeeHook;
 
     private static final String VALID_ACCOUNT_ID = "acc-123";
@@ -54,7 +65,34 @@ class EmployeeHookValidationTest {
 
     @BeforeEach
     void setUp() {
-        employeeHook = new EmployeeHook(departmentRepository, accountClient);
+        employeeHook = new EmployeeHook(departmentRepository, accountClient, circuitBreakerFactory);
+        
+        // Default: CB factory returns mock CB
+        lenient().when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
+    }
+
+    /**
+     * Helper: CB passes through (healthy state)
+     */
+    @SuppressWarnings("unchecked")
+    private void setupCircuitBreakerToPassThrough() {
+        when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+            .thenAnswer(invocation -> {
+                Supplier<?> supplier = invocation.getArgument(0);
+                return supplier.get();
+            });
+    }
+
+    /**
+     * Helper: CB triggers fallback (open state)
+     */
+    @SuppressWarnings("unchecked")
+    private void setupCircuitBreakerToFallback(RuntimeException exception) {
+        when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+            .thenAnswer(invocation -> {
+                Function<Throwable, ?> fallback = invocation.getArgument(1);
+                return fallback.apply(exception);
+            });
     }
 
     // ========================================================================
@@ -89,9 +127,10 @@ class EmployeeHookValidationTest {
     class AccountValidationTests {
 
         @Test
-        @DisplayName("Should pass validation when account exists")
+        @DisplayName("Should pass validation when account exists and CB is closed")
         void shouldPassValidation_whenAccountExists() {
             // Given
+            setupCircuitBreakerToPassThrough();
             EmployeeRequest request = createValidRequest();
             
             ApiResponse<AccountResponse> accountResponse = ApiResponse.ok(createAccountResponse());
@@ -107,6 +146,7 @@ class EmployeeHookValidationTest {
         @DisplayName("Should fail validation when account does not exist")
         void shouldFailValidation_whenAccountNotFound() {
             // Given
+            setupCircuitBreakerToPassThrough();
             EmployeeRequest request = createValidRequest();
             
             ApiResponse<AccountResponse> notFoundResponse = new ApiResponse<>();
@@ -126,28 +166,26 @@ class EmployeeHookValidationTest {
         }
 
         @Test
-        @DisplayName("Should fail validation when auth service fails (FeignHelper catches exception)")
-        void shouldFailValidation_whenAuthServiceFails() {
+        @DisplayName("Should fail with SERVICE_UNAVAILABLE when auth CB is open")
+        void shouldFailValidation_whenAuthCircuitBreakerIsOpen() {
             // Given
             EmployeeRequest request = createValidRequest();
+            // Note: department validation happens AFTER account validation
+            // If CB throws, we never reach department check
             
-            // FeignHelper.safeCall catches exceptions and returns error ApiResponse
-            ApiResponse<AccountResponse> errorResponse = new ApiResponse<>();
-            errorResponse.setCode(5000);
-            errorResponse.setMessage("Service unavailable");
-            
-            when(accountClient.findById(VALID_ACCOUNT_ID)).thenReturn(errorResponse);
-            when(departmentRepository.existsById(VALID_DEPARTMENT_ID)).thenReturn(true);
+            // CB is open - fallback throws SERVICE_UNAVAILABLE
+            setupCircuitBreakerToFallback(new RuntimeException("Auth service unavailable"));
 
-            // When/Then - validation fails because code != 1000
+            // When/Then - CB fallback throws SERVICE_UNAVAILABLE
             ApiException exception = assertThrows(ApiException.class, 
                 () -> employeeHook.validateCreate(request, new HashMap<>()));
 
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.VALIDATION_ERROR);
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SERVICE_UNAVAILABLE);
+            assertThat(exception.getMessage()).contains("Auth service unavailable");
         }
 
         @Test
-        @DisplayName("Should skip account validation when accountId is null")
+        @DisplayName("Should skip account validation when accountId is null (no CB call)")
         void shouldSkipAccountValidation_whenAccountIdNull() {
             // Given
             EmployeeRequest request = createValidRequest();
@@ -159,12 +197,13 @@ class EmployeeHookValidationTest {
             assertDoesNotThrow(() -> 
                 employeeHook.validateCreate(request, new HashMap<>()));
             
-            // Verify account client was not called
+            // Verify CB was not created for auth
+            verify(circuitBreakerFactory, never()).create("hrAuth");
             verify(accountClient, never()).findById(anyString());
         }
 
         @Test
-        @DisplayName("Should skip account validation when accountId is blank")
+        @DisplayName("Should skip account validation when accountId is blank (no CB call)")
         void shouldSkipAccountValidation_whenAccountIdBlank() {
             // Given
             EmployeeRequest request = createValidRequest();
@@ -176,6 +215,7 @@ class EmployeeHookValidationTest {
             assertDoesNotThrow(() -> 
                 employeeHook.validateCreate(request, new HashMap<>()));
             
+            verify(circuitBreakerFactory, never()).create("hrAuth");
             verify(accountClient, never()).findById(anyString());
         }
     }
@@ -232,6 +272,7 @@ class EmployeeHookValidationTest {
         @DisplayName("Should collect all validation errors when both account and department invalid")
         void shouldCollectAllErrors_whenBothInvalid() {
             // Given
+            setupCircuitBreakerToPassThrough();
             EmployeeRequest request = createValidRequest();
             
             ApiResponse<AccountResponse> notFoundResponse = new ApiResponse<>();
@@ -255,6 +296,7 @@ class EmployeeHookValidationTest {
         @DisplayName("Should validate on update with same rules")
         void shouldValidateOnUpdate_withSameRules() {
             // Given
+            setupCircuitBreakerToPassThrough();
             EmployeeRequest request = createValidRequest();
             
             ApiResponse<AccountResponse> accountResponse = ApiResponse.ok(createAccountResponse());

@@ -9,15 +9,19 @@ import com.hms.patient_service.entities.Patient;
 import com.hms.patient_service.helpers.PatientHelper;
 import com.hms.patient_service.repositories.PatientRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class PatientHook implements GenericHook<Patient, String, PatientRequest, PatientResponse> {
     private final PatientRepository patientRepository;
     private final AccountClient authClient;
+    private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
     @Override
     public void enrichFindAll(PageResponse<PatientResponse> response) {
@@ -50,15 +54,33 @@ public class PatientHook implements GenericHook<Patient, String, PatientRequest,
     @Override
     public void enrichCreate(PatientRequest input, Patient entity, Map<String, Object> context) {
         // Auto-fill email from Account if accountId is provided and email is empty
+        // If accountId is provided, we MUST verify it exists - fail fast if auth service is down
         if (entity.getAccountId() != null && !entity.getAccountId().isEmpty() 
                 && (entity.getEmail() == null || entity.getEmail().isEmpty())) {
-            try {
-                var accountResponse = authClient.findById(entity.getAccountId());
-                if (accountResponse != null && accountResponse.getData() != null) {
-                    entity.setEmail(accountResponse.getData().getEmail());
+            
+            var authCircuitBreaker = circuitBreakerFactory.create("patientAuth");
+            
+            // Step 1: CB handles service availability - fail fast if down
+            var accountResponse = authCircuitBreaker.run(
+                () -> authClient.findById(entity.getAccountId()),
+                throwable -> {
+                    log.error("[CB-FALLBACK] Auth service unavailable - cannot verify account: {}", 
+                            throwable.getMessage());
+                    throw new RuntimeException("Auth service unavailable. Cannot verify account. Please try again later.");
                 }
-            } catch (Exception e) {
-                // If account fetch fails, proceed with enrichDefaultData which sets "N/A"
+            );
+            
+            // Step 2: Check if account exists (service responded)
+            if (accountResponse != null && accountResponse.getData() != null) {
+                String email = accountResponse.getData().getEmail();
+                if (email != null) {
+                    entity.setEmail(email);
+                    log.info("Email enriched from account: {}", entity.getAccountId());
+                }
+            } else {
+                // Account not found - this is a validation error
+                log.warn("Account not found for ID: {}", entity.getAccountId());
+                throw new RuntimeException("Account not found for ID: " + entity.getAccountId());
             }
         }
         

@@ -14,29 +14,34 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
- * Tests for graceful degradation in PrescriptionHook invoice generation.
+ * Tests for Circuit Breaker behavior in PrescriptionHook invoice generation.
  * 
- * Key Pattern: FIRE AND FORGET
- * When billing-service is unavailable, the prescription dispense operation
+ * Key Pattern: FIRE AND FORGET (Graceful Degradation)
+ * When billing-service CB is open, the prescription dispense operation
  * succeeds but invoice generation fails silently (logged).
  * 
  * Verifies:
- * 1. Invoice generation is attempted after prescription dispense
- * 2. Billing service failure does NOT fail the prescription operation
- * 3. Proper logging of invoice generation failures
+ * 1. Invoice generation with CB pass-through (billing service healthy)
+ * 2. CB fallback behavior - invoice creation returns false, operation continues
+ * 3. Main operation (prescription dispense) succeeds regardless of CB state
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("PrescriptionHook Invoice Generation Graceful Degradation Tests")
+@DisplayName("PrescriptionHook Invoice Generation Circuit Breaker Tests")
 class PrescriptionHookInvoiceGenerationTest {
 
     @Mock
@@ -54,6 +59,12 @@ class PrescriptionHookInvoiceGenerationTest {
     @Mock
     private BillingClient billingClient;
 
+    @Mock
+    private CircuitBreakerFactory<?, ?> circuitBreakerFactory;
+
+    @Mock
+    private CircuitBreaker circuitBreaker;
+
     private PrescriptionHook prescriptionHook;
 
     private static final String PRESCRIPTION_ID = "presc-123";
@@ -67,9 +78,37 @@ class PrescriptionHookInvoiceGenerationTest {
             medicalExamRepository,
             prescriptionItemMapper,
             webClientBuilder,
-            billingClient
+            billingClient,
+            circuitBreakerFactory
         );
         ReflectionTestUtils.setField(prescriptionHook, "medicineServiceUrl", "http://medicine-service");
+        
+        // Default: CB factory returns mock CB
+        lenient().when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
+    }
+
+    /**
+     * Helper: CB passes through (healthy state)
+     */
+    @SuppressWarnings("unchecked")
+    private void setupCircuitBreakerToPassThrough() {
+        when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+            .thenAnswer(invocation -> {
+                Supplier<?> supplier = invocation.getArgument(0);
+                return supplier.get();
+            });
+    }
+
+    /**
+     * Helper: CB triggers fallback (open state) - returns false for invoice creation
+     */
+    @SuppressWarnings("unchecked")
+    private void setupCircuitBreakerToFallback(RuntimeException exception) {
+        when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+            .thenAnswer(invocation -> {
+                Function<Throwable, ?> fallback = invocation.getArgument(1);
+                return fallback.apply(exception);
+            });
     }
 
     // ========================================================================
@@ -100,9 +139,10 @@ class PrescriptionHookInvoiceGenerationTest {
     class InvoiceGenerationSuccessTests {
 
         @Test
-        @DisplayName("Should generate invoice successfully when billing service responds")
+        @DisplayName("Should generate invoice successfully when CB is closed and billing service responds")
         void shouldGenerateInvoice_whenBillingServiceSucceeds() {
             // Given
+            setupCircuitBreakerToPassThrough();
             Prescription prescription = createDispensedPrescription();
             MedicalExam exam = createMedicalExam();
 
@@ -134,12 +174,12 @@ class PrescriptionHookInvoiceGenerationTest {
     // ========================================================================
 
     @Nested
-    @DisplayName("2. Graceful Degradation - Billing Service Failures")
+    @DisplayName("2. Graceful Degradation - Circuit Breaker Fallback")
     class GracefulDegradationTests {
 
         @Test
-        @DisplayName("Should NOT throw when billing service fails (graceful degradation)")
-        void shouldNotThrow_whenBillingServiceFails() {
+        @DisplayName("Should NOT throw when billing CB is open (graceful degradation - returns false)")
+        void shouldNotThrow_whenBillingCircuitBreakerIsOpen() {
             // Given
             Prescription prescription = createDispensedPrescription();
             MedicalExam exam = createMedicalExam();
@@ -149,22 +189,42 @@ class PrescriptionHookInvoiceGenerationTest {
             when(medicalExamRepository.findById(EXAM_ID))
                 .thenReturn(Optional.of(exam));
 
-            // Billing service throws exception
-            when(billingClient.upsertInvoice(any(BillingClient.InvoiceRequest.class)))
-                .thenThrow(new RuntimeException("Billing service unavailable"));
+            // CB is open - fallback returns false (invoice not created)
+            setupCircuitBreakerToFallback(new RuntimeException("Billing service unavailable"));
 
-            // When/Then - should NOT throw, prescription dispense is complete
+            // When/Then - should NOT throw, CB fallback handles gracefully
             assertDoesNotThrow(() -> 
                 prescriptionHook.generateInvoiceAfterDispense(PRESCRIPTION_ID));
-
-            // Verify billing was attempted
-            verify(billingClient).upsertInvoice(any());
         }
 
         @Test
-        @DisplayName("Should NOT throw when FeignException occurs (service unavailable)")
-        void shouldNotThrow_whenFeignExceptionOccurs() {
+        @DisplayName("Should NOT throw when billing service throws inside CB (pass-through)")
+        void shouldNotThrow_whenBillingServiceThrowsInsideCB() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            Prescription prescription = createDispensedPrescription();
+            MedicalExam exam = createMedicalExam();
+
+            when(prescriptionRepository.findById(PRESCRIPTION_ID))
+                .thenReturn(Optional.of(prescription));
+            when(medicalExamRepository.findById(EXAM_ID))
+                .thenReturn(Optional.of(exam));
+
+            // Billing service throws exception - CB is closed, passes through
+            when(billingClient.upsertInvoice(any(BillingClient.InvoiceRequest.class)))
+                .thenThrow(new RuntimeException("Billing service unavailable"));
+
+            // When/Then - exception is caught by FeignHelper.safeCall or try-catch
+            // The operation completes but invoice flag is false
+            assertDoesNotThrow(() -> 
+                prescriptionHook.generateInvoiceAfterDispense(PRESCRIPTION_ID));
+        }
+
+        @Test
+        @DisplayName("Should NOT throw when FeignException occurs inside CB")
+        void shouldNotThrow_whenFeignExceptionOccursInsideCB() {
+            // Given
+            setupCircuitBreakerToPassThrough();
             Prescription prescription = createDispensedPrescription();
             MedicalExam exam = createMedicalExam();
 
@@ -182,30 +242,6 @@ class PrescriptionHookInvoiceGenerationTest {
                     null, null));
 
             // When/Then - graceful degradation: prescription still complete
-            assertDoesNotThrow(() -> 
-                prescriptionHook.generateInvoiceAfterDispense(PRESCRIPTION_ID));
-        }
-
-        @Test
-        @DisplayName("Should NOT throw when connection timeout occurs")
-        void shouldNotThrow_whenConnectionTimesOut() {
-            // Given
-            Prescription prescription = createDispensedPrescription();
-            MedicalExam exam = createMedicalExam();
-
-            when(prescriptionRepository.findById(PRESCRIPTION_ID))
-                .thenReturn(Optional.of(prescription));
-            when(medicalExamRepository.findById(EXAM_ID))
-                .thenReturn(Optional.of(exam));
-
-            when(billingClient.upsertInvoice(any(BillingClient.InvoiceRequest.class)))
-                .thenThrow(new feign.FeignException.GatewayTimeout(
-                    "Gateway Timeout", 
-                    feign.Request.create(feign.Request.HttpMethod.POST, "/test", 
-                        java.util.Collections.emptyMap(), null, null, null),
-                    null, null));
-
-            // When/Then
             assertDoesNotThrow(() -> 
                 prescriptionHook.generateInvoiceAfterDispense(PRESCRIPTION_ID));
         }

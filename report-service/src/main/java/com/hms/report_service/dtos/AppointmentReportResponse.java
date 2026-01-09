@@ -22,13 +22,19 @@ import java.util.Map;
 public class AppointmentReportResponse implements Serializable {
     
     private Period period;
-    private int totalAppointments;
+    private Integer totalAppointments;
     private Map<String, Integer> appointmentsByStatus;
     private Map<String, Integer> appointmentsByType;
     private List<DepartmentStats> appointmentsByDepartment;
     private List<DailyCount> dailyTrend;  // Daily appointment counts
-    private double averagePerDay;
+    private Double averagePerDay;
     private Instant generatedAt;
+    
+    /**
+     * Data availability status. Null when data is available.
+     * Set to "UNAVAILABLE: {reason}" when downstream service is unavailable.
+     */
+    private String dataStatus;
     
     @Data
     @Builder

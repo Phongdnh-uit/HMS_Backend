@@ -30,6 +30,12 @@ public class RevenueReportResponse implements Serializable {
     private List<PaymentMethodRevenue> revenueByPaymentMethod;
     private Instant generatedAt;
     
+    /**
+     * Data availability status. Null when data is available.
+     * Set to "UNAVAILABLE: {reason}" when downstream service is unavailable.
+     */
+    private String dataStatus;
+    
     @Data
     @Builder
     @NoArgsConstructor

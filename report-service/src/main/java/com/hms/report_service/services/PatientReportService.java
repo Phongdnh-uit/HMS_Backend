@@ -7,6 +7,7 @@ import com.hms.report_service.dtos.PatientReportResponse;
 import com.hms.report_service.dtos.PatientStatsDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,11 @@ import java.util.stream.Collectors;
 /**
  * Service for generating patient activity reports.
  * Uses Redis caching for performance optimization.
+ * 
+ * Caching strategy:
+ * - Fresh data cached for 30 minutes (TTL)
+ * - Degraded responses (dataStatus != null) are NOT cached
+ * - When TTL expires + downstream unavailable -> returns UNAVAILABLE (honest failure)
  */
 @Service
 @RequiredArgsConstructor
@@ -28,22 +34,31 @@ public class PatientReportService {
 
     private final PatientClient patientClient;
     private final MedicalExamClient medicalExamClient;
+    private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
     /**
      * Generate patient activity report.
      * Calls patient-service /patients/stats endpoint for pre-aggregated data.
      * Calls medical-exam-service /exams/stats for top diagnoses.
      * Results are cached in Redis for 30 minutes.
+     * Note: Degraded responses (dataStatus != null) are NOT cached.
      */
-    @Cacheable(value = "patient-reports")
+    @Cacheable(value = "patient-reports", unless = "#result.dataStatus != null")
     public PatientReportResponse generatePatientReport() {
         log.info("Generating patient report (fetching from patient-service and medical-exam-service)");
         
-        var statsResponse = patientClient.getPatientStats();
+        var patientCircuitBreaker = circuitBreakerFactory.create("reportPatient");
+        var statsResponse = patientCircuitBreaker.run(
+            patientClient::getPatientStats,
+            throwable -> {
+                log.warn("[CB-FALLBACK] Patient service unavailable: {}", throwable.getMessage());
+                return null;
+            }
+        );
         
         if (statsResponse == null || statsResponse.getData() == null) {
             log.warn("No stats data returned from patient-service");
-            return buildEmptyReport();
+            return buildUnavailableReport("Patient service unavailable");
         }
         
         PatientStatsDTO stats = statsResponse.getData();
@@ -81,7 +96,15 @@ public class PatientReportService {
      */
     private List<PatientReportResponse.TopDiagnosis> fetchTopDiagnoses() {
         try {
-            var diagnosisResponse = medicalExamClient.getDiagnosisStats();
+            var examCircuitBreaker = circuitBreakerFactory.create("reportMedicalExam");
+            var diagnosisResponse = examCircuitBreaker.run(
+                medicalExamClient::getDiagnosisStats,
+                throwable -> {
+                    log.warn("[CB-FALLBACK] Medical exam service unavailable for diagnoses: {}", 
+                        throwable.getMessage());
+                    return null;
+                }
+            );
             if (diagnosisResponse != null && diagnosisResponse.getData() != null) {
                 DiagnosisStatsDTO diagnosisStats = diagnosisResponse.getData();
                 if (diagnosisStats.getTopDiagnoses() != null) {
@@ -109,17 +132,23 @@ public class PatientReportService {
         log.info("Patient report cache cleared");
     }
     
-    private PatientReportResponse buildEmptyReport() {
+    /**
+     * Build report indicating data is unavailable.
+     * This response is NOT cached (via unless condition).
+     */
+    private PatientReportResponse buildUnavailableReport(String reason) {
+        log.warn("Building unavailable patient report: {}", reason);
         return PatientReportResponse.builder()
-            .totalPatients(0)
-            .newPatientsThisMonth(0)
-            .newPatientsThisYear(0)
-            .patientsByGender(new HashMap<>())
-            .patientsByBloodType(new HashMap<>())
+            .totalPatients(null)  // null indicates unavailable
+            .newPatientsThisMonth(null)
+            .newPatientsThisYear(null)
+            .patientsByGender(null)
+            .patientsByBloodType(null)
             .registrationTrend(new ArrayList<>())
             .topDiagnoses(new ArrayList<>())
-            .averageAge(0)
+            .averageAge(null)
             .generatedAt(Instant.now())
+            .dataStatus("UNAVAILABLE: " + reason)
             .build();
     }
 }

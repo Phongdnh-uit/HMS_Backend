@@ -16,9 +16,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -29,6 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,13 +61,41 @@ class PrescriptionHookTest {
     private WebClient.RequestBodySpec requestBodySpec;
     @Mock
     private WebClient.ResponseSpec responseSpec;
+    @Mock
+    private CircuitBreakerFactory<?, ?> circuitBreakerFactory;
+    @Mock
+    private CircuitBreaker circuitBreaker;
 
-    @InjectMocks
     private PrescriptionHook prescriptionHook;
 
     @BeforeEach
     void setUp() {
+        // Manual constructor instead of @InjectMocks since we need CB
+        prescriptionHook = new PrescriptionHook(
+            prescriptionRepository,
+            medicalExamRepository,
+            prescriptionItemMapper,
+            webClientBuilder,
+            null, // billingClient not needed for these tests
+            circuitBreakerFactory
+        );
         ReflectionTestUtils.setField(prescriptionHook, "medicineServiceUrl", "http://medicine-service");
+        
+        // Default CB setup - pass through
+        lenient().when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
+        setupCircuitBreakerToPassThrough();
+    }
+
+    /**
+     * Helper: CB passes through (healthy state)
+     */
+    @SuppressWarnings("unchecked")
+    private void setupCircuitBreakerToPassThrough() {
+        lenient().when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+            .thenAnswer(invocation -> {
+                Supplier<?> supplier = invocation.getArgument(0);
+                return supplier.get();
+            });
     }
 
     @Test

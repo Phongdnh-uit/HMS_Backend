@@ -14,6 +14,7 @@ import com.hms.hr_service.repositories.DepartmentRepository;
 import com.hms.hr_service.repositories.EmployeeRepository;
 import com.hms.hr_service.repositories.ScheduleRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import com.hms.common.helpers.FeignHelper;
@@ -36,17 +37,20 @@ public class ScheduleHook implements GenericHook<EmployeeSchedule, String, Sched
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
     private final AppointmentClient appointmentClient;
+    private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
     // Manual constructor to apply @Lazy
     public ScheduleHook(
             ScheduleRepository scheduleRepository,
             EmployeeRepository employeeRepository,
             DepartmentRepository departmentRepository,
-            @Lazy AppointmentClient appointmentClient) {
+            @Lazy AppointmentClient appointmentClient,
+            CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
         this.scheduleRepository = scheduleRepository;
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
         this.appointmentClient = appointmentClient;
+        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     // Context keys
@@ -190,26 +194,28 @@ public class ScheduleHook implements GenericHook<EmployeeSchedule, String, Sched
         
         EmployeeSchedule schedule = scheduleOpt.get();
         
-        try {
-            // Call appointment-service to count active appointments
-            var response = FeignHelper.safeCall(() -> 
-                appointmentClient.countByDoctorAndDate(
-                    schedule.getEmployeeId(), schedule.getWorkDate()));
-            
-            int appointmentCount = response.getData() != null ? response.getData() : 0;
-            
-            if (appointmentCount > 0) {
-                throw new ApiException(ErrorCode.OPERATION_NOT_ALLOWED, 
-                        "Cannot delete schedule with " + appointmentCount + " active appointment(s). " +
-                        "Cancel all appointments first, or set schedule status to CANCELLED to trigger cascade cancel.");
+        // Call appointment-service to count active appointments (with Circuit Breaker)
+        var appointmentCircuitBreaker = circuitBreakerFactory.create("hrAppointment");
+        int appointmentCount = appointmentCircuitBreaker.run(
+            () -> {
+                var response = FeignHelper.safeCall(() -> 
+                    appointmentClient.countByDoctorAndDate(
+                        schedule.getEmployeeId(), schedule.getWorkDate()));
+                return response.getData() != null ? response.getData() : 0;
+            },
+            throwable -> {
+                log.error("[CB-FALLBACK] Appointment service unavailable for schedule {}: {}", 
+                    id, throwable.getMessage());
+                // Fail safe - block the delete when we can't verify
+                throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                    "Appointment service unavailable. Cannot verify if schedule has appointments.");
             }
-        } catch (ApiException e) {
-            throw e; // Re-throw our validation exception
-        } catch (Exception e) {
-            log.error("Failed to verify appointments for schedule {}: {}", id, e.getMessage());
-            // If we can't verify, fail safe - block the delete
+        );
+        
+        if (appointmentCount > 0) {
             throw new ApiException(ErrorCode.OPERATION_NOT_ALLOWED, 
-                    "Unable to verify if schedule has appointments. Please try again or use cancel operation.");
+                    "Cannot delete schedule with " + appointmentCount + " active appointment(s). " +
+                    "Cancel all appointments first, or set schedule status to CANCELLED to trigger cascade cancel.");
         }
     }
 
@@ -222,6 +228,7 @@ public class ScheduleHook implements GenericHook<EmployeeSchedule, String, Sched
     public void validateBulkDelete(Iterable<String> ids) {
         // Validate each schedule - collect all that have appointments
         Map<String, Integer> schedulesWithAppointments = new HashMap<>();
+        var appointmentCircuitBreaker = circuitBreakerFactory.create("hrAppointment");
         
         for (String id : ids) {
             Optional<EmployeeSchedule> scheduleOpt = scheduleRepository.findById(id);
@@ -231,19 +238,23 @@ public class ScheduleHook implements GenericHook<EmployeeSchedule, String, Sched
             
             EmployeeSchedule schedule = scheduleOpt.get();
             
-            try {
-                var response = FeignHelper.safeCall(() -> 
-                    appointmentClient.countByDoctorAndDate(
-                        schedule.getEmployeeId(), schedule.getWorkDate()));
-                int count = response.getData() != null ? response.getData() : 0;
-                
-                if (count > 0) {
-                    schedulesWithAppointments.put(id, count);
+            int count = appointmentCircuitBreaker.run(
+                () -> {
+                    var response = FeignHelper.safeCall(() -> 
+                        appointmentClient.countByDoctorAndDate(
+                            schedule.getEmployeeId(), schedule.getWorkDate()));
+                    return response.getData() != null ? response.getData() : 0;
+                },
+                throwable -> {
+                    log.error("[CB-FALLBACK] Appointment service unavailable for schedule {}: {}", 
+                        id, throwable.getMessage());
+                    // Return -1 to indicate unknown - will be treated as blocked
+                    return -1;
                 }
-            } catch (Exception e) {
-                log.error("Failed to verify appointments for schedule {}: {}", id, e.getMessage());
-                // Fail safe - treat as having appointments
-                schedulesWithAppointments.put(id, -1); // -1 means unknown but blocked
+            );
+            
+            if (count != 0) { // count > 0 means has appointments, count == -1 means CB fallback
+                schedulesWithAppointments.put(id, count);
             }
         }
         
