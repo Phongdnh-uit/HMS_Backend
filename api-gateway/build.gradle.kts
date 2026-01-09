@@ -8,3 +8,16 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-config-client")
 
 }
+
+tasks.test {
+    // Exclude E2E tests from regular test task - they require full infrastructure
+    exclude("**/e2e/**")
+}
+
+// Separate task for E2E tests (run manually with full infrastructure)
+tasks.register<Test>("e2eTest") {
+    description = "Runs E2E integration tests (requires full infrastructure)"
+    group = "verification"
+    include("**/e2e/**")
+    shouldRunAfter(tasks.test)
+}
