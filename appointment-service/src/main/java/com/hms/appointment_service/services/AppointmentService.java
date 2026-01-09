@@ -16,6 +16,7 @@ import com.hms.common.exceptions.errors.ErrorCode;
 import com.hms.common.helpers.FeignHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +44,7 @@ public class AppointmentService {
     private final PatientClient patientClient;
     private final AppointmentMapper appointmentMapper;
     private final QueueService queueService;
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
     /**
      * Get available time slots for a doctor on a specific date.
@@ -55,19 +57,23 @@ public class AppointmentService {
     public List<TimeSlotResponse> getAvailableSlots(String doctorId, LocalDate date) {
         log.info("🔍 [getAvailableSlots] Fetching slots for doctor {} on {}", doctorId, date);
 
-        // 1. Get Doctor Schedule from HR Service
-        ApiResponse<HrClient.ScheduleInfo> scheduleResponse;
-        try {
-            log.info("📞 [getAvailableSlots] Calling HR service for schedule: doctorId={}, date={}", doctorId, date);
-            scheduleResponse = FeignHelper.safeCall(() -> 
-                hrClient.getScheduleByDoctorAndDate(doctorId, date));
-            log.info("✅ [getAvailableSlots] HR service response received: {}", scheduleResponse != null ? "Not null" : "NULL");
-            if (scheduleResponse != null) {
-                log.info("📊 [getAvailableSlots] Schedule response data: {}", scheduleResponse.getData());
+        // 1. Get Doctor Schedule from HR Service (with circuit breaker - fail-fast)
+        var hrCircuitBreaker = circuitBreakerFactory.create("appointmentHr");
+        ApiResponse<HrClient.ScheduleInfo> scheduleResponse = hrCircuitBreaker.run(
+            () -> {
+                log.info("📞 [getAvailableSlots] Calling HR service for schedule: doctorId={}, date={}", doctorId, date);
+                return FeignHelper.safeCall(() -> hrClient.getScheduleByDoctorAndDate(doctorId, date));
+            },
+            throwable -> {
+                log.error("❌ [getAvailableSlots] CB fallback - HR service unavailable: {}", throwable.getMessage());
+                throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                    "Cannot fetch doctor schedule - HR service temporarily unavailable. Please try again later.");
             }
-        } catch (Exception e) {
-            log.error("❌ [getAvailableSlots] Failed to fetch schedule for doctor {}: {}", doctorId, e.getMessage(), e);
-            return List.of(); // Return empty if no schedule or error
+        );
+        
+        log.info("✅ [getAvailableSlots] HR service response received: {}", scheduleResponse != null ? "Not null" : "NULL");
+        if (scheduleResponse != null) {
+            log.info("📊 [getAvailableSlots] Schedule response data: {}", scheduleResponse.getData());
         }
 
         if (scheduleResponse == null || scheduleResponse.getData() == null) {
@@ -452,36 +458,40 @@ public class AppointmentService {
         appointment.setPriority(priority);
         appointment.setPriorityReason(request.getPriorityReason());
         
-        // Fetch patient name from patient-service
-        try {
-            var patientResponse = FeignHelper.safeCall(() -> patientClient.getPatientById(request.getPatientId()));
-            if (patientResponse != null && patientResponse.getData() != null) {
-                appointment.setPatientName(patientResponse.getData().fullName());
-                log.debug("Fetched patient name: {}", patientResponse.getData().fullName());
-            } else {
-                appointment.setPatientName("Walk-in Patient");
-                log.warn("Could not fetch patient name for patientId: {}", request.getPatientId());
+        // Fetch patient name from patient-service (with circuit breaker - fail-fast)
+        var patientCircuitBreaker = circuitBreakerFactory.create("appointmentPatient");
+        var patientResponse = patientCircuitBreaker.run(
+            () -> FeignHelper.safeCall(() -> patientClient.getPatientById(request.getPatientId())),
+            throwable -> {
+                log.error("CB fallback - patient-service unavailable for walk-in: {}", throwable.getMessage());
+                throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                    "Cannot verify patient - Patient service temporarily unavailable. Please try again.");
             }
-        } catch (Exception e) {
-            appointment.setPatientName("Walk-in Patient");
-            log.warn("Failed to fetch patient name: {}", e.getMessage());
+        );
+        if (patientResponse == null || patientResponse.getData() == null) {
+            throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND, 
+                "Patient not found with id: " + request.getPatientId());
         }
+        appointment.setPatientName(patientResponse.getData().fullName());
+        log.debug("Fetched patient name: {}", patientResponse.getData().fullName());
         
-        // Fetch doctor name and department from hr-service
-        try {
-            var doctorResponse = FeignHelper.safeCall(() -> hrClient.getEmployeeById(request.getDoctorId()));
-            if (doctorResponse != null && doctorResponse.getData() != null) {
-                appointment.setDoctorName(doctorResponse.getData().fullName());
-                appointment.setDoctorDepartment(doctorResponse.getData().departmentName());
-                log.debug("Fetched doctor: {} ({})", doctorResponse.getData().fullName(), doctorResponse.getData().departmentName());
-            } else {
-                appointment.setDoctorName("Doctor");
-                log.warn("Could not fetch doctor name for doctorId: {}", request.getDoctorId());
+        // Fetch doctor name and department from hr-service (with circuit breaker - fail-fast)
+        var hrCircuitBreaker = circuitBreakerFactory.create("appointmentHr");
+        var doctorResponse = hrCircuitBreaker.run(
+            () -> FeignHelper.safeCall(() -> hrClient.getEmployeeById(request.getDoctorId())),
+            throwable -> {
+                log.error("CB fallback - hr-service unavailable for walk-in: {}", throwable.getMessage());
+                throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                    "Cannot verify doctor - HR service temporarily unavailable. Please try again.");
             }
-        } catch (Exception e) {
-            appointment.setDoctorName("Doctor");
-            log.warn("Failed to fetch doctor name: {}", e.getMessage());
+        );
+        if (doctorResponse == null || doctorResponse.getData() == null) {
+            throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND, 
+                "Doctor not found with id: " + request.getDoctorId());
         }
+        appointment.setDoctorName(doctorResponse.getData().fullName());
+        appointment.setDoctorDepartment(doctorResponse.getData().departmentName());
+        log.debug("Fetched doctor: {} ({})", doctorResponse.getData().fullName(), doctorResponse.getData().departmentName());
         
         appointment = appointmentRepository.save(appointment);
         log.info("Walk-in registered: id={}, queueNumber={}, priority={}", 

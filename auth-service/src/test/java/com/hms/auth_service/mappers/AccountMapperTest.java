@@ -22,13 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Note: MapStruct mappers are generated at compile time and need Spring context
  * for dependency injection when using componentModel = "spring".
  */
-@SpringBootTest(properties = {
-    "spring.cloud.config.enabled=false",
-    "eureka.client.enabled=false",
-    "spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL",
-    "spring.datasource.driver-class-name=org.h2.Driver",
-    "spring.jpa.hibernate.ddl-auto=create-drop"
-})
+@SpringBootTest
 @ActiveProfiles("test")
 @DisplayName("UC-AUTH-010/011: AccountMapper Unit Tests")
 class AccountMapperTest {

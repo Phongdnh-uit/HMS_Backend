@@ -3,6 +3,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.cloud:spring-cloud-config-client")
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
     // MinIO for file storage
     implementation("io.minio:minio:8.5.7")
     developmentOnly("org.springframework.boot:spring-boot-devtools")

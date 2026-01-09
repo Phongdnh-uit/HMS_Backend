@@ -12,6 +12,8 @@ import com.hms.hr_service.dtos.employee.EmployeeResponse;
 import com.hms.hr_service.entities.Employee;
 import com.hms.hr_service.repositories.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Component;
 
 import com.hms.hr_service.entities.Department;
@@ -21,9 +23,11 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class EmployeeHook implements GenericHook<Employee, String, EmployeeRequest, EmployeeResponse> {
     private final DepartmentRepository departmentRepository;
     private final AccountClient accountClient;
+    private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
 
     @Override
@@ -107,9 +111,18 @@ public class EmployeeHook implements GenericHook<Employee, String, EmployeeReque
     private void validate(EmployeeRequest request) {
         Map<String, String> errors = new java.util.HashMap<>();
 
-        // validate accountId if provided
+        // validate accountId if provided (with Circuit Breaker)
         if (request.getAccountId() != null && !request.getAccountId().isBlank()) {
-            var response = FeignHelper.safeCall(() -> accountClient.findById(request.getAccountId()));
+            var authCircuitBreaker = circuitBreakerFactory.create("hrAuth");
+            var response = authCircuitBreaker.run(
+                () -> FeignHelper.safeCall(() -> accountClient.findById(request.getAccountId())),
+                throwable -> {
+                    log.warn("[CB-FALLBACK] Auth service unavailable: {}", throwable.getMessage());
+                    // Cannot validate account - fail safe by blocking
+                    throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                        "Auth service unavailable. Cannot validate account ID.");
+                }
+            );
             if (response.getCode() != 1000) {
                 errors.put("accountId", "Account with ID " + request.getAccountId() + " does not exist");
             }

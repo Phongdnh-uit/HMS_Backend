@@ -5,6 +5,7 @@ import com.hms.notification_service.clients.PatientClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ public class FollowUpNotificationScheduler {
     private final EmailService emailService;
     private final MedicalExamClient medicalExamClient;
     private final PatientClient patientClient;
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
     /**
      * Days offset for follow-up check.
@@ -49,11 +51,18 @@ public class FollowUpNotificationScheduler {
         LocalDate targetDate = LocalDate.now().plusDays(followUpDaysOffset);
         
         try {
-            // Fetch exams with followUpDate = targetDate and not yet notified
-            var response = medicalExamClient.getExamsForFollowUpNotification(targetDate.toString());
+            // Fetch exams with followUpDate = targetDate and not yet notified (with circuit breaker)
+            var medicalExamCircuitBreaker = circuitBreakerFactory.create("notificationMedicalExam");
+            var response = medicalExamCircuitBreaker.run(
+                () -> medicalExamClient.getExamsForFollowUpNotification(targetDate.toString()),
+                throwable -> {
+                    log.error("CB fallback - medical-exam-service unavailable: {}", throwable.getMessage());
+                    return null;
+                }
+            );
             
             if (response == null || response.getData() == null) {
-                log.info("No exams found for follow-up notification");
+                log.info("No exams found for follow-up notification (or service unavailable)");
                 return;
             }
 
@@ -62,11 +71,19 @@ public class FollowUpNotificationScheduler {
 
             int successCount = 0;
             int failCount = 0;
+            var patientCircuitBreaker = circuitBreakerFactory.create("notificationPatient");
 
             for (var exam : exams) {
                 try {
-                    // Fetch patient email
-                    var patientResponse = patientClient.getPatientById(exam.patientId());
+                    // Fetch patient email (with circuit breaker)
+                    var patientResponse = patientCircuitBreaker.run(
+                        () -> patientClient.getPatientById(exam.patientId()),
+                        throwable -> {
+                            log.warn("CB fallback - patient-service unavailable for exam {}: {}", 
+                                    exam.examId(), throwable.getMessage());
+                            return null;
+                        }
+                    );
                     
                     if (patientResponse == null || patientResponse.getData() == null) {
                         log.warn("Patient not found for exam {}", exam.examId());
@@ -92,8 +109,21 @@ public class FollowUpNotificationScheduler {
                             exam.diagnosis() != null ? exam.diagnosis() : "Follow-up visit"
                     );
 
-                    // Mark notification as sent
-                    medicalExamClient.markFollowUpNotificationSent(exam.examId());
+                    // Mark notification as sent (with circuit breaker - log-and-skip on failure)
+                    Boolean marked = medicalExamCircuitBreaker.run(
+                        () -> {
+                            medicalExamClient.markFollowUpNotificationSent(exam.examId());
+                            return true; // Success
+                        },
+                        throwable -> {
+                            log.warn("[CB-FALLBACK] Failed to mark notification sent for exam {}: {}", 
+                                    exam.examId(), throwable.getMessage());
+                            return false; // Fallback - marking failed
+                        }
+                    );
+                    if (!Boolean.TRUE.equals(marked)) {
+                        log.warn("Email sent but failed to mark notification as sent for exam {} - may result in duplicate reminder", exam.examId());
+                    }
                     successCount++;
 
                     log.info("Sent follow-up reminder to {} for exam {}", patient.email(), exam.examId());

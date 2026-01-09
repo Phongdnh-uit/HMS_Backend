@@ -31,6 +31,17 @@ spring:
       enabled: true
       path: /h2-console
 
+  # Mail configuration for testing (use mock sender)
+  mail:
+    host: localhost
+    port: 25
+    username: test@hms.com
+    password: test
+
+  # Thymeleaf configuration for testing
+  thymeleaf:
+    check-template-location: false
+
 # Disable Eureka client
 eureka:
   client:
@@ -40,6 +51,16 @@ eureka:
 docker:
   compose:
     enabled: false
+
+# JWT Configuration for testing - Valid RSA 2048-bit keys
+# WARNING: These are TEST KEYS ONLY - NEVER use in production
+jwt:
+  private-key: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCzq5b75OdtR+xmK1RyPVOw5e7JMEQ/oCqIbpGSmNpZw1wo/V2MLioXdfGpSypz1Wx7cuvIH3ghQLtC/ekFb7MFu+8r5b0pi/g3lG7Rpiyg3x6gAcRlttvbAzgFuTAwqbzBtOjEAfYcMi//i1epbeu83IZ4lMVHVYa+KpFZylSikZs+Lp3Czvqxku2lUw4F6QNXeVaHEy7+TqJkn85j0xp0RhKufUWvXKakhrQL+ixU9+fgAkRjCGgNWrhZ4FmQAu/8Z62Ou4Xp/X4zM+HrDdpUDVzfjCZXKEJRtljv7+lPhvibA3HW7KEcuFI/H4/NfXQdZf9QiA4KdNAUTwcOBnWDAgMBAAECggEAAKrlCzeNApNvVevYSvpeWrxn+DhlMIVUUyByCwTlXssChyZ12AT95Atso+/jDv4egpDpPlubkygN6hBOctY46I8LsvKOEt7xw6caCE5hQRHDJ94J0ETvKS+oYCERhETFLkURTlUhiHZJRl5Kq5b8dr2tBDqtRvgS4Zb/5kEBsn7taBH5XubCwXWaePMgv0OWOqvgbqBqrn1oKUAo2tgnzb5Z8iqRbU8sKmnaWg2d0N3UlU1PcakgaTRUsMedkFFRK7wm7EnOx7T7mabq0pH+pNiJRjcXkaZiZyKFTQylqVkhkiMz+Kr7hQOR999vWknD/5WJ3yqZbf46qWvWW/lO8QKBgQDc4kUUqD6lihrwxZzco5DhqtiMiBZTrRjIlyTQVkzoUf75T5vBgw9dV8KOvAyfAIhPqZy/K3tJE5h0Y2qdSX4YHFHnpFaUeAc6jA9VN38jvV++mJioCORMSyvcdme3bwKZwPH4bdyhpXXvDu8WgMqtxuA1qnSIrW5kj2YeT2xVUwKBgQDQO/jXjx+stYwI6IrhmKmd/GsP6ARq7DBvc8ehAWxIUWy/doVtLDKA7iBiY2k4txuKZ+vVJiFIrlWQEXkN0v9V+xSOQfAsTfCvReA9VrTcmrGyg4sczYaqTynUtpBiPk3JR6USg+uHnhB3v8xcJ0BnWaNFfaFZosWZnqscdVupEQKBgD2326WR/S80D6MHFHVyHqFvo2JhBBwNWcdytA6ijoq7nor6+4JupHRoeSx4zu3+sBfSRMIF3ETm/MpInRml113VS+11tdt2Tk7Fo+Mjxpqt53rSGJWbJm9K8c6AJyrSEd/0Uaggym1AVludyKB5DCjSUQOtxTILg7UFfHsrphGRAoGBALwrVYTFCuRw8egi601NPQlMzhqDmWpdoK82OtEdjhITsmeZ3Jx48fJcPNtr5eugW7zIh+4HFNCu6RbVE0UQxDeYOk0K/NOsYrCgPjBvp+QpziX4hL80YlqISs6zYunET1px6ZM/rpjQlyT/JtaniaVa9RWYnzN2yYU2Qn3m9zthAoGBANw3mDYQTrquF2/dSqyVtPhiWMfQHEsvFqWWPc5xmGC4EgS6YErBUBYmEkETP1rDR/jnbCsKwvqstRiL6P5AeKjaah3LfjDWT2TGJVXUlXA9oBCm2d8Gh2E+l+CYHUj5BgbJ/0osYMUoLPOEgJBS/2JuBUft0bZ2B39pLdW3YoOQ
+  public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs6uW++TnbUfsZitUcj1TsOXuyTBEP6AqiG6RkpjaWcNcKP1djC4qF3XxqUsqc9Vse3LryB94IUC7Qv3pBW+zBbvvK+W9KYv4N5Ru0aYsoN8eoAHEZbbb2wM4BbkwMKm8wbToxAH2HDIv/4tXqW3rvNyGeJTFR1WGviqRWcpUopGbPi6dws76sZLtpVMOBekDV3lWhxMu/k6iZJ/OY9MadEYSrn1Fr1ympIa0C/osVPfn4AJEYwhoDVq4WeBZkALv/GetjruF6f1+MzPh6w3aVA1c34wmVyhCUbZY7+/pT4b4mwNx1uyhHLhSPx+PzX10HWX/UIgOCnTQFE8HDgZ1gwIDAQAB
+  access-token:
+    expiration: 3600
+  refresh-token:
+    expiration: 86400
 
 # Logging configuration for tests
 logging:
@@ -54,3 +75,9 @@ logging:
 hms:
   test:
     enabled: true
+
+# Application configuration for testing
+app:
+  frontend:
+    reset-password-url: http://localhost:3000/reset-password
+    activate-account-url: http://localhost:3000/activate

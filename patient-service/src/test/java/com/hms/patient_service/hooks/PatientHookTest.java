@@ -15,18 +15,22 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for PatientHook.
@@ -42,7 +46,12 @@ class PatientHookTest {
     @Mock
     private AccountClient accountClient;
 
-    @InjectMocks
+    @Mock
+    private CircuitBreakerFactory<?, ?> circuitBreakerFactory;
+
+    @Mock
+    private CircuitBreaker circuitBreaker;
+
     private PatientHook patientHook;
 
     private PatientRequest testRequest;
@@ -51,6 +60,17 @@ class PatientHookTest {
 
     @BeforeEach
     void setUp() {
+        // Setup circuit breaker mock - execute supplier directly (pass-through behavior)
+        lenient().when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
+        lenient().when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+                .thenAnswer(invocation -> {
+                    Supplier<?> supplier = invocation.getArgument(0);
+                    return supplier.get();
+                });
+
+        // Create PatientHook manually after CB mocks are configured
+        patientHook = new PatientHook(patientRepository, accountClient, circuitBreakerFactory);
+
         context = new HashMap<>();
 
         testRequest = new PatientRequest();
@@ -137,6 +157,7 @@ class PatientHookTest {
         @DisplayName("UC-PAT-003: Should enrich entity with default data when fields are null")
         void enrichCreate_withNullFields_shouldEnrichWithDefaults() {
             // Given
+            testEntity.setAccountId(null); // Don't trigger account fetch
             testEntity.setEmail(null);
             testEntity.setPhoneNumber(null);
             testEntity.setAddress(null);
@@ -162,6 +183,7 @@ class PatientHookTest {
         @DisplayName("Should enrich entity with default data when fields are empty strings")
         void enrichCreate_withEmptyFields_shouldEnrichWithDefaults() {
             // Given
+            testEntity.setAccountId(null); // Don't trigger account fetch
             testEntity.setEmail("");
             testEntity.setPhoneNumber("");
             testEntity.setAddress("");
@@ -230,13 +252,18 @@ class PatientHookTest {
             testEntity.setAccountId(accountId);
             testEntity.setEmail(null);
 
-            given(accountClient.findById(accountId)).willThrow(new RuntimeException("Account not found"));
+            // When circuit breaker fallback is triggered (auth service down),
+            // it throws RuntimeException as per the new implementation
+            when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+                    .thenAnswer(invocation -> {
+                        Function<Throwable, ?> fallback = invocation.getArgument(1);
+                        return fallback.apply(new RuntimeException("Connection refused"));
+                    });
 
-            // When
-            patientHook.enrichCreate(testRequest, testEntity, context);
-
-            // Then
-            assertThat(testEntity.getEmail()).isEqualTo("N/A");
+            // When & Then - Circuit breaker throws exception for service unavailability
+            assertThatThrownBy(() -> patientHook.enrichCreate(testRequest, testEntity, context))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Auth service unavailable");
         }
 
         @Test

@@ -18,12 +18,14 @@ import com.hms.common.securities.UserContext;
 import com.hms.common.helpers.FeignHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +61,7 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
     private final PrescriptionItemMapper prescriptionItemMapper;
     private final WebClient.Builder webClientBuilder;
     private final BillingClient billingClient;
+    private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
     
     @Value("${app.services.medicine-service.url:http://medicine-service}")
     private String medicineServiceUrl;
@@ -354,8 +357,23 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
                     exam.getId(), // Pass examId for direct prescription lookup
                     "Auto-generated after prescription dispense"
                 );
-                FeignHelper.safeCall(() -> billingClient.upsertInvoice(invoiceRequest));
-                log.info("[INVOICE] Invoice created/updated successfully for prescription: {}", prescription.getId());
+                // Invoice generation is an optional side effect - log-and-skip on failure
+                Boolean invoiceCreated = circuitBreakerFactory.create("examBilling").run(
+                    () -> {
+                        FeignHelper.safeCall(() -> billingClient.upsertInvoice(invoiceRequest));
+                        return true; // Success
+                    },
+                    throwable -> {
+                        // Don't throw - invoice generation is non-critical side effect
+                        // Prescription dispense already succeeded, invoice can be created manually later
+                        log.warn("[CB-FALLBACK] Billing service unavailable for invoice generation: {} - will retry later or create manually", 
+                            throwable.getMessage());
+                        return false; // Fallback - invoice not created
+                    }
+                );
+                if (Boolean.TRUE.equals(invoiceCreated)) {
+                    log.info("[INVOICE] Invoice created/updated successfully for prescription: {}", prescription.getId());
+                }
             } catch (Exception e) {
                 log.error("[INVOICE] Failed to generate invoice for prescription {}: {}", 
                     prescription.getId(), e.getMessage());
@@ -385,13 +403,21 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
                 try {
                     log.debug("[CANCEL-SAGA] Attempt {}/{} - Restoring stock for medicine {}: +{}", 
                         attempt, MAX_RETRY_ATTEMPTS, record.medicineId(), record.quantity());
-                    
-                    medicineClient.patch()
-                        .uri("/medicines/{id}/stock", record.medicineId())
-                        .bodyValue(Map.of("delta", record.quantity()))
-                        .retrieve()
-                        .toBodilessEntity()
-                        .block();
+
+                    circuitBreakerFactory.create("examMedicine").run(
+                        () -> {
+                            medicineClient.patch()
+                                .uri("/medicines/{id}/stock", record.medicineId())
+                                .bodyValue(Map.of("delta", record.quantity()))
+                                .retrieve()
+                                .toBodilessEntity()
+                                .block(Duration.ofSeconds(2));
+                            return null;
+                        },
+                        throwable -> {
+                            throw new RuntimeException(throwable);
+                        }
+                    );
                     
                     log.info("[CANCEL-SAGA] Stock restored for medicine {}: +{}", 
                         record.medicineId(), record.quantity());
@@ -440,11 +466,17 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
             
             try {
                 // Call medicine-service to get medicine details
-                MedicineApiResponse response = medicineClient.get()
-                    .uri("/medicines/{id}", medicineId)
-                    .retrieve()
-                    .bodyToMono(MedicineApiResponse.class)
-                    .block();
+                MedicineApiResponse response = circuitBreakerFactory.create("examMedicine").run(
+                    () -> medicineClient.get()
+                        .uri("/medicines/{id}", medicineId)
+                        .retrieve()
+                        .bodyToMono(MedicineApiResponse.class)
+                        .block(Duration.ofSeconds(2)),
+                    throwable -> {
+                        throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR,
+                            "Medicine service unavailable: " + throwable.getMessage());
+                    }
+                );
                 
                 // Extract medicine data from response wrapper
                 MedicineData medicine = response.data();
@@ -514,12 +546,21 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
                 log.debug("[SAGA] Decrementing stock for medicine {}: -{}", medicineId, quantity);
                 
                 // Call PATCH /api/medicines/{id}/stock with negative delta
-                medicineClient.patch()
-                    .uri("/medicines/{id}/stock", medicineId)
-                    .bodyValue(Map.of("delta", -quantity))
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block();
+                circuitBreakerFactory.create("examMedicine").run(
+                    () -> {
+                        medicineClient.patch()
+                            .uri("/medicines/{id}/stock", medicineId)
+                            .bodyValue(Map.of("delta", -quantity))
+                            .retrieve()
+                            .toBodilessEntity()
+                            .block(Duration.ofSeconds(2));
+                        return null;
+                    },
+                    throwable -> {
+                        throw new ApiException(ErrorCode.STOCK_DECREMENT_FAILED,
+                            "Medicine service unavailable: " + throwable.getMessage());
+                    }
+                );
                 
                 // Track successful decrement for potential rollback
                 completedDecrements.add(new StockDecrementRecord(medicineId, quantity));
@@ -576,12 +617,20 @@ public class PrescriptionHook implements GenericHook<Prescription, String, Presc
                         attempt, MAX_RETRY_ATTEMPTS, record.medicineId(), record.quantity());
                     
                     // Call PATCH with positive delta to restore stock
-                    medicineClient.patch()
-                        .uri("/medicines/{id}/stock", record.medicineId())
-                        .bodyValue(Map.of("delta", record.quantity())) // Positive = add back
-                        .retrieve()
-                        .toBodilessEntity()
-                        .block();
+                    circuitBreakerFactory.create("examMedicine").run(
+                        () -> {
+                            medicineClient.patch()
+                                .uri("/medicines/{id}/stock", record.medicineId())
+                                .bodyValue(Map.of("delta", record.quantity())) // Positive = add back
+                                .retrieve()
+                                .toBodilessEntity()
+                                .block(Duration.ofSeconds(2));
+                            return null;
+                        },
+                        throwable -> {
+                            throw new RuntimeException(throwable);
+                        }
+                    );
                     
                     log.info("[SAGA-COMPENSATE] Stock restored for medicine {}: +{}", 
                         record.medicineId(), record.quantity());

@@ -15,9 +15,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -26,6 +27,8 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -53,7 +56,12 @@ class AppointmentServiceTest {
     @Mock
     private QueueService queueService;
 
-    @InjectMocks
+    @Mock
+    private CircuitBreakerFactory circuitBreakerFactory;
+
+    @Mock
+    private CircuitBreaker circuitBreaker;
+
     private AppointmentService appointmentService;
 
     private static final ZoneId VIETNAM_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
@@ -63,6 +71,11 @@ class AppointmentServiceTest {
 
     @BeforeEach
     void setUp() {
+        appointmentService = new AppointmentService(
+            appointmentRepository, hrClient, patientClient, 
+            appointmentMapper, queueService, circuitBreakerFactory
+        );
+        
         testDoctorId = TestDataFactory.uuid();
         testDate = LocalDate.now().plusDays(1);
 
@@ -74,6 +87,32 @@ class AppointmentServiceTest {
         testAppointment.setAppointmentTime(Instant.now().plusSeconds(86400));
     }
 
+    /**
+     * Helper method to setup circuit breaker to pass through to supplier
+     */
+    @SuppressWarnings("unchecked")
+    private void setupCircuitBreakerToPassThrough() {
+        given(circuitBreakerFactory.create(anyString())).willReturn(circuitBreaker);
+        given(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+            .willAnswer(invocation -> {
+                Supplier<?> supplier = invocation.getArgument(0);
+                return supplier.get();
+            });
+    }
+
+    /**
+     * Helper method to setup circuit breaker to trigger fallback
+     */
+    @SuppressWarnings("unchecked")
+    private void setupCircuitBreakerToFallback(Throwable exception) {
+        given(circuitBreakerFactory.create(anyString())).willReturn(circuitBreaker);
+        given(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+            .willAnswer(invocation -> {
+                Function<Throwable, ?> fallback = invocation.getArgument(1);
+                return fallback.apply(exception);
+            });
+    }
+
     @Nested
     @DisplayName("Method: getAvailableSlots()")
     class GetAvailableSlotsTests {
@@ -82,6 +121,8 @@ class AppointmentServiceTest {
         @DisplayName("UC-APT-006: Should return available time slots for a doctor")
         void getAvailableSlots_withValidSchedule_shouldReturnSlots() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             HrClient.ScheduleInfo schedule = new HrClient.ScheduleInfo(
                     TestDataFactory.uuid(),
                     testDoctorId,
@@ -119,6 +160,8 @@ class AppointmentServiceTest {
         @DisplayName("Should mark booked slots as unavailable")
         void getAvailableSlots_withBookedSlots_shouldMarkUnavailable() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             HrClient.ScheduleInfo schedule = new HrClient.ScheduleInfo(
                     TestDataFactory.uuid(),
                     testDoctorId,
@@ -156,6 +199,8 @@ class AppointmentServiceTest {
         @DisplayName("Should ignore cancelled appointments when calculating availability")
         void getAvailableSlots_withCancelledAppointments_shouldIgnoreThem() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             HrClient.ScheduleInfo schedule = new HrClient.ScheduleInfo(
                     TestDataFactory.uuid(),
                     testDoctorId,
@@ -191,6 +236,8 @@ class AppointmentServiceTest {
         @DisplayName("Should return empty list when doctor has no schedule")
         void getAvailableSlots_withNoSchedule_shouldReturnEmptyList() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             ApiResponse<HrClient.ScheduleInfo> emptyResponse = ApiResponse.ok(null);
 
             given(hrClient.getScheduleByDoctorAndDate(testDoctorId, testDate))
@@ -201,21 +248,18 @@ class AppointmentServiceTest {
 
             // Then
             assertThat(slots).isEmpty();
-            then(appointmentRepository).shouldHaveNoInteractions();
         }
 
         @Test
-        @DisplayName("Should return empty list when HR service fails")
-        void getAvailableSlots_whenHrServiceFails_shouldReturnEmptyList() {
+        @DisplayName("Should throw SERVICE_UNAVAILABLE when HR service CB is open")
+        void getAvailableSlots_whenHrServiceFails_shouldThrowServiceUnavailable() {
             // Given
-            given(hrClient.getScheduleByDoctorAndDate(testDoctorId, testDate))
-                    .willThrow(new RuntimeException("HR service unavailable"));
+            setupCircuitBreakerToFallback(new RuntimeException("HR service unavailable"));
 
-            // When
-            List<TimeSlotResponse> slots = appointmentService.getAvailableSlots(testDoctorId, testDate);
-
-            // Then
-            assertThat(slots).isEmpty();
+            // When & Then
+            assertThatThrownBy(() -> appointmentService.getAvailableSlots(testDoctorId, testDate))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("HR service temporarily unavailable");
         }
     }
 

@@ -5,6 +5,7 @@ import com.hms.report_service.dtos.AppointmentReportResponse;
 import com.hms.report_service.dtos.AppointmentStatsDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,11 @@ import java.util.stream.Collectors;
 /**
  * Service for generating appointment reports.
  * Uses Redis caching for performance optimization.
+ * 
+ * Caching strategy:
+ * - Fresh data cached for 15 minutes (TTL)
+ * - Degraded responses (dataStatus != null) are NOT cached
+ * - When TTL expires + downstream unavailable -> returns UNAVAILABLE (honest failure)
  */
 @Service
 @RequiredArgsConstructor
@@ -26,21 +32,30 @@ import java.util.stream.Collectors;
 public class AppointmentReportService {
 
     private final AppointmentClient appointmentClient;
+    private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
     /**
      * Generate appointment report for the specified period.
      * Calls appointment-service /appointments/stats endpoint for pre-aggregated data.
      * Results are cached in Redis for 10 minutes.
+     * Note: Degraded responses (dataStatus != null) are NOT cached.
      */
-    @Cacheable(value = "appointment-reports", key = "#startDate + '-' + #endDate")
+    @Cacheable(value = "appointment-reports", key = "#startDate + '-' + #endDate", unless = "#result.dataStatus != null")
     public AppointmentReportResponse generateAppointmentReport(LocalDate startDate, LocalDate endDate) {
         log.info("Generating appointment report from {} to {} (fetching from appointment-service)", startDate, endDate);
         
-        var statsResponse = appointmentClient.getAppointmentStats(startDate, endDate);
+        var circuitBreaker = circuitBreakerFactory.create("reportAppointment");
+        var statsResponse = circuitBreaker.run(
+            () -> appointmentClient.getAppointmentStats(startDate, endDate),
+            throwable -> {
+                log.warn("[CB-FALLBACK] Appointment service unavailable: {}", throwable.getMessage());
+                return null;
+            }
+        );
         
         if (statsResponse == null || statsResponse.getData() == null) {
             log.warn("No stats data returned from appointment-service");
-            return buildEmptyReport(startDate, endDate);
+            return buildUnavailableReport(startDate, endDate, "Appointment service unavailable");
         }
         
         AppointmentStatsDTO stats = statsResponse.getData();
@@ -90,19 +105,25 @@ public class AppointmentReportService {
         log.info("Appointment report cache cleared");
     }
     
-    private AppointmentReportResponse buildEmptyReport(LocalDate startDate, LocalDate endDate) {
+    /**
+     * Build report indicating data is unavailable.
+     * This response is NOT cached (via unless condition).
+     */
+    private AppointmentReportResponse buildUnavailableReport(LocalDate startDate, LocalDate endDate, String reason) {
+        log.warn("Building unavailable appointment report: {}", reason);
         return AppointmentReportResponse.builder()
             .period(AppointmentReportResponse.Period.builder()
                 .startDate(startDate)
                 .endDate(endDate)
                 .build())
-            .totalAppointments(0)
-            .appointmentsByStatus(new HashMap<>())
-            .appointmentsByType(new HashMap<>())
+            .totalAppointments(null)  // null indicates unavailable
+            .appointmentsByStatus(null)
+            .appointmentsByType(null)
             .appointmentsByDepartment(new ArrayList<>())
             .dailyTrend(new ArrayList<>())
-            .averagePerDay(0)
+            .averagePerDay(null)
             .generatedAt(Instant.now())
+            .dataStatus("UNAVAILABLE: " + reason)
             .build();
     }
 }

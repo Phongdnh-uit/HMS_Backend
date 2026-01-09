@@ -10,8 +10,10 @@ import com.hms.appointment_service.repositories.AppointmentRepository;
 import com.hms.common.dtos.PageResponse;
 import com.hms.common.exceptions.errors.ApiException;
 import com.hms.common.exceptions.errors.ErrorCode;
+import com.hms.common.helpers.FeignHelper;
 import com.hms.common.hooks.GenericHook;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -30,15 +32,18 @@ public class AppointmentHook implements GenericHook<Appointment, String, Appoint
     private final HrClient hrClient;
     private final PatientClient patientClient;
     private final AppointmentRepository appointmentRepository;
+    private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
     // Manual constructor to apply @Lazy
     public AppointmentHook(
             @Lazy HrClient hrClient,
             @Lazy PatientClient patientClient,
-            AppointmentRepository appointmentRepository) {
+            AppointmentRepository appointmentRepository,
+            CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
         this.hrClient = hrClient;
         this.patientClient = patientClient;
         this.appointmentRepository = appointmentRepository;
+        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     private static final int APPOINTMENT_DURATION_MINUTES = 30;
@@ -71,30 +76,38 @@ public class AppointmentHook implements GenericHook<Appointment, String, Appoint
         }
         context.put("appointmentInstant", appointmentInstant);
 
-        // 2. Validate patient exists
-        PatientClient.PatientInfo patient;
-        try {
-            var response = patientClient.getPatientById(input.getPatientId());
-            patient = response.getData();
-        } catch (Exception e) {
-            log.error("Failed to validate patient: {}", e.getMessage());
-            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Unable to verify patient");
-        }
+        // 2. Validate patient exists (with Circuit Breaker)
+        var patientCircuitBreaker = circuitBreakerFactory.create("appointmentPatient");
+        PatientClient.PatientInfo patient = patientCircuitBreaker.run(
+            () -> {
+                var response = FeignHelper.safeCall(() -> patientClient.getPatientById(input.getPatientId()));
+                return response.getData();
+            },
+            throwable -> {
+                log.error("[CB-FALLBACK] Patient service unavailable: {}", throwable.getMessage());
+                throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                    "Patient service unavailable. Please try again later.");
+            }
+        );
         if (patient == null) {
             throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Patient not found");
         }
         
         context.put(PATIENT_KEY, patient);
 
-        // 3. Validate doctor exists and has DOCTOR role
-        HrClient.EmployeeInfo doctor;
-        try {
-            var response = hrClient.getEmployeeById(input.getDoctorId());
-            doctor = response.getData();
-        } catch (Exception e) {
-            log.error("Failed to validate doctor: {}", e.getMessage());
-            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Unable to verify doctor");
-        }
+        // 3. Validate doctor exists and has DOCTOR role (with Circuit Breaker)
+        var hrCircuitBreaker = circuitBreakerFactory.create("appointmentHr");
+        HrClient.EmployeeInfo doctor = hrCircuitBreaker.run(
+            () -> {
+                var response = FeignHelper.safeCall(() -> hrClient.getEmployeeById(input.getDoctorId()));
+                return response.getData();
+            },
+            throwable -> {
+                log.error("[CB-FALLBACK] HR service unavailable: {}", throwable.getMessage());
+                throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                    "HR service unavailable. Please try again later.");
+            }
+        );
         if (doctor == null) {
             throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Doctor not found");
         }
@@ -103,16 +116,19 @@ public class AppointmentHook implements GenericHook<Appointment, String, Appoint
         }
         context.put(DOCTOR_KEY, doctor);
 
-        // 4. Validate doctor has schedule for this date
+        // 4. Validate doctor has schedule for this date (with Circuit Breaker)
         LocalDate appointmentDate = appointmentInstant.atZone(ZoneId.systemDefault()).toLocalDate();
-        HrClient.ScheduleInfo schedule;
-        try {
-            var response = hrClient.getScheduleByDoctorAndDate(input.getDoctorId(), appointmentDate);
-            schedule = response.getData();
-        } catch (Exception e) {
-            log.error("Failed to validate doctor schedule: {}", e.getMessage());
-            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Unable to verify doctor schedule");
-        }
+        HrClient.ScheduleInfo schedule = hrCircuitBreaker.run(
+            () -> {
+                var response = FeignHelper.safeCall(() -> hrClient.getScheduleByDoctorAndDate(input.getDoctorId(), appointmentDate));
+                return response.getData();
+            },
+            throwable -> {
+                log.error("[CB-FALLBACK] HR service unavailable for schedule check: {}", throwable.getMessage());
+                throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                    "HR service unavailable. Please try again later.");
+            }
+        );
         if (schedule == null) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "Doctor has no schedule on this date");
         }
@@ -215,19 +231,32 @@ public class AppointmentHook implements GenericHook<Appointment, String, Appoint
 
     /**
      * Check if all slots are booked and update schedule status accordingly.
+     * Uses Circuit Breaker with log-and-skip fallback (non-critical side effect).
      */
     private void checkAndUpdateScheduleStatus(Appointment appointment) {
+        var hrCircuitBreaker = circuitBreakerFactory.create("appointmentHr");
+        
         try {
             LocalDate appointmentDate = appointment.getAppointmentTime()
                     .atZone(ZoneId.of("Asia/Ho_Chi_Minh"))
                     .toLocalDate();
             
-            var scheduleResponse = hrClient.getScheduleByDoctorAndDate(
-                    appointment.getDoctorId(), appointmentDate);
+            // Fetch schedule with CB protection
+            var schedule = hrCircuitBreaker.run(
+                () -> {
+                    var response = FeignHelper.safeCall(() -> 
+                        hrClient.getScheduleByDoctorAndDate(appointment.getDoctorId(), appointmentDate));
+                    return response.getData();
+                },
+                throwable -> {
+                    log.warn("[CB-FALLBACK] HR service unavailable for schedule status update: {}", 
+                        throwable.getMessage());
+                    return null;
+                }
+            );
             
-            if (scheduleResponse.getData() == null) return;
+            if (schedule == null) return;
             
-            var schedule = scheduleResponse.getData();
             int totalSlots = schedule.getTotalSlots();
             
             // Count current SCHEDULED appointments for this doctor on this date
@@ -249,11 +278,22 @@ public class AppointmentHook implements GenericHook<Appointment, String, Appoint
                         schedule.id(), bookedSlots, totalSlots);
             }
             
-            // Update schedule status based on slot availability
+            // Update schedule status based on slot availability (with CB protection)
             String newStatus = bookedSlots >= totalSlots ? "BOOKED" : "AVAILABLE";
             if (!newStatus.equals(schedule.status())) {
-                hrClient.updateScheduleStatus(schedule.id(), newStatus);
-                log.info("Updated schedule {} status to {}", schedule.id(), newStatus);
+                Boolean updated = hrCircuitBreaker.run(
+                    () -> {
+                        hrClient.updateScheduleStatus(schedule.id(), newStatus);
+                        return true; // Success
+                    },
+                    throwable -> {
+                        log.warn("[CB-FALLBACK] Failed to update schedule status: {}", throwable.getMessage());
+                        return false; // Fallback - update failed
+                    }
+                );
+                if (Boolean.TRUE.equals(updated)) {
+                    log.info("Updated schedule {} status to {}", schedule.id(), newStatus);
+                }
             }
         } catch (Exception e) {
             log.error("Failed to update schedule status: {}", e.getMessage());

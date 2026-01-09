@@ -20,6 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -29,9 +31,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.lenient;
 
 /**
  * Unit tests for InvoiceHook.
@@ -56,7 +61,13 @@ class InvoiceHookTest {
     @Mock
     private HrClient hrClient;
 
-    @InjectMocks
+    @Mock
+    private CircuitBreakerFactory<?, ?> circuitBreakerFactory;
+
+    @Mock
+    private CircuitBreaker circuitBreaker;
+
+    // Use manual construction instead of @InjectMocks to properly control circuit breaker setup
     private InvoiceHook invoiceHook;
 
     private InvoiceRequest testRequest;
@@ -71,6 +82,24 @@ class InvoiceHookTest {
         String examId = TestDataFactory.uuid();
         String patientId = TestDataFactory.uuid();
         String doctorId = TestDataFactory.uuid();
+
+        // Setup circuit breaker to execute supplier directly (no circuit breaking in tests)
+        lenient().when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
+        lenient().when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+                .thenAnswer(invocation -> {
+                    Supplier<?> supplier = invocation.getArgument(0);
+                    return supplier.get();
+                });
+
+        // Create InvoiceHook manually after circuit breaker setup
+        invoiceHook = new InvoiceHook(
+            invoiceRepository,
+            medicalExamClient,
+            appointmentClient,
+            patientClient,
+            hrClient,
+            circuitBreakerFactory
+        );
 
         // Setup request
         testRequest = new InvoiceRequest();
@@ -137,6 +166,13 @@ class InvoiceHookTest {
                 .medicalExamId(examId)
                 .items(new ArrayList<>())
                 .build();
+
+        // Default stubs for external service calls that validateCreate makes
+        // These are lenient so tests can override them with specific expectations
+        lenient().when(invoiceRepository.findByAppointmentId(anyString())).thenReturn(Optional.empty());
+        lenient().when(medicalExamClient.getPrescriptionByExam(anyString())).thenReturn(ApiResponse.ok(null));
+        lenient().when(medicalExamClient.getLabResultsByExam(anyString())).thenReturn(ApiResponse.ok(List.of()));
+        lenient().when(hrClient.getEmployeeById(anyString())).thenReturn(ApiResponse.ok(null));
     }
 
     @Nested
@@ -215,8 +251,9 @@ class InvoiceHookTest {
             Map<String, Object> context = new HashMap<>();
             given(medicalExamClient.getExamById(testRequest.getExamId()))
                     .willReturn(ApiResponse.ok(examResponse));
+            // Service responds with null data (prescription not found) - not an error
             given(medicalExamClient.getPrescriptionByExam(examResponse.id()))
-                    .willThrow(new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Prescription not found"));
+                    .willReturn(ApiResponse.ok(null));
 
             // When
             invoiceHook.validateCreate(testRequest, context);
@@ -323,8 +360,9 @@ class InvoiceHookTest {
             Map<String, Object> context = new HashMap<>();
             given(medicalExamClient.getExamById(testRequest.getExamId()))
                     .willReturn(ApiResponse.ok(examResponse));
+            // Service responds with empty list (no lab tests) - not an error
             given(medicalExamClient.getLabResultsByExam(examResponse.id()))
-                    .willThrow(new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "No lab tests"));
+                    .willReturn(ApiResponse.ok(List.of()));
 
             // When
             invoiceHook.validateCreate(testRequest, context);

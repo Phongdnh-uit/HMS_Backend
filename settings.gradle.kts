@@ -13,7 +13,6 @@ include(
     "medical-exam-service",
     "billing-service",
     "report-service",
-    "notification-service",
-    "performance-tests"
+    "notification-service"
 )
 

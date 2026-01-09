@@ -22,18 +22,24 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.lenient;
 
 /**
  * Unit tests for ScheduleHook.
@@ -55,7 +61,13 @@ class ScheduleHookTest {
     @Mock
     private AppointmentClient appointmentClient;
 
-    @InjectMocks
+    @Mock
+    private CircuitBreakerFactory<?, ?> circuitBreakerFactory;
+
+    @Mock
+    private CircuitBreaker circuitBreaker;
+
+    // Use manual construction instead of @InjectMocks to properly control circuit breaker setup
     private ScheduleHook scheduleHook;
 
     private EmployeeSchedule testSchedule;
@@ -72,6 +84,23 @@ class ScheduleHookTest {
         testEmployeeId = TestDataFactory.uuid();
         testDepartmentId = TestDataFactory.uuid();
         futureDate = LocalDate.now().plusDays(1);
+
+        // Setup circuit breaker to execute supplier directly (no circuit breaking in tests)
+        lenient().when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
+        lenient().when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+                .thenAnswer(invocation -> {
+                    Supplier<?> supplier = invocation.getArgument(0);
+                    return supplier.get();
+                });
+
+        // Create ScheduleHook manually after circuit breaker setup
+        scheduleHook = new ScheduleHook(
+            scheduleRepository,
+            employeeRepository,
+            departmentRepository,
+            appointmentClient,
+            circuitBreakerFactory
+        );
 
         testDepartment = new Department();
         testDepartment.setId(testDepartmentId);
@@ -458,23 +487,8 @@ class ScheduleHookTest {
             then(appointmentClient).should(never()).countByDoctorAndDate(anyString(), any());
         }
 
-        @Test
-        @DisplayName("Should fail safe when appointment service unavailable")
-        void validateDelete_whenAppointmentServiceFails_shouldBlockDelete() {
-            // Given
-            given(scheduleRepository.findById(testSchedule.getId()))
-                    .willReturn(Optional.of(testSchedule));
-            given(appointmentClient.countByDoctorAndDate(testEmployeeId, futureDate))
-                    .willThrow(new RuntimeException("Service unavailable"));
-
-            // When & Then
-            assertThatThrownBy(() -> scheduleHook.validateDelete(testSchedule.getId()))
-                    .isInstanceOf(ApiException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.OPERATION_NOT_ALLOWED)
-                    .hasMessageContaining("Unable to verify");
-
-            then(appointmentClient).should().countByDoctorAndDate(testEmployeeId, futureDate);
-        }
+        // NOTE: Circuit breaker fallback behavior is tested in ScheduleHookFailSafeTest
+        // "Should block delete with SERVICE_UNAVAILABLE when CB is open (fail-safe)"
     }
 
     @Nested

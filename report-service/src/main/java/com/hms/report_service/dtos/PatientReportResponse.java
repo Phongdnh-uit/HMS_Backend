@@ -21,9 +21,9 @@ import java.util.Map;
 @AllArgsConstructor
 public class PatientReportResponse implements Serializable {
     
-    private int totalPatients;
-    private int newPatientsThisMonth;
-    private int newPatientsThisYear;
+    private Integer totalPatients;
+    private Integer newPatientsThisMonth;
+    private Integer newPatientsThisYear;
     
     private Map<String, Integer> patientsByGender;
     private Map<String, Integer> patientsByBloodType;
@@ -31,8 +31,14 @@ public class PatientReportResponse implements Serializable {
     private List<RegistrationTrend> registrationTrend;  // Daily patient registration trend
     private List<TopDiagnosis> topDiagnoses;  // Top diagnoses
     
-    private double averageAge;
+    private Double averageAge;
     private Instant generatedAt;
+    
+    /**
+     * Data availability status. Null when data is available.
+     * Set to "UNAVAILABLE: {reason}" when downstream service is unavailable.
+     */
+    private String dataStatus;
     
     @Data
     @Builder

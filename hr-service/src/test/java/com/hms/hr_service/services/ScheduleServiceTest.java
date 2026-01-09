@@ -24,9 +24,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -37,9 +38,14 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.lenient;
 
 /**
  * Unit tests for ScheduleService.
@@ -64,7 +70,13 @@ class ScheduleServiceTest {
     @Mock
     private AppointmentClient appointmentClient;
 
-    @InjectMocks
+    @Mock
+    private CircuitBreakerFactory<?, ?> circuitBreakerFactory;
+
+    @Mock
+    private CircuitBreaker circuitBreaker;
+
+    // Use manual construction instead of @InjectMocks to properly control circuit breaker setup
     private ScheduleService scheduleService;
 
     private String testEmployeeId;
@@ -82,6 +94,24 @@ class ScheduleServiceTest {
         testDoctorId = TestDataFactory.uuid();
         testDepartmentId = TestDataFactory.uuid();
         testDate = LocalDate.now().plusDays(1);
+
+        // Setup circuit breaker to execute supplier directly (no circuit breaking in tests)
+        lenient().when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
+        lenient().when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+                .thenAnswer(invocation -> {
+                    Supplier<?> supplier = invocation.getArgument(0);
+                    return supplier.get();
+                });
+
+        // Create ScheduleService manually after circuit breaker setup
+        scheduleService = new ScheduleService(
+            scheduleRepository,
+            employeeRepository,
+            departmentRepository,
+            scheduleMapper,
+            appointmentClient,
+            circuitBreakerFactory
+        );
 
         // Setup test department
         testDepartment = new Department();

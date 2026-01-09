@@ -15,16 +15,21 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.mock;
 
@@ -51,7 +56,12 @@ class PrescriptionHookTest {
     @Mock
     private BillingClient billingClient;
 
-    @InjectMocks
+    @Mock
+    private CircuitBreakerFactory<?, ?> circuitBreakerFactory;
+
+    @Mock
+    private CircuitBreaker circuitBreaker;
+
     private PrescriptionHook prescriptionHook;
 
     private PrescriptionRequest testRequest;
@@ -63,6 +73,21 @@ class PrescriptionHookTest {
 
     @BeforeEach
     void setUp() {
+        // Manual constructor since we need CircuitBreakerFactory
+        prescriptionHook = new PrescriptionHook(
+            prescriptionRepository,
+            medicalExamRepository,
+            prescriptionItemMapper,
+            webClientBuilder,
+            billingClient,
+            circuitBreakerFactory
+        );
+        ReflectionTestUtils.setField(prescriptionHook, "medicineServiceUrl", "http://medicine-service");
+        
+        // Default CB setup - pass through
+        lenient().when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
+        setupCircuitBreakerToPassThrough();
+
         context = new HashMap<>();
         testExamId = TestDataFactory.uuid();
         testPrescriptionId = TestDataFactory.uuid();
@@ -102,6 +127,18 @@ class PrescriptionHookTest {
         testEntity.setDoctorId(testExam.getDoctorId());
         testEntity.setDoctorName(testExam.getDoctorName());
         testEntity.setPrescribedAt(Instant.now());
+    }
+
+    /**
+     * Helper: CB passes through (healthy state)
+     */
+    @SuppressWarnings("unchecked")
+    private void setupCircuitBreakerToPassThrough() {
+        lenient().when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+            .thenAnswer(invocation -> {
+                Supplier<?> supplier = invocation.getArgument(0);
+                return supplier.get();
+            });
     }
 
     @Nested

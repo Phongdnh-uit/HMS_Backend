@@ -18,6 +18,7 @@ import com.hms.medical_exam_service.mappers.MedicalExamMapper;
 import com.hms.medical_exam_service.repositories.MedicalExamRepository;
 import io.github.perplexhub.rsql.RSQLJPASupport;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -51,16 +52,19 @@ public class MedicalExamController extends GenericController<MedicalExam, String
     private final MedicalExamRepository medicalExamRepository;
     private final MedicalExamMapper medicalExamMapper;
     private final PatientClient patientClient;
+    private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
     public MedicalExamController(
             CrudService<MedicalExam, String, MedicalExamRequest, MedicalExamResponse> service,
             MedicalExamRepository medicalExamRepository,
             MedicalExamMapper medicalExamMapper,
-            PatientClient patientClient) {
+            PatientClient patientClient,
+            CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
         super(service);
         this.medicalExamRepository = medicalExamRepository;
         this.medicalExamMapper = medicalExamMapper;
         this.patientClient = patientClient;
+        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     /**
@@ -141,19 +145,26 @@ public class MedicalExamController extends GenericController<MedicalExam, String
             throw new ApiException(ErrorCode.AUTHENTICATION_REQUIRED, "User not authenticated");
         }
         
-        // Lookup patient by accountId
-        String patientId;
-        try {
-            var patientResponse = FeignHelper.safeCall(
-                () -> patientClient.getPatientByAccountId(currentUser.getId())
-            );
-            patientId = patientResponse.getData().id();
-            log.info("Found patient {} for accountId {}", patientId, currentUser.getId());
-        } catch (Exception e) {
-            log.error("Failed to lookup patient for accountId {}: {}", currentUser.getId(), e.getMessage());
-            throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND, 
-                "Patient profile not found. Please contact support.");
-        }
+        // Lookup patient by accountId (with Circuit Breaker)
+        var patientCircuitBreaker = circuitBreakerFactory.create("examPatient");
+        String patientId = patientCircuitBreaker.run(
+            () -> {
+                var patientResponse = FeignHelper.safeCall(
+                    () -> patientClient.getPatientByAccountId(currentUser.getId())
+                );
+                if (patientResponse.getData() == null) {
+                    throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND, 
+                        "Patient profile not found. Please contact support.");
+                }
+                return patientResponse.getData().id();
+            },
+            throwable -> {
+                log.error("[CB-FALLBACK] Patient service unavailable: {}", throwable.getMessage());
+                throw new ApiException(ErrorCode.SERVICE_UNAVAILABLE, 
+                    "Patient service unavailable. Please try again later.");
+            }
+        );
+        log.info("Found patient {} for accountId {}", patientId, currentUser.getId());
         
         // Get exams for this patient
         List<MedicalExam> exams = medicalExamRepository.findByPatientId(patientId);

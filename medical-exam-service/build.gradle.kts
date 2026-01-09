@@ -4,6 +4,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.cloud:spring-cloud-config-client")
     implementation("org.springframework.boot:spring-boot-starter-webflux") // For WebClient to call medicine-service
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
     
     // MinIO for S3-compatible object storage
     implementation("io.minio:minio:8.5.7")

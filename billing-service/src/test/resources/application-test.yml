@@ -1,10 +1,17 @@
-# Test configuration for HMS services
-# This configuration disables cloud dependencies and uses H2 in-memory database
+# Test configuration for billing-service
+# Supports Circuit Breaker tests and H2 in-memory database
 
 spring:
+  application:
+    name: billing-service-test
+  main:
+    allow-bean-definition-overriding: true
+  
   # Disable cloud config
   cloud:
     config:
+      enabled: false
+    discovery:
       enabled: false
 
   # H2 in-memory database
@@ -41,14 +48,40 @@ docker:
   compose:
     enabled: false
 
+# Circuit Breaker test configuration - faster timeouts for testing
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 1s
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: false
+        slowCallDurationThreshold: 500ms
+        slowCallRateThreshold: 80
+    instances:
+      billingMedicalExam:
+        baseConfig: default
+      billingHr:
+        baseConfig: default
+      billingAppointment:
+        baseConfig: default
+      billingPatient:
+        baseConfig: default
+
 # Logging configuration for tests
 logging:
   level:
     root: WARN
     com.hms: DEBUG
+    io.github.resilience4j: DEBUG
+    com.hms.billing_service: DEBUG
     org.springframework.web: DEBUG
     org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 # Test-specific properties
 hms:
