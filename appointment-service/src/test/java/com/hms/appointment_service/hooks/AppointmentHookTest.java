@@ -16,9 +16,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -28,6 +29,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -49,7 +52,12 @@ class AppointmentHookTest {
     @Mock
     private PatientClient patientClient;
 
-    @InjectMocks
+    @Mock
+    private CircuitBreakerFactory circuitBreakerFactory;
+
+    @Mock
+    private CircuitBreaker circuitBreaker;
+
     private AppointmentHook appointmentHook;
 
     private AppointmentRequest testRequest;
@@ -62,6 +70,8 @@ class AppointmentHookTest {
 
     @BeforeEach
     void setUp() {
+        appointmentHook = new AppointmentHook(hrClient, patientClient, appointmentRepository, circuitBreakerFactory);
+        
         context = new HashMap<>();
         testDoctorId = TestDataFactory.uuid();
         testPatientId = TestDataFactory.uuid();
@@ -88,6 +98,32 @@ class AppointmentHookTest {
         testEntity.setStatus(AppointmentStatus.SCHEDULED);
     }
 
+    /**
+     * Helper method to setup circuit breaker to pass through to supplier
+     */
+    @SuppressWarnings("unchecked")
+    private void setupCircuitBreakerToPassThrough() {
+        given(circuitBreakerFactory.create(anyString())).willReturn(circuitBreaker);
+        given(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+            .willAnswer(invocation -> {
+                Supplier<?> supplier = invocation.getArgument(0);
+                return supplier.get();
+            });
+    }
+
+    /**
+     * Helper method to setup circuit breaker to trigger fallback
+     */
+    @SuppressWarnings("unchecked")
+    private void setupCircuitBreakerToFallback(Throwable exception) {
+        given(circuitBreakerFactory.create(anyString())).willReturn(circuitBreaker);
+        given(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+            .willAnswer(invocation -> {
+                Function<Throwable, ?> fallback = invocation.getArgument(1);
+                return fallback.apply(exception);
+            });
+    }
+
     @Nested
     @DisplayName("Method: validateCreate()")
     class ValidateCreateTests {
@@ -96,6 +132,8 @@ class AppointmentHookTest {
         @DisplayName("UC-APT-009: Should pass validation with valid appointment data")
         void validateCreate_withValidData_shouldPass() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             PatientClient.PatientInfo patientInfo = new PatientClient.PatientInfo(
                     testPatientId,
                     TestDataFactory.fullName(),
@@ -168,6 +206,8 @@ class AppointmentHookTest {
         @DisplayName("Should throw exception when patient not found")
         void validateCreate_withNonExistentPatient_shouldThrowException() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             given(patientClient.getPatientById(testPatientId))
                     .willReturn(ApiResponse.ok(null));
 
@@ -178,22 +218,23 @@ class AppointmentHookTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when patient service fails")
-        void validateCreate_whenPatientServiceFails_shouldThrowException() {
+        @DisplayName("Should throw SERVICE_UNAVAILABLE when patient service CB is open")
+        void validateCreate_whenPatientServiceFails_shouldThrowServiceUnavailable() {
             // Given
-            given(patientClient.getPatientById(testPatientId))
-                    .willThrow(new RuntimeException("Service unavailable"));
+            setupCircuitBreakerToFallback(new RuntimeException("Service unavailable"));
 
             // When & Then
             assertThatThrownBy(() -> appointmentHook.validateCreate(testRequest, context))
                     .isInstanceOf(ApiException.class)
-                    .hasMessageContaining("Unable to verify patient");
+                    .hasMessageContaining("service unavailable");
         }
 
         @Test
         @DisplayName("Should throw exception when doctor not found")
         void validateCreate_withNonExistentDoctor_shouldThrowException() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             PatientClient.PatientInfo patientInfo = new PatientClient.PatientInfo(
                     testPatientId,
                     TestDataFactory.fullName(),
@@ -216,6 +257,8 @@ class AppointmentHookTest {
         @DisplayName("Should throw exception when employee is not a doctor")
         void validateCreate_withNonDoctorEmployee_shouldThrowException() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             PatientClient.PatientInfo patientInfo = new PatientClient.PatientInfo(
                     testPatientId,
                     TestDataFactory.fullName(),
@@ -245,6 +288,8 @@ class AppointmentHookTest {
         @DisplayName("Should throw exception when doctor has no schedule on date")
         void validateCreate_withNoSchedule_shouldThrowException() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             PatientClient.PatientInfo patientInfo = new PatientClient.PatientInfo(
                     testPatientId,
                     TestDataFactory.fullName(),
@@ -276,6 +321,8 @@ class AppointmentHookTest {
         @DisplayName("Should throw exception when doctor's schedule is cancelled")
         void validateCreate_withCancelledSchedule_shouldThrowException() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             PatientClient.PatientInfo patientInfo = new PatientClient.PatientInfo(
                     testPatientId,
                     TestDataFactory.fullName(),
@@ -315,6 +362,8 @@ class AppointmentHookTest {
         @DisplayName("Should throw exception when time is outside schedule hours")
         void validateCreate_withTimeOutsideSchedule_shouldThrowException() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             Instant earlyTime = appointmentDate.atTime(8, 0)
                     .atZone(ZoneId.of("Asia/Ho_Chi_Minh"))
                     .toInstant();
@@ -359,6 +408,8 @@ class AppointmentHookTest {
         @DisplayName("Should throw exception when time slot is already booked")
         void validateCreate_withBookedSlot_shouldThrowException() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             PatientClient.PatientInfo patientInfo = new PatientClient.PatientInfo(
                     testPatientId,
                     TestDataFactory.fullName(),
@@ -540,6 +591,8 @@ class AppointmentHookTest {
         @DisplayName("UC-APT-010: Should handle status change to CANCELLED")
         void afterUpdate_withCancelledStatus_shouldTriggerScheduleCheck() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             testEntity.setStatus(AppointmentStatus.CANCELLED);
             AppointmentResponse response = new AppointmentResponse();
 
@@ -566,9 +619,11 @@ class AppointmentHookTest {
         }
 
         @Test
-        @DisplayName("Should not fail when schedule update fails")
+        @DisplayName("Should not fail when schedule update fails (graceful degradation)")
         void afterUpdate_whenScheduleUpdateFails_shouldNotThrowException() {
             // Given
+            setupCircuitBreakerToPassThrough();
+            
             testEntity.setStatus(AppointmentStatus.CANCELLED);
             AppointmentResponse response = new AppointmentResponse();
 
